@@ -1,0 +1,46 @@
+\section{cJSON}
+\label{section:cJSON}
+cJSON \cite{cJSON} jest lekką biblioteką napisaną w języku C, która służy do obsługi danych w formacie JSON (JavaScript Object Notation). JSON jest jednym z najbardziej popularnych formatów wymiany danych, który jest szeroko stosowany. Swojej popularności zawdzięcza prostocie i czytelności. Powyższa biblioteka umożliwia parsowanie, tworzenie i modyfikowanie struktur JSON w wydajny sposób z niskim zużyciem zasobów procesora. Alternatywną do JSON jest XML, ale zajmuje o wiele więcej pamięci, która jest kluczowa dla mikroprocesorów.
+\subsection{Zalety cJSON}
+\begin{enumerate}
+    \item \textbf{Lekkość:} cJSON jest małą biblioteką, na licencji MIT, co czyni ją idealną do zastosowania w systemach wbudowanych o ograniczonych zasobach, takich jak STM32.
+    \item \textbf{Prostota:} API biblioteki jest intuicyjne i łatwe w użyciu, co przyspiesza implementację.
+    \item \textbf{Wsparcie dla dynamicznej alokacji:} Automatycznie zarządza pamięcią dla struktur JSON, co znacząco ułatwia pisanie dynamicznych tablic char jak i eliminuje potencjalne błędy.
+    \item \textbf{Obsługa podstawowych typów danych:} Wspiera różne typy JSON, takie jak obiekty, tablice, liczby i ciągi znaków.
+\end{enumerate}
+\subsection{Wady cJSON}
+\begin{enumerate}
+    \item \textbf{Dynamiczna alokacja pamięci:} cJSON intensywnie korzysta z funkcji takich jak \textit{malloc()} i \textit{free()}, co może być problematyczne w systemach wbudowanych z ograniczoną ilością pamięci RAM, takich jak STM32. W tym przypadku jest używany system czasu rzeczywistego FreeRTOS i może dojść do przepełnienia stosu. Przez zbyt duży rozmiar tablicy char, który jest spowodowany dużą ilością próbek, może dojść do przepełnienia stosu, a co za tym idzie z licznymi i nieprzewidywalnymi błędami aplikacji.
+    \item \textbf{Brak wsparcia dla zaawansowanych funkcji:} Nie obsługuje bardziej zaawansowanych operacji JSON, takich jak schematy JSON (\textit{JSON schema}) lub walidacji.
+    \item \textbf{Potencjalne przecieki pamięci:} Jeśli obiekty cJSON nie są poprawnie zwalniane, to może dojść do wycieków pamięci.
+\end{enumerate}
+\section{JSON}
+\label{section:JSON}
+JSON \cite{JSON} (JavaScript Object Notation) to lekki format wymiany danych, który jest szeroko stosowany w aplikacjach. Jego prostota i czytelność sprawiają, że praktycznie każdy język jest w stanie go obsłużyć, co wpływa na jego popularność w przypadku przesyłania danych pomiędzy systemami lub przechowywania danych.
+\subsection{Ogólna charakterystyka JSON}
+JSON to format tekstowy oparty na składni języka JavaScript, który pozwala na reprezentacje struktur danych w prosty, czytelny i intuicyjny sposób. Składa się przede wszystkim z par kluczy oraz tablic. Oczywiście przechowuje także proste typy zmiennych na przykład null, bool, float czy int. Mimo, że jest inspirowany JavaScriptem, JSON może być używany w wielu językach programowania. Języki wysokiego poziomu zazwyczaj mają wbudowaną obsługę JSON'a, natomiast języki niskiego poziomu typu C wymagają odpowiednich bibliotek lub samodzielnej obsługi.
+
+\subsection{Zalety JSON}
+JSON posiada wiele funkcjonalności i zalet, które przyczyniły się do jego popularności:
+\begin{enumerate}
+    \item \textbf{Prostota:}  
+    Składnia JSON jest łatwa i intuicyjna dla ludzi, co znacząco ułatwia debugowanie oraz pracę z danymi.
+    \item \textbf{Uniwersalność:}  
+    JSON może zostać użyty w wielu językach programowania takich jak JavaScript czy C.
+    \item \textbf{Lekkość:}  
+    Rozmiar JSON'a nie jest zbyt duży w porównaniu do innych formatów danych, na przykład XML, dlatego jest wydajny podczas przesyłania przez sieć.
+    \item \textbf{Obsługa przez przeglądarki:}  
+    JSON jest natywnie obsługiwany przez JavaScript, co czyni go jednym z najlepszych wyborów do szybciej obsługi danych między serwerem, a przeglądarką.
+    \item \textbf{Łatwość integracji z API:}  
+    JSON jest standardem jeśli chodzi o wymianę danych w nowoczesnych interfejsach API, takich jak REST.
+\end{enumerate}
+\subsection{Wady JSON}
+Pomimo wielu zalet JSON ma także pewne ograniczenia:
+\begin{enumerate}
+    \item \textbf{Brak wsparcia dla bardziej złożonych typów danych:}  
+    JSON obsługuje tylko podstawowe i bardziej zaawansowane typy danych jak liczby, stringi czy tablice i listy. Nie obsługuje binarnych typów danych ani dat. Daty są przechowywane jako ciąg znaków np. w formacie ISO.
+    \item \textbf{Brak obsługi komentarzy:}  
+    JSON nie obsługuje komentarzy, co uniemożliwia opisywanie w pliku danych.
+    \item \textbf{Wolniejsze przetwarzanie w porównaniu do binarnych formatów:}  
+    W przypadku dużych zbiorów danych, typu liczby o wartościach milionowych, JSON może być mniej wydajny niż binarne formaty wymiany danych. Przykładowo liczba uint32 o wartości 20 000 000 zajmuje 4 bajty pamięci, natomiast w JSON będzie zajmować aż 8 bajtów, jeden bajt na jeden znak.
+\end{enumerate}

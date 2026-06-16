@@ -1,0 +1,142 @@
+\usepackage[a4paper, 
+            left = 3 cm, right = 2.5 cm, top = 2.5 cm, bottom = 2.5 cm] {geometry}
+
+\usepackage{times}
+\usepackage[utf8x]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage[polish]{babel}
+\usepackage{lmodern} 
+\usepackage{amsmath}
+\usepackage{amssymb}
+\usepackage{amsfonts}
+\usepackage{array}
+\usepackage{mdframed}
+%Type1-font for non-english texts and characters
+\usepackage{setspace}
+\usepackage{titlesec} % Do dostosowania nagłówków
+\usepackage{appendix} % Pakiet do pracy z dodatkami
+
+\titleformat{\section}[block]{\large\bfseries}{\thesection.}{1em}{}
+\titleformat{\subsection}[block]{\large\bfseries}{\thesubsection}{1em}{}
+
+
+\usepackage[cmex10]{amsmath}
+
+%% Packages for Graphics & Figures %%%%%%%%%%%%%%%%%%%%%%%%%%
+
+\usepackage{bmpsize}
+\usepackage{epsfig}
+\usepackage{graphicx} %%For loading graphic files
+\usepackage[pdf]{pstricks}
+\usepackage{pst-all}
+\usepackage{moredefs}
+\usepackage{svg}
+%\usepackage{auto-pst-pdf}
+%\usepackage{auto-pst-pdf}
+\usepackage[crop=off]{auto-pst-pdf}
+
+\usepackage{fancyhdr}
+\usepackage{url}
+\usepackage{float}
+\usepackage{color}
+\usepackage{xcolor}
+
+\usepackage{subfigure}
+\usepackage{hyperref}
+
+%\usepackage{epstopdf}
+\definecolor{light-gray}{gray}{0.4}
+\definecolor{mauve}{rgb}{0.88, 0.69, 1.0}
+\definecolor{pakistangreen}{rgb}{0.0, 0.4, 0.0}
+\definecolor{pearl}{rgb}{0.94, 0.92, 0.84}
+\definecolor{whitesmoke}{rgb}{0.96, 0.96, 0.96}
+
+\usepackage{colortbl}
+\usepackage{listings}
+\lstset{
+  basicstyle=\footnotesize\ttfamily,
+  columns=fullflexible,
+  frame=single,
+  captionpos=b,
+  breaklines,
+	numbers=left, stepnumber=2, numbersep=5pt,
+	numberstyle=\tiny\color{gray},
+  keywordstyle=\color{blue},
+  commentstyle=\color{pakistangreen},
+  stringstyle=\color{mauve},
+	backgroundcolor = \color{whitesmoke},
+	breakatwhitespace=true,
+	showspaces=false,                % show spaces everywhere adding particular underscores; it overrides 'showstringspaces'
+  showstringspaces=false,          % underline spaces within strings only
+  showtabs=false,                  % show tabs within strings adding particular underscores
+  postbreak=\mbox{\textcolor{red}{$\hookrightarrow$}\space}
+}
+
+%\pagestyle{fancy}
+%\usepackage[a4paper,left=20mm,top=20mm,bottom=10mm,right=10mm]{geometry} 
+%\setlength\headheight{22pt}
+%\renewcommand{\footrulewidth}{0.4pt}
+%\rule[0.2cm]{\textwidth}{0.5pt} 
+%\cfoot{ \textrm{\textbf{\thepage}}}  
+
+\fancyfoot[C]{\thepage} % Numer strony na środku stopki
+\pagestyle{fancy} % Włączenie fancyhdr
+\fancyhf{} % Wyczyść wszystkie domyślne ustawienia
+\fancyhead[CO]{Inżynierska Praca Dyplomowa} % Tekst w górnym nagłówku
+\fancyhead[CE]{Instytut Automatyki i Robotyki Politechniki Poznańskiej} % Tekst dla stron parzystych
+\fancyfoot[C]{-~\thepage~\textcolor{light-gray}{~| Strona~-}} % Numeracja stron na środku stopki
+\renewcommand{\headrulewidth}{0.4pt} % Dodaj linię oddzielającą nagłówek
+\renewcommand{\footrulewidth}{0.4pt} % Dodaj linię oddzielającą stopkę
+
+\pagenumbering{arabic} % Ustaw numerację w systemie arabskim (1, 2, 3...)
+
+%\fancyhead[LE]{ \textcolor{light-gray}{\leftmark}}
+%\fancyhead[RO]{\textcolor{light-gray}{\rightmark}}
+% \cfoot{-~\thepage \textcolor{light-gray}{~| Strona~-}}
+
+\hyphenpenalty=10000		% nie dziel wyrazów zbyt często
+\clubpenalty=10000			% kara za sierotki
+\widowpenalty=10000			% nie pozostawiaj wdów
+\brokenpenalty=10000		% nie dziel wyrazów między stronami
+\exhyphenpenalty=999999		% nie dziel słów z myślnikiem
+\righthyphenmin=3			% dziel minimum 3 litery
+
+\tolerance=4500
+\pretolerance=250
+\hfuzz=1.5pt
+\hbadness=1450
+
+\sloppy						% umacnia pozycję prawego marginesu
+\titleformat{\paragraph}
+  {\normalfont\normalsize\bfseries}
+  {\theparagraph}{1em}{}
+
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1em}
+
+% \setlength{\textwidth}{\paperwidth}
+% \addtolength{\textwidth}{-5cm}
+% \setlength{\textheight}{\paperheight}
+% \addtolength{\textheight}{-5cm}
+% \setlength{\oddsidemargin}{2.5cm}
+% \setlength{\evensidemargin}{2.5cm}
+% \topmargin -1.25cm
+% \footskip 1.4cm
+
+\linespread{1.3}
+
+% \counterwithout{figure}{chapter}
+\counterwithout{table}{chapter}
+\counterwithout{equation}{chapter}
+\usepackage{hyperref}
+\hypersetup{
+    colorlinks=false, %set true if you want colored links
+    linktoc=all,     %set to all if you want both sections and subsections linked
+    linkcolor=black,  %choose some color if you want links to stand out
+}
+
+\newcommand{\reviewdp}[1]{{\color{red} #1}}
+
+\begin{document}
+\raggedbottom 
+%\input{hypernation}

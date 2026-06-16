@@ -1,0 +1,151 @@
+\section{Redis}
+Redis to skrót od \textbf{Remote Dictionary Server} (zdalny serwer słowników) i jest to otwartoźródłowy magazyn struktur danych działająy w pamięci operacyjnej, czyli pamięci RAM. Mimo bycia klasyfikowanym jako baza klucz-wartość w literaturze technicznej często jest określany mianem serwera struktur danych, ponieważ wartości skojarzone z kluczami nie muszą być prostymi ciągami znaków, lecz mogą przyjmować postać złożonych typów danych takich jak mapy haszujące, listy czy zbiory.
+\subsection{Architektura}
+Ważną cechą architektury Redis jest oparcie przetwarzania komend na modelu jednowątkowym wykorzystując mechanizm pętli zdarzeń. Stare operacje pokroju DELETE były blokujące dla systemu, w nowszych wersjach używa się funkcji UNLINK w celu nieblokowania wejścia/wyjścia. Brak wielowątkowości w kontekście obsługi zapytań wynika głownie z:
+\begin{itemize}
+    \item \textbf{Eliminacja przełączania kontekstu:} brak kosztownych operacji pozwala na maksymalne wykorzystanie czasu procesora na właściwe operacje na danych.
+    \item \textbf{Brak konieczności blokowania:} komendy wykonują się sekwencyjnie, nie ma potrzeby stosowania skomplikowanych mechanizmów synchronizacji wątków przy dostępie do struktur danych, co upraszcza kod i zwiększa stabilność systemu.
+    \item \textbf{Wydajność:} w systemach trzymających dane w pamięci operacyjnej wąskim gardłem zazwyczaj jest przepustowość sieci lub pamięci, a nie mocy obliczeniowej procesora.
+\end{itemize}
+W nowszych wersjach Redis zostały wprowadzone pomocnicze wątki do obsługi operacji sieciowych, jednak samo wykonywanie komend pozostaje jednowątkowe.
+\subsection{Struktury danych}
+Redis rozszerze prosty model klucz wartości oferując zestaw atomowych operacji na złożonych typach danych, co pozwala na przeniesienie części logiki aplikacji bezpośrednio na serwer bazy danych:
+\begin{itemize}
+    \item \textbf{Stringi:} podstawowy typ, bezpieczny binarnie. Może przechowywać tekst, JSON, XML, obrazy i inne typy po odpowiedniej serializacji. Obsługuije operacje bitowe (bitmaps) oraz inkrementacje.
+    \item \textbf{Listy:} implementowane jako listy powiązane. Pozwalają na dodawanie i usuwanie elementów z obu końców w czasie $0(1)$, co czyni ten typ danych idealnym narzędziem do budowy kolejek.
+    \item \textbf{Zbiory:} nieuporządkowane kolekcje unikalnych ciągów znaków. Umożliwia wykonywanie operacji teoriomnogościowych po stronie serwera, możliwe operacje to: sumy, przecięcia i różnice.
+    \item \textbf{Zbiory posortowane:} unikalna struktura, w której każdy element posiada przypisaną liczbę zmiennoprzecinkową. Elementy są automatycznie sortowane według ich wartości. Wstawianie i wyszukiwanie wartości na poziomie $O(\log N)$.
+    \item \textbf{HyperLogLog:} probabilistyczna struktura danych służąca do kardynalności zbiorów z bardzo małym błędem standardowym , zużywająca maksymalnie 12KB pamięci.
+\end{itemize}
+\subsection{Trwałość danych}
+Mimo przechowywania danych w pamięci RAM, Redis oferuj dwa mechanizmy zapewniające trwałość:
+\begin{enumerate}
+    \item \textbf{Redis Database:} okresowe wykonywanie zrzutów pamięci na dysk. Jest obarczony ryzykiem utraty danych z okresu pomiędzy zrzutami.
+    \item \textbf{Append Only File:} rejestrowanie każdej operacji zapisu w dzienniku zdarzeń. Zapewnia wyższy poziom bezpieczeństwa w porównaniu do powyższej metody, ale jest wolniejszy i generuje większe pliki. Również proces odtwarzania bazy po awarii zajmuje więcej czasu.
+\end{enumerate}
+\subsection{Inne funkcjonalności}
+Redis poza rolą magazynu danych oferuje również inne funkcjonalności takie jak:
+\paragraph{Systemy kolejkowania i broker wiadomości}
+\begin{itemize}
+    \item \textbf{Publish/Subscribe:} mechanizm przesyłania wiadomości w czasie rzeczywistym. Wydawcy wysyłaja wiadomości na kanały, a subskrybenci je odbierają. Wiadomości są wysyłane jednorazowo i nie są przetrzymywane.
+    \item \textbf{Redis Streams:} struktura danych, która działa jak trwały dziennik zdarzeń, zbliżony funkcjonalnie do Apache Kafka. Umożliwia niezawodne przesyłanie strumieni danych, obsługuje grupy konsumentów oraz przetwarzanie historycznych wiadomości co jest kluczowe w architekturze mikroserwisowej
+\end{itemize}
+\paragraph{RedisJSON}
+Tradycyjnie, aby przechować obiekt JSON w bazie klucz-wartość aplikacja musiała przed zapisem zserializować go, a przy odczycie dokonać deserializacji, co było kosztowne w przypadku dużych zbiorów danych. Moduł \textbf{RedisJSON} usprawia Redis o funkcję pełnoprawnej bazy dokumentowej:
+\begin{itemize}
+    \item Dane są przechowywane w formacie binarnym zoptymalizowanym pod kątem dostępu do drzewa obiektu.
+    \item Umożliwia atomowe modyfikacje konkretnych pól bez konieczności przesyłania całego dokumentu przez sieć.
+    \item Zapewnia zgodność ze standardem ECMA-404.
+\end{itemize}
+\paragraph{Silnik wyszukiwania pełnotekstowego}
+Standardowo model klucz-wartość uniemożliwia wyszukiwanie po zawartości rekordu. Moduł \textbf{RediSearch} implementuje w pamięci RAM struktury indeksów w tym indeksy odwrócone.
+\begin{itemize}
+    \item Wykonywanie zapytań pełnotekstowych z obsługą stemmingu i usuwaniem słów przystankowych.
+    \item Wyszukiwanie fasetowe i agregacje w czasie rzeczywistym.
+    \item Osiąganie wydajności rzędu setek tysięcy zapytań na sekundę, stanowiąc solidną alternatywę dla systemów takich jak Elasticsearch w zastosowaniach wymagających niskich opóźnień.
+\end{itemize}
+\paragraph{Szeregi czasowe}
+Dla zastosowanych IoT i monitoringu systemów model klucz-wartość jest nieefektywny pod względem zużycia pamięci. Moduł \textbf{RedisTimeSeries} wprowadza dedykowane struktury dla danych zmieniających się w czasie:
+\begin{itemize}
+    \item \textbf{Kompresja:} Korzystając z algorytmu \textbf{Double Delta} redukuje zużycie pamięci o ponad 90\% w porównaniu do standardowych struktur.
+    \item \textbf{Downsampling:} Automatycznie zmniejsza rozdzielczość danych historycznych, na przykład agregując dane sekundowe do minutowych, za pomocą reguł retencji.
+\end{itemize}
+\paragraph{Filtry probablistyczne}
+\textbf{RedisBloom} wprowadza zaawansowane struktury danych, które służą do problemów analitycznych przy ograniczonych zasobach pamięci:
+\begin{itemize}
+    \item \textbf{Filtr Blooma:} Pozwala z określoną pewnością stwierdzić czy element nie należy do zbioru.
+    \item \textbf{Cuckoo Filter:} Alternatywa dla filtra Blooma, umożliwia usuwanie elementów.
+    \item \textbf{Count-Min Sketch:} Służy do szacowania częstotliwości występowania zdarzeń w strumieniach danych.
+\end{itemize}
+
+\paragraph{Programowalność po stronie serwera}
+Redis umożliwia przeniesienie logiki biznesowej bezpośrednio do warstwy danych, co minimalizuje narzut sieciowy:
+\begin{itemize}
+    \item \textbf{Lua Scripts:} Skrypty wykonywane atomowo. Gwarantują izolacje sekwencyjną, czyli podczas wykonywania ów skryptów inny klient nie zmieni stanu bazy.
+    \item \textbf{Redis Functions:} Ulepszenie skryptów Lua. Funkcje są przechowywanie w bazie danych, a nie przesyłane przez klienta przy każdym żądaniu.
+\end{itemize}
+
+\section{Memcached}
+Memcached to wydajny, rozproszony system buforowania obiektów w pamięci RAM. Stał się fundamentalnym elementem architektury wielu największych seriwsów internetowych takich, jak Facebook, Twitter czy Wikipedia, przed erą dominacji Redis.
+W przeciwieństwie od Redis, który ewoluował w kierunku serwra struktur danych. Memcached pozostał czystym magazynem typu klucz-wartość, nieoferując złożonych typów danych ani mechanizmów trwałości.
+\subsection{Architektura wielowątkowa}
+Najważniejszą róznicą architektoniczną względem Redis jest model współbiezności. Memcached jest systemem w wielowątkowym, natomiast jego rywal wykonuje większość operacji na jednym wątku.
+\begin{itemize}
+    \item Wykorzystuje bibliotekę \textbf{pthreads} oraz mechanizm \textbf{libevent} do obsługi połączeń sieciowych.
+    \item Pozwala to na efektywnie skalowanie wertykalne pod względem ilości wątków procesora, co w przypadku Redis byłoby niemożliwe.
+    \item Skutkiem wielowątkowości jest konieczność stosowania blokad w celu synchronizacji dostępu do pamięci współdzielonej, co przy większym obciążeniu może prowadzić do zjawiska rywalizacji o zasoby.
+\end{itemize}
+\subsection{Zarządanie pamięcią}
+Memchaced stosuje własny alokator pamięci w celu rozwiązania problemu fragmentacji pamieci w systemach długo działających. Tradycyjne alokatory systemowe takie jak \textbf{malloc} i \textbf{free} przy dużej liczbie operacji alokacji i zwalniania pamięci o różnych rozmiarach prowadzą do fragmentacji zewnętrznej, co degraduje wydajność i może doprowadzić do nieprawidłowego funkcjonowania programu. Mechanizm Slab Allocation działa w następujący sposób:
+\begin{enumerate}
+    \item Pamięć RAM jest dzielona na duże bloki.
+    \item Każdy blok jest dzielony na mniejsze kawałki o stałym rozmiarze dla danej klasy.
+    \item Gdy przychodzi żądanie zapisania obiektu, Memcached szuka klasę o odpowiednim rozmiarze i wolnego kawałka i tam zapisuje dane. W większości przypadków rozmiar obiektu jest mniejszy od rozmiaru klasy, co skutkuje marnowaniem pamięci.
+\end{enumerate}
+Zaletą takiego rozwiązania jest eliminacja fragmentacji zewnętrznej i stały czas alokacji. Minusem jest fragmentacja wewnętrzna, w większości przypadków marnuje się pamięć w klasach.
+\subsection{Architektura "Shared-Nothing" i rola klienta}
+Memcache wdraża paragmat architektury \textbf{Shared-Nothing}. Serwerzy w klastrze Memcached nie wiedzą o swoim istnieniu i nie komunikują się ze sobą. Skutkuje to brakiem replikacji i protokołu Gossip. Cała logika spoczywa na kliencie:
+\begin{itemize}
+    \item Klient decyduje do jakiego serwera zapisać dane. Zazwyczaj używa się algorytmu spójnego haszowania w celu wyboru serwera.
+    \item Dzięki takiemu rozwiązaniu klaster skaluje się liniowo. Dodanie nowego serwera wymagana jedynie aktualizacji listy serwerów po stronie klienta bez konieczności rekonfiguracji węzłów bazy danych.
+\end{itemize}
+\subsection{Ograniczenia projektowe}
+Prostota systemu wiąże się ze sztywnymi ograniczeniami, które definiują jego przypadki użycia:
+\begin{itemize}
+    \item \textbf{Brak trwałości:} dane przechowywane są wyłącznie w pamięci RAM. Awaria zasilania bądź restart serwera oznacza nieodwracalną utratę wszystkich danych.
+    \item \textbf{Proste typy danych:} wartości są zawsze ciągi bajtów. Brak struktur takich jak listy czy zbiory wymusza na aplikacji pobieranie i zapisywanie całego obiektu jak i zarządzanie serializacją i deserializacją.
+    \item \textbf{Limit rozmiaru klucza i wartości:} rozmiar klucza nie możne przekraczać 250 bajtów, natomiast wartość domyślnie 1 MB. Jest to spowodowane blokowaniem wątków przy zbyt dużych danych.
+\end{itemize}
+\section{LevelDB}
+LevelDB to biblioteka osadzona implementująca trwały mechanizm klucz-wartość. Została stworzona przez inżynierów Google. W przeciwieństwie do Redis czy Memchaced, LevelDB nie jest serwerem sieciowym, lecz biblioteką importowaną bezpośrednio do kodu aplikacji. System stał się standardem dla implementacji struktur LSM-Tree, stanowiąc fundament dla wielu późniejszych projektów takich jak RocksDB czy Hyperledger GoLevelDB.
+\subsection{Architektura zapisu}
+LevelDB zrywa z tradycyjnym dla baz relacyjnym modelem B-Tree, które optymalizuje odczyt kosztem losowych operacji zapisu na dysku. Zamiast tego wykorzystuje architekturę LSM-Tree, która przekształca losowe zapisy w sekwencyjne operacje wejścia/wyjścia, co jest kluczowe dla wydajności dysków talerzowych HDD oraz trwałości dysków Flash SSD.
+
+Ścieżka zapisu danych przebiega następująco:
+\begin{enumerate}
+    \item \textbf{Write Ahead Log:} Każda operacja zapisu trafia najpierw do sekwencyjnego pliku logu na dysku. Gwarantuje to trwałośc danych w przypadku awarii zasilania.
+    \item \textbf{MemTable:} Równolegle dane są wstawiane do struktury w pamięci RAM.
+    \item \textbf{Immutable MemTable:} Gdy MemTable osiągnie określony rozmiar (domyślnie 4 MB), staje się tylko do odczytu, a system tworzy nową MemTable dla bieżących operacji.
+    \item \textbf{Zrzut na dysk:} Immutable MemTable jest zrzucana na dysk w postaci pliku SSTable (Sorted String Table).
+\end{enumerate}
+\subsection{SSTables i Leveled Compaction}
+Nazwa LevelDB pochodzi od specyficznej strategii organizacji plików na dysku, zwanej kompaktowaniem poziomym (Leveled Compaction). Pliki SSTable są organizowane w warstwy (levels):
+\begin{itemize}
+    \item \textbf{Level 0 (L0):} W tej warstwie trafiają pliki bezpośrednio zrzucane z pamięci RAM. Jest to jedyny poziom, gdzie zakresy kluczy w plikach mogą się na siebie nakładać.
+    \item \textbf{Level 1+:} Gdy liczba plików na warstwie 0 przekroczy próg, następuje kompaktowanie. Pliki są scalane, duplikaty usuwane, a wyniki trafiają na wyższy poziom warstwy pierwszej. na tych poziomach klucze są ściśle rozdzielone, jeden zakres kluczy znajduje się tylko w jednym pliku SSTable.
+\end{itemize}
+Taka struktura gwarantuje bardzo szybkie wyszukiwanie, na wyższych poziomach wystarczy sprawdzić jeden plik, aby znaleźć klucz, który można wyszukać za pomocą algorytmu wyszukiwania binarnego i indeksom w stopce pliku. Każda warstwa może pomieścić coraz co większą ilość danych np. warstwa 1 może pomieścić 10MB danych, natomiast warstwa czwarta może pomieścić 10GB. Na każdym z wyższych poziomów (od poziomu $L_1$ w górę) pliki są zorganizowane niczym równo ułożone klocki. Klucze w plikach na tym samym poziomie nigdy się nie pokrywają. Przykładowo, jeśli na poziomie $L_2$ znajduje się 50 plików, są one globalnie posortowane i rozłączne:
+
+\begin{itemize}
+    \item \texttt{Plik A:} zakres kluczy $[000 - 099]$
+    \item \texttt{Plik B:} zakres kluczy $[100 - 199]$
+    \item \texttt{Plik C:} zakres kluczy $[200 - 299]$
+\end{itemize}
+Każda kolejna warstwa charakteryzuje się dziesięciokrotnie większą pojemnością maksymalną niż warstwa poprzednia. Limit ten wyraża wzór:
+$$C_i = 10^i \times 10 \text{ MB}$$
+\subsection{Jak dane wędrują wyżej? Proces Kompaktowania}
+
+Załóżmy, że proces zapisu zapełnił poziom $L_1$ i jego limit $10 \text{ MB}$ został przekroczony. W tym momencie LevelDB uruchamia procedurę kompaktowania według następujących kroków:
+
+\begin{enumerate}
+    \item \textbf{Wybór pliku:} System wybiera jeden plik z poziomu $L_1$. Załóżmy, że wybrany plik zawiera klucze z zakresu $[100 - 199]$.
+    \item \textbf{Szukanie na wyższym poziomie:} LevelDB skanuje kolejny, wyższy poziom ($L_2$) w poszukiwaniu wszystkich plików, które mają klucze z tego samego zakresu. W naszym przypadku znajdzie tam np. dwa pliki: o zakresie $[080 - 120]$ oraz $[121 - 210]$.
+    \item \textbf{Wielkie scalanie:} Strumienie danych z wybranego pliku z $L_1$ oraz dopasowanych plików z $L_2$ trafiają do pamięci RAM. Tam następuje ich wielodrogowe scalanie. Podczas tego procesu usuwane są stare, nadpisane wersje kluczy oraz znaczniki danych usuniętych przez użytkownika.
+    \item \textbf{Zapis wyżej:} Ze scalonych, czystych i posortowanych danych tworzone są zupełnie nowe pliki SSTable, które zostają zapisane na poziomie $L_2$. Stare pliki źródłowe są bezpowrotnie usuwane.
+\end{enumerate}
+$$\text{Plik seryjny z } L_i + \text{Pliki nakładające się z } L_{i+1} \xrightarrow{\text{Merge Sort}} \text{Nowe, rozłączne pliki na } L_{i+1}$$
+Ta sama procedura powtarza się kaskadowo: gdy poziom $L_2$ przekroczy próg $100 \text{ MB}$, jeden z jego plików zostanie wybrany i po scaleniu przerzucony na poziom $L_3$.
+\subsection{Zaleta wyższych poziomów}
+
+Dzięki temu, że na poziomach od $L_1$ w górę zakresy kluczy w plikach się nie nakładają, odczyt danych jest niesamowicie szybki.
+
+W przypadku szukania jednego konkretnego klucza na przykład o wartości 150, a cała baza ważyła 100GB, LevelDB nie musi marnować czasu na przeszukiwanie całego dysku:
+\begin{itemize}
+    \item Baza wie, że na poziomie $L_1$ klucz $150$ może znajdować się \textbf{tylko w jednym} konkretnym pliku.
+    \item Na poziomie $L_2$ również tylko w jednym pliku.
+    \item Na poziomie $L_3$ analogicznie, w maksymalnie \textbf{jednym} pliku.
+\end{itemize}
+
+W najgorszym możliwym scenariuszu, maksymalna liczba plików, jakie baza musi odczytać, aby upewnić się, czy dany klucz istnieje, wynosi:
+$$|L_0| + n$$
+Gdzie $|L_0|$ to liczba niesegregowanych plików na poziomie zerowym, a $n$ to całkowita liczba wyższych poziomów, zazwyczaj 6. Zamiast przeszukiwać miliony losowych rekordów na dysku, LevelDB dokładnie wie, do których pojedynczych plików zajrzeć na każdym poziomie.
