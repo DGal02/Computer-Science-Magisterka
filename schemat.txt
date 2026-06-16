@@ -1,0 +1,66 @@
+1. Wprowadzenie
+1.1. Cel i zakres pracy
+1.2. Zakres badanych technologii
+1.3. Hipotezy i pytania badawcze
+1.4. Metodyka badań (Python + konteneryzacja + testy porównawcze)
+1.5. Struktura pracy
+2. Przegląd teoretyczny
+2.1. Bazy danych NoSQL - idea i zastosowania
+2.2. Klasyfikacja baz NoSQL
+2.3. Wady i zalety w porównaniu z bazami relacyjnymi
+2.4. Charakterystyka baz typu key-value
+2.5. Typowe scenariusze użycia baz key-value
+3. Charakterystyka porównywanych systemów
+3.1 Redis
+3.2 Memcached
+3.3 LevelDB
+3.4 RocksDB
+3.5 Couchbase
+3.6 Tarantool
+3.7 FoundationDB
+3.8 BerkeleyDB
+
+4. Środowisko testowe i metodyka testów
+4.1. Wykorzystane technologie i narzędzia
+  - Python (benchmark runner, testy, logowanie wyników)
+  - Docker i Docker Compose (konteneryzacja środowiska)
+  - Systemy operacyjne:
+    - WSL 2 (Windows 11)
+    - Linux
+4.2. Konfiguracja sprzętowa (CPU, RAM, dysk, wersje OS)
+4.3. Konfiguracja sieci kontenerów
+4.4. Struktura repozytorium i organizacja kodu testowego
+
+4.5. Założenia testowe
+4.6. Zestaw operacji testowych
+    4.6.1. Insert (write)
+    4.6.2. Read (get)
+    4.6.3. Update
+    4.6.4. Delete
+    4.6.5. Mieszane obciążenie (np. 80% read / 20% write)
+4.7. Zestaw danych testowych
+    - Rozmiar klucza, wartość, liczba rekordów (np. 10k, 100k, 1M)
+4.8. Scenariusze eksperymentów
+    - Test pojedynczego klienta
+    - Test wielowątkowy (concurrent access)
+4.9. Mierzone metryki
+    - Czas średni / mediany
+    - Przepustowość (ops/sec)
+    - Użycie CPU / RAM
+    - Trwałość wyników (persistence overhead)
+5. Wyniki eksperymentów
+5.1. Wyniki w środowisku Linux
+5.2. Wyniki w środowisku WSL
+5.3. Porównanie środowisk (różnice, narzuty, stabilność)
+5.4. Porównanie między bazami
+5.5. Wizualizacja wyników (wykresy i tabele)
+5.6. Analiza wydajnościowa i interpretacja
+6. Dyskusja wyników
+6.1. Wpływ architektury bazy na wyniki
+6.2. Wpływ środowiska uruchomieniowego (WSL vs Linux)
+6.3. Wnioski praktyczne - kiedy używać której bazy
+6.4. Ograniczenia badań
+7. Podsumowanie i wnioski
+7.1. Osiągnięte cele
+7.2. Odpowiedzi na pytania badawcze
+7.3. Kierunki dalszych badań (np. testy rozproszone, inne typy NoSQL)
