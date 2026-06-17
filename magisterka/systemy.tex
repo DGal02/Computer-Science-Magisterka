@@ -168,3 +168,41 @@ Ze względu na swoją lekkość i wydajność, LevelDB jest często wykorzystywa
     \item Blockchain (pierwotna implementacja klienta Bitcoin Core).
     \item Systemy logowania zdarzeń o wysokiej przepustowości zapisu.
 \end{itemize}
+
+\section{RocksDB}
+RocksDB to wysoce wydajny, osadzony magazyn danych typu klucz-wartość rozwijany przez firmę Facebook (obecnie Meta). Projekt powstał w 2012 roku jako rozwidlenie (fork) kodu biblioteki LevelDB w celu optymalizacji działania na serwerach wieloprocesorowych oraz szybkich nośnikach półprzewodnikowych (SSD). Podobnie jak pierwowzór, RocksDB bazuje na architekturze LSM-Tree, wprowadzając jednak szereg usprawnień umożliwiających skalowanie wydajności zapisu oraz odczytu.
+
+\subsection{Wielowątkowość i optymalizacja pod kątem dysków SSD}
+Głównym ograniczeniem LevelDB w środowiskach serwerowych była jednowątkowa architektura procesu kompaktowania oraz zapisu. RocksDB rozwiązuje ten problem poprzez zastosowanie następujących rozwiązań:
+\begin{itemize}
+    \item \textbf{Współbieżne kompaktowanie:} procesy scalania plików SSTable (compaction) oraz zrzucania danych z pamięci na dysk (flush) mogą być wykonywane równolegle przez wiele wątków tła, co pozwala na pełne wykorzystanie nowoczesnych procesorów wielordzeniowych.
+    \item \textbf{Zoptymalizowany zapis:} zastosowanie mechanizmu grupowania operacji zapisu (write batching) oraz potokowości (pipelining) pozwala na zminimalizowanie rywalizacji o blokady pomiędzy wątkami aplikacyjnymi.
+\end{itemize}
+
+\subsection{Rodziny kolumn (Column Families)}
+Jedną z najważniejszych innowacji w RocksDB jest wprowadzenie rodzin kolumn. Umożliwiają one podział bazy danych na niezależne logicznie przestrzenie kluczy w ramach tej samej instancji:
+\begin{itemize}
+    \item Każda rodzina kolumn posiada własne struktury MemTable oraz pliki SSTable na dysku, co pozwala na stosowanie różnych algorytmów kompresji czy konfiguracji kompaktowania dla poszczególnych typów danych.
+    \item Wszystkie rodziny kolumn współdzielą ten sam dziennik zapisu (Write-Ahead Log), co gwarantuje atomowość operacji zapisu obejmujących klucze z różnych rodzin (operacje typu multi-family write).
+\end{itemize}
+
+\subsection{Elastyczność i konfiguracja struktur pamięciowych}
+RocksDB oferuje szerokie możliwości dostosowania struktur wewnętrznych do specyfiki obciążenia aplikacyjnego:
+\begin{itemize}
+    \item \textbf{Zróżnicowane typy struktur MemTable:} standardowa struktura typu SkipList może zostać zastąpiona przez tablicę mieszającą (HashSkipList lub HashLinkList), co przyspiesza operacje wyszukiwania punktowego przy braku potrzeby iteracji po zakresie kluczy.
+    \item \textbf{Elastyczne strategie kompaktowania:} poza klasycznym kompaktowaniem poziomym (Leveled Compaction), biblioteka udostępnia kompaktowanie uniwersalne (Universal Compaction) zorientowane na wysoką przepustowość zapisu kosztem odczytu, a także kompaktowanie typu FIFO (First-In, First-Out) przeznaczone do przechowywania danych czasowych.
+\end{itemize}
+
+\subsection{Operator scalania (Merge Operator)}
+Tradycyjne operacje modyfikacji rekordu typu odczyt-modyfikacja-zapis (ang. \emph{read-modify-write}) wymagają pobrania wartości do aplikacji, jej aktualizacji i ponownego zapisu. W RocksDB wprowadzono dedykowany operator scalania, który upraszcza ten proces:
+\begin{itemize}
+    \item Aplikacja przesyła jedynie instrukcję modyfikacji, na przykład dodanie wartości do licznika lub dołączenie elementu do listy.
+    \item Instrukcja ta jest dopisywana bezpośrednio do struktury LSM-Tree, a rzeczywiste scalenie danych następuje asynchronicznie w tle podczas odczytu lub kompaktowania, co radykalnie zmniejsza narzut komunikacyjny i blokady.
+\end{itemize}
+
+\subsection{Zarządzanie zasobami i trwałość}
+W przeciwieństwie do LevelDB, RocksDB posiada zaawansowane mechanizmy kontroli pracy silnika w warunkach dużego obciążenia:
+\begin{itemize}
+    \item \textbf{Rate Limiter:} umożliwia precyzyjne ograniczenie przepustowości zapisu na dysk, co zapobiega zjawisku blokowania operacji wejścia/wyjścia (I/O) podczas intensywnego kompaktowania.
+    \item \textbf{Kopie zapasowe i punkty kontrolne:} wbudowane mechanizmy umożliwiają tworzenie spójnych migawek (checkpoints) oraz kopii zapasowych w czasie działania bazy danych (hot backups) bez blokowania wątków zapisujących.
+\end{itemize}
