@@ -1,187 +1,187 @@
 \section{Baza danych NoSQL, idea i zastosowania}
-Termin NoSQL, często rozwijany jako Not Only SQL, odnosi się do dużej ilości klasy systemów zarządzania bazami danych, które nie korzystają z tradycyjnego modelu relacji między danymi, który dominuje w informatyce od lat siedemdziesiątych XX wieku. Ów model nie powstał w celu wyparcia relacyjnych baz danych, lecz był odpowiedzią na specyficzne wyzwania nowoczesnych aplikacji i systemów Big Data, którym klasyczne bazy danych nie były w stanie sprostać.
+Termin NoSQL, często rozwijany jako Not Only SQL, odnosi się do klasy systemów zarządzania bazami danych, które nie korzystają z tradycyjnego modelu relacji między danymi, dominującego w informatyce od lat siedemdziesiątych XX wieku. Ów model nie powstał w celu wyparcia relacyjnych baz danych, lecz był odpowiedzią na specyficzne wyzwania nowoczesnych aplikacji i systemów Big Data, którym klasyczne bazy danych nie były w stanie sprostać.
 \subsection{Geneza: Problem ''One Size Fits All''}
-Przez lata relacyjne bazy danych były traktowane jako uniwersalne rozwiązanie (''OneSize Fits All''). Wraz z nadejściem ery Web 2.0, mediów społecznościowych oraz Internetu Rzeczy (IoT) pojawiły się wyzwania określone jako model \textbf{3V}:
+Przez lata relacyjne bazy danych były traktowane jako uniwersalne rozwiązanie (''One Size Fits All''). Wraz z nadejściem ery Web 2.0, mediów społecznościowych oraz Internetu Rzeczy (IoT) pojawiły się wyzwania określone jako model \textbf{3V}:
 \begin{itemize}
-    \item \textbf{Objętość (Volume):} Znaczny przyrost danych liczony w petabajtach. W aplikacjach typu \textbf{Multi-Tenant}, czyli aplikacji z jedną instancją i dzierżawą przez wielu klientów, przechowuje się niewyobrażalnie duże ilości danych. Przykładem jest Jira.
-    \item \textbf{Szybkość (Velocity):} Potrzeba przetwarzania strumieni danych w czasie rzeczywistym. Na przykład w aplikacjach Internetu Rzeczy, gdzie każde opóźnienie w znaczący sposób wpływa na działanie aplikacji.
-    \item \textbf{Różnorodność (Variety):} Aplikację zaczęły mieć potrzebę przechowywania danych w inny sposób niż strukturalny (tabelaryczny). Pojawiły się takie formaty jak JSON i XML, które należą do danych półstrukturalnych jak i dane niestrukturalne jak wideo czy tekst.
+    \item \textbf{Objętość (Volume):} znaczny przyrost danych liczony w petabajtach. W aplikacjach typu \textbf{Multi-Tenant} (z jedną instancją współdzieloną przez wielu klientów) przechowuje się ogromne wolumeny danych (przykładem jest system Jira).
+    \item \textbf{Szybkość (Velocity):} potrzeba przetwarzania strumieni danych w czasie rzeczywistym. Ma to kluczowe znaczenie m.in. w aplikacjach Internetu Rzeczy, gdzie opóźnienia znacząco wpływają na poprawność działania systemu.
+    \item \textbf{Różnorodność (Variety):} konieczność przechowywania danych w postaci innej niż strukturalna (tabelaryczna). Wymaga to obsługi formatów takich jak JSON i XML (dane półstrukturalne) oraz danych niestrukturalnych (np. wideo, dźwięk, tekst).
 \end{itemize}
-Fundamentem idei NoSQL jest odejście od sztywnych zasad ACID (Niepodzielności, Spójności, Izolacji i Trwałości) na rzecz wydajnośc i elastyczności. Głównymi założeniami są:
+Fundamentem idei NoSQL jest odejście od sztywnych zasad ACID (Niepodzielności, Spójności, Izolacji i Trwałości) na rzecz wydajności i elastyczności. Głównymi założeniami są:
 \begin{itemize}
-    \item \textbf{Skalowalność horyzontalna:} tradycyjne bazy SQL skalują się głównie wertykalnie, czyli zwiększają swoją wydajność poprzez dokupienie mocniejszego serwera. Takie rozwiązanie jest kosztowne i po siada fizyczne limity. Nierelacyjne bazy danych projektowane są do skalowania horyzontalnego, czyli dołączania kolejnych serwerów do klastra. Takie rozwiązanie jest o wiele tańsze i nie posiada fizicznych limitów.
-    \item \textbf{Elastyczność modelu danych:} w relacyjnych systemach zmiana struktury danych, na przykład dodanie nowej kolumny w tabeli, która zawiera miliardy rekordów jest operacją kosztowną i blokującą system. Nierelacyjne bazy danych pozwalają na zapisywanie danych o dowolnej strukturze bez potrzeby definiowania ich schematu. Takie rozwiązanie w znaczący sposób ułatwia tworzenie aplikacji, które posiadają ciągle zmienny format danych.
+    \item \textbf{Skalowalność horyzontalna:} tradycyjne bazy SQL są skalowane głównie pionowo (wertykalnie), co oznacza zwiększanie ich wydajności poprzez rozbudowę sprzętową pojedynczego serwera. Rozwiązanie to jest kosztowne i ograniczone fizycznymi limitami sprzętu. Nierelacyjne bazy danych projektuje się z myślą o skalowaniu poziomym (horyzontalnym), polegającym na dołączaniu kolejnych serwerów do klastra, co pozwala uniknąć barier technologicznych i obniżyć koszty.
+    \item \textbf{Elastyczność modelu danych:} w systemach relacyjnych modyfikacja struktury danych, np. dodanie nowej kolumny do tabeli zawierającej miliardy rekordów, jest operacją kosztowną i często blokującą działanie bazy. Nierelacyjne bazy danych pozwalają na zapisywanie danych o dowolnej strukturze bez konieczności uprzedniego definiowania schematu. Ułatwia to rozwój aplikacji przetwarzających dynamicznie zmieniające się formaty danych.
 \end{itemize}
-Ze względu na swoje działanie i ograniczenia bazy NoSQL nie są w stanie w pełni zastąpić relacyjnych baz. Systemy bankowe wymagają ścisłych transakcji. Aczkolwiek mogą uzupełnić je w takich obszarach jak:
+Ze względu na specyfikę działania i ograniczenia, bazy NoSQL nie są w stanie w pełni zastąpić systemów relacyjnych (np. w bankowości, gdzie wymagana jest ścisła zgodność z zasadami ACID). Mogą one jednak stanowić dla nich cenne uzupełnienie w obszarach takich jak:
 \begin{itemize}
-    \item \textbf{Big Data i Analityka:} Przechowywanie i analiza ogromnych zbiorów danych takich jak logi systemowe czy zachowania użytkowników.
-    \item \textbf{Zarządzanie treścią i katalogami produktów:} Elastyczne struktury dokumentowe są idealnym rozwiązaniem dla systemów e-commerce, gdzie każdy produkt może zawierać inny zestaw atrybutów i danych.
-    \item \textbf{Internet Rzeczy:} Zbieranie milionów rekordów z czujników na sekundę, gdzie priorytetem jest szybkość zapisu, byłoby niemożliwe przy relacyjnych bazach danych.
-    \item \textbf{Media społecznościowe i rekomendacje:} Złożone relacje między użytkownikami, które doprowadziły by do tak zwanej bomby złączeń (JOIN Bomb).
+    \item \textbf{Big Data i Analityka:} przechowywanie i analiza ogromnych zbiorów danych, takich jak logi systemowe czy zachowania użytkowników.
+    \item \textbf{Zarządzanie treścią i katalogami produktów:} elastyczne struktury dokumentowe są idealnym rozwiązaniem dla systemów e-commerce, w których każdy produkt może zawierać inny zestaw atrybutów.
+    \item \textbf{Internet Rzeczy:} rejestrowanie milionów odczytów z czujników na sekundę, gdzie priorytetem jest wysoka przepustowość zapisu, byłoby niezwykle trudne do zrealizowania w tradycyjnych relacyjnych bazach danych.
+    \item \textbf{Media społecznościowe i rekomendacje:} modelowanie złożonych relacji między użytkownikami, których odpytywanie w relacyjnych bazach prowadziłoby do drastycznego spadku wydajności wskutek zjawiska tzw. bomby złączeń (ang. \emph{JOIN Bomb}).
 \end{itemize}
-Współczesna architektura aplikacja promuje podejście użycia zarówno relacyjnych jak i nierelacyjnych baz danych. Na przykład w nierelacyjnej bazie danych Redis trzyma się sesje użytkowników, w nierelacyjnej dokumentowej bazie MongoDB przechowuje się katalogi produktów, a w relacyjnej bazie PostgreSQL obsługuje się transakcje finansowe.
+Współczesna architektura systemów informatycznych często opiera się na podejściu wielobazowym (ang. \emph{polyglot persistence}). Przykładowo, w pamięciowej bazie danych Redis przechowywane są sesje użytkowników, w dokumentowej bazie MongoDB katalogi produktów, natomiast transakcje finansowe są rejestrowane w relacyjnym systemie PostgreSQL.
 \section{Klasyfikacja baz NoSQL}
 \subsection{Dokumentowe bazy danych}
-Głównym założeniem baz dokumentowych jest odejście od struktury tabelarycznej na rzecz elastycznych dokumentów, które pozwalają na przechowywanie danych w formacie zbliżonym do struktur wykorzystywanych w nowoczesnych językach programowania. Dokumenty są pojemnikami dla par klucz-wartość, gdzie wartościami mogą być typy danych pokroju liczby, ciągi znaków, tablice lub zagnieżdżone dokumenty. Większość systemów typu dokument wykorzystuje formaty wywodzące się z języka programowania JavaScript:
+Głównym założeniem baz dokumentowych jest odejście od struktury tabelarycznej na rzecz elastycznych dokumentów, co umożliwia przechowywanie danych w formacie zbliżonym do struktur wykorzystywanych w nowoczesnych językach programowania. Dokumenty stanowią kontenery dla par klucz-wartość, w których wartościami mogą być zarówno typy proste (liczby, ciągi znaków), jak i złożone (tablice lub zagnieżdżone dokumenty). Większość systemów dokumentowych wykorzystuje formaty wywodzące się z języka JavaScript:
 \begin{itemize}
-    \item \textbf{JSON (JavaScript Object Notation):} Format tekstowy przystępny dla człowieka, który jest standardem stosowanym w komunikacji webowej.
-    \item \textbf{BSON (Binary JSON):} Binarny odpowiednik JSON, który jest głównie wykorzystywany między innymi przez MongoDB. Oferuje większą wydajność parsowania oraz rozszerza format JSON oferując dodatkowe typy danych takie jak daty czy dane binarne.
+    \item \textbf{JSON (JavaScript Object Notation):} format tekstowy przystępny dla człowieka, będący powszechnym standardem w komunikacji sieciowej.
+    \item \textbf{BSON (Binary JSON):} binarny odpowiednik formatu JSON, wykorzystywany m.in. przez MongoDB. Zapewnia wyższą wydajność parsowania oraz rozszerza standard o dodatkowe typy danych, takie jak daty czy dane binarne.
 \end{itemize}
-Dokumenty o podobnej strukturze są grupowane w kolekcjach, które stanowią odpowiednik tabel w relacyjnych bazach danych. Najważniejszą cechą różniącą nierelacyjne bazy dokumentowe od relacyjnych jest brak konieczności definiowania struktury danych. Każdy dokument moze posiadać inny zestaw par kluczy i wartości. Takie rozwiązanie skutkuje dużą elastycznością i jest idealne w przypadku danych, które ulegają częstym zmianom. Nierelacyjne bazy dokumentowe są głównie projektowanie z myśla o rozproszonej architekturze. Skalowanie odbywa się przede wszystkim na dwóch płaszczyznach:
+Dokumenty o zbliżonej strukturze są grupowane w kolekcjach, będących odpowiednikiem tabel w relacyjnych bazach danych. Kluczową cechą różniącą systemy dokumentowe od relacyjnych jest brak konieczności definiowania sztywnego schematu danych – każdy dokument może zawierać odmienny zestaw par klucz-wartość. Zapewnia to dużą elastyczność i sprawdza się w przypadku danych o zmiennej strukturze. Nierelacyjne bazy dokumentowe są projektowane z myślą o architekturze rozproszonej, w której skalowanie odbywa się przede wszystkim na dwóch płaszczyznach:
 \begin{itemize}
-    \item \textbf{Replikacja:} Tworzenie kopii danych na różnych węzłach. Zapewnia to wysoką dostępność.
-    \item \textbf{Sharding:} Horyzontalne partycjoniwanie danych, które polega na rozdzielaniu kolekcji pomiędzy wieloma serwerami na podstawie tak zwanych kluczy shardowania.
+    \item \textbf{Replikacja:} tworzenie kopii danych na różnych węzłach, co zapewnia wysoką dostępność systemu.
+    \item \textbf{Sharding:} horyzontalne partycjonowanie danych polegające na dystrybucji elementów kolekcji między wiele serwerów na podstawie wybranego klucza partycjonowania (ang. \emph{shard key}).
 \end{itemize}
-Nierelacyjne bazy dokumentowe posiadają zarówno zalety jak i wady:
+Nierelacyjne bazy dokumentowe mają zarówno zalety, jak i wady:
 \begin{itemize}
-    \item \textbf{Denormalizacja i zagnieżdżenia:} Skutkuje to wysoką wydajnością odczytu ale również redundancja, która zwiększa zapotrzebowanie na miejsce.
-    \item \textbf{Elastycznosc schematu:} Pozwala na łatwość iteracji, również otwiera furtkę na niespójność danych.
+    \item \textbf{Denormalizacja i zagnieżdżenia:} skutkuje to wysoką wydajnością odczytu, lecz generuje nadmiarowość (redundancję) danych, co zwiększa zapotrzebowanie na przestrzeń dyskową.
+    \item \textbf{Elastyczność schematu:} ułatwia szybkie wdrażanie zmian w aplikacji, ale stwarza ryzyko wystąpienia niespójności w przechowywanych danych.
 \end{itemize}
 \subsection{Szerokokolumnowe bazy danych}
-Szerokokolumnowe bazy danych są zorientowanymi systemami, które charakteryzują się wydajnością przy ogromnych zbiorach danych w architekturach rozproszonych. Pozornie przypominają model relacyjny, ponieważ wykorzystują takie pojęcia jak wiersze i kolumny. Jednakże struktura i sposób składowania danych na dysku jest diamentralnie inna. W przeciwieństwie do systemów zarządzania relacyjną bazą danych, które przechowują dane wierszami, nierelacyjne bazy szerokokolumnowe grupują dane w tak zwane rodziny kolumn.
+Szerokokolumnowe bazy danych to systemy zorientowane kolumnowo, które charakteryzują się wysoką wydajnością przy przetwarzaniu ogromnych zbiorów danych w architekturach rozproszonych. Pozornie przypominają model relacyjny, ponieważ wykorzystują pojęcia wierszy i kolumn, jednak ich struktura oraz sposób składowania danych na dysku są diametralnie inne. W przeciwieństwie do systemów relacyjnych (RDBMS), które przechowują dane wierszami, bazy szerokokolumnowe grupują dane w tzw. rodziny kolumn.
 \begin{itemize}
-    \item \textbf{Wiersz:} Każdy wiersz jest identyfikowany przez unikalny klucz. Wiersze w tej samej rodzinie kolumn nie muszą posiadać tych samych zestawów kolumn.
-    \item \textbf{Rodzina kolumn:} Logiczna grupa powiązanych ze sobą danych. Są one fizycznie składowane blisko siebie na dysku. Podział na rodziny kolumn ma duże znaczenie dla wydajności operacji zarówno wejścia i wyjścia.
-    \item \textbf{Komórka:} Najmniejsza jednostka danych, która jest przecięciem wiersza i kolumny. Posiada mechanizm wersjonowania danych za pomocą znacznika czasu.
+    \item \textbf{Wiersz:} każdy wiersz identyfikowany jest przez unikalny klucz. Wiersze w obrębie tej samej rodziny kolumn nie muszą posiadać tożsamych zestawów kolumn.
+    \item \textbf{Rodzina kolumn:} logiczna grupa powiązanych ze sobą danych, fizycznie składowanych blisko siebie na dysku. Taki podział ma kluczowe znaczenie dla optymalizacji operacji wejścia/wyjścia (I/O).
+    \item \textbf{Komórka:} najmniejsza jednostka danych będąca przecięciem wiersza i kolumny. Oferuje mechanizm wersjonowania danych przy użyciu znaczników czasu.
 \end{itemize}
-Większośc baz szerokokolumnowych takich jak Apache Cassandra wykorzystuje strukturę LSM-Tree zamiast tradycyjnych drzew B-Tree.
+Większość baz szerokokolumnowych, takich jak Apache Cassandra, wykorzystuje strukturę LSM-Tree (ang. \emph{Log-Structured Merge-Tree}) zamiast tradycyjnych drzew B-Tree.
 \begin{itemize}
     \item \textbf{B-Tree} \begin{itemize}
-        \item Posiada zbalansowaną drzewiastą strukturę optymalizowaną pod kątem systemów pamięcy masowych.
-        \item Wykorzystuje strategię aktualizacji w miejscu. Zmiana rekordu wymaga odnalezienia konkretnej strony na dysku i jej nadpisania.
-        \item Minusem tego rozwiązania są wysokie koszty zapisu oraz koniecznością blokowania stron.
-        \item Plusem tego rozwiązania jest bardzo szybki odczyt punktowy, co jest znaczącym plusem dla systemów opierajacych się głównie na odczycie.
+        \item Charakteryzuje się zbalansowaną strukturą drzewiastą, optymalizowaną pod kątem systemów pamięci masowej.
+        \item Wykorzystuje strategię aktualizacji w miejscu (ang. \emph{update-in-place}). Zmiana rekordu wymaga zlokalizowania konkretnej strony na dysku i jej nadpisania.
+        \item Wadą tego rozwiązania jest wysoki koszt zapisu oraz konieczność blokowania stron.
+        \item Zaletą jest szybki odczyt punktowy, co sprawdza się w systemach o przewadze operacji odczytu.
     \end{itemize}
     \item \textbf{LSM-Tree} \begin{itemize}
-        \item Jest zaprojektowana pod kątem maksymalizacji przepustowości zapisu poprzez zmianę losowych operacji wejścia i wyjścia na sekwencyjne.
-        \item Dane sa zawsze dopisywane. W tle zachodzi proces scalania plików i usuwania nieaktualnych wersji rekordów.
-        \item Największym plusem tego rozwiązania jest ekstremalnie szybki zapis oraz brak fragmentacji przy zapisie. Takie rozwiązanie jest optymalne dla zmiennych dużych zbiorów danych.
-        \item Minusem tego rozwiązania jest natomiast nadmiarowość odczytu, ponieważ musi przeszukać parę dysków naraz w celu znalezienia najnowszej wersji. Innym minusem jest również nadmiarowość zapisu, przyczyną takiego zjawiska jest zapisywanie fizycznie na dysku danych wiele razy w celu utrzymania większego porządku, zapisują się małe pliki i łączą w większe, żeby utrzymać porządek.
+        \item Projektowane jest pod kątem maksymalizacji przepustowości zapisu poprzez zamianę losowych operacji I/O na operacje sekwencyjne.
+        \item Dane są zawsze dopisywane. W tle uruchamiany jest proces scalania plików oraz usuwania nieaktualnych wersji rekordów.
+        \item Zaletą tego rozwiązania jest szybki zapis oraz brak fragmentacji dyskowej. Sprawdza się ono przy dynamicznie rosnących zbiorach danych.
+        \item Wadą jest natomiast nadmiarowość odczytu (ang. \emph{read amplification} – konieczność przeszukania wielu plików na dysku w celu znalezienia najnowszej wersji klucza) oraz zjawisko nadmiarowości zapisu (ang. \emph{write amplification}), wynikające z wielokrotnego przepisywania tych samych danych podczas scalania mniejszych plików w większe.
     \end{itemize} 
 \end{itemize}
 
 Proces zapisu przebiega w następujący sposób:
 \begin{enumerate}
-    \item Nowe dane trafiają do dziennika operacji w celu zapewnienia trwałości i uniknięcia utraty danych.
-    \item W kolejnym kroku trafiają do pamięci RAM w odpowiedniej strukturze (\textbf{MemTable}.
-    \item Po osiągnięciu określonego rozmiaru w \textbf{MemTable}, dane są zapisywane na dysku jako nieedytowalny plik.
+    \item Nowe dane trafiają do dziennika operacji w celu zapewnienia trwałości (ang. \emph{Write-Ahead Log}).
+    \item W kolejnym kroku są zapisywane w pamięci RAM w odpowiedniej strukturze (\textbf{MemTable}).
+    \item Po osiągnięciu określonego rozmiaru struktury \textbf{MemTable}, dane są zrzucane na dysk jako nieedytowalny plik.
 \end{enumerate}
-Powyższy proces w bazach szerokokolumnowych oferuje wysoką wydajność zapisu, co czyni je idealnie dostosowanymi do systemów logowania zdarzeń czy do analtyki czasu rzeczywistego.
+Powyższy proces zapewnia wysoką wydajność zapisu, co czyni bazy szerokokolumnowe optymalnym rozwiązaniem dla systemów logowania zdarzeń czy analizy danych w czasie rzeczywistym.
 
-Takie systemy realizują koncepcję niezależności węzłów w klastrze. Skalowanie odbywanie się horyzontalnie poprzez:
+Systemy te realizują koncepcję niezależności węzłów w klastrze. Skalowanie odbywa się horyzontalnie poprzez:
 \begin{itemize}
-    \item \textbf{Spójne hashowanie:} Pozwala na równomierne rozłożenie danych pomiędzy węzły klastra na podstawie klucza partycji.
-    \item \textbf{Replikacja wieloośrodkowa:} Możliwość przechowywania kopii danych w różnych centrach danych, co zapewnia odporność na awarie całych regionów geograficznych.
+    \item \textbf{Spójne haszowanie:} pozwala na równomierne rozłożenie danych między węzłami klastra na podstawie klucza partycji.
+    \item \textbf{Replikacja wieloośrodkowa:} umożliwia przechowywanie kopii danych w różnych centrach danych, co zapewnia odporność na awarie całych regionów geograficznych.
 \end{itemize}
-Bazy szerokokolumnowe głównie stosuje się w sytuacjach gdy dane mają charakter szeregów czasowych lub aplikacje potrzebują obsługi miliardów rekordów przy niskich opóźnieniach.
+Bazy szerokokolumnowe są stosowane głównie w sytuacjach, gdy dane mają charakter szeregów czasowych lub gdy aplikacje wymagają obsługi miliardów rekordów przy niskich opóźnieniach.
 
 
 Przykłady baz szerokokolumnowych i ich cechy szczególne:
 \begin{itemize}
-    \item \textbf{Apache Cassandra:} Architektura pierścienia, która eleminuje pojedyńczy punkt awarii.
-    \item \textbf{Google Bigtable:} Usługa chmurowa. Podstawa działania wyszukiwarki Goole i Gmaila.
-    \item \textbf{Apache HBase:} Wysoka spójność danych, ścisła integracja z systemem plików HDFS.
-    \item \textbf{ScyllaDB:} Wysokowydajny klon Cassandry napisany w języku programowania C++.
+    \item \textbf{Apache Cassandra:} architektura pierścienia eliminująca pojedynczy punkt awarii (ang. \emph{Single Point of Failure}).
+    \item \textbf{Google Bigtable:} usługa chmurowa stanowiąca podstawę działania wyszukiwarki Google i poczty Gmail.
+    \item \textbf{Apache HBase:} zapewniająca wysoką spójność danych, ściśle zintegrowana z rozproszonym systemem plików HDFS.
+    \item \textbf{ScyllaDB:} wysokowydajny klon bazy Cassandra napisany w języku C++.
 \end{itemize}
 \subsection{Grafowe bazy danych}
-Grafowe bazy danych są zaprojektowne do przechowywania i nawigowania po złożonych relacjach między danymi. W innych modelach NoSQL relacje są symulowane lub pomijane, natomiast w bazach grafowych stanowią one fundament architektury, będąc równie istotne co same węzły.
+Grafowe bazy danych są zaprojektowane do przechowywania i efektywnego przeszukiwania złożonych relacji między danymi. W innych modelach NoSQL relacje są symulowane bądź pomijane, natomiast w bazach grafowych stanowią one fundament architektury, będąc równie istotne co same węzły (encje).
 
 
-Większość komercyjnych rozwiązań, na przykład Neo4j, opiera się na modelu etykietowanych właściwości grafu. Składa się z trzech podstawowych elementów:
+Większość komercyjnych rozwiązań, na przykład Neo4j, opiera się na modelu etykietowanych właściwości grafu (ang. \emph{Labeled Property Graph}). Model ten składa się z trzech podstawowych elementów:
 \begin{itemize}
-    \item \textbf{Węzły:} reprezentują encje, na przykład użytkownika, produkt czy miasto. Mogą posiadać etykiety, które kategoryzują ich rolę w grafie.
-    \item \textbf{Krawędzie:} definiuja połączenia między węzłami. W bazach grafowych krawędzie zawsze posiadają kierunek jak i posiadają nazwę.
-    \item \textbf{Właściwości:} pary klucz-wartość, które mogą być przypisane zarówno do węzłów jak i do krawędzi. Umożliwia to przechowywanie metadanych relacji takich jak datę zawarcia znajomości na krawędzi.
+    \item \textbf{Węzły:} reprezentują encje (np. użytkownika, produkt lub lokalizację) i mogą mieć przypisane etykiety określające ich rolę w grafie.
+    \item \textbf{Krawędzie (relacje):} definiują połączenia między węzłami. W bazach grafowych krawędzie są zawsze skierowane i nazwane.
+    \item \textbf{Właściwości:} pary klucz-wartość, które mogą być przypisane zarówno do węzłów, jak i do krawędzi, co umożliwia przechowywanie dodatkowych metadanych (np. daty utworzenia powiązania).
 \end{itemize}
-Główną różnicą pomiędzy relacyjnymi bazami danych, a natywnymi bazami grafowymi jest jest mechanizm sąsiedztw bezindeksowych. W relacyjnej bazie danych powiązanych rekodów wymagana przeszukania indeksu (złożoność $0(\log n)$, co przy wielokrotnych złączeniach np. \textbf{JOIN} prowadzi do drastycznego spadku wydajności. W natywnej bazie grafowej każdy węzeł przechowuje fizyczne wskaźniki w postaci adresów w pamięci do swoich sąsiadów.
+Główną różnicą między relacyjnymi bazami danych a natywnymi systemami grafowymi jest mechanizm sąsiedztw bezindeksowych (ang. \emph{index-free adjacency}). W relacyjnej bazie danych odnalezienie powiązanych rekordów wymaga przeszukania indeksu (złożoność $O(\log n)$), co przy wielokrotnych złączeniach typu \emph{JOIN} prowadzi do drastycznego spadku wydajności. W natywnej bazie grafowej każdy węzeł przechowuje fizyczne wskaźniki (adresy w pamięci) do swoich sąsiadów.
 
-Dzięki sąsiedztw bezindeksowych koszt przejścia grafu zależy wyłącznie od liczby relacji wychodzących z danego węzła, a nie od całkowitego rozmiaru bazy danych. Zapewnia to stałą wydajność ($0(1)$) nawet przy milardach rekordów, co byłoby niemożliwe przy relacyjnych bazach danych.
+Dzięki sąsiedztwu bezindeksowemu koszt przeszukiwania grafu zależy wyłącznie od liczby relacji wychodzących z danego węzła, a nie od całkowitego rozmiaru bazy danych. Zapewnia to stałą wydajność ($O(1)$) nawet przy miliardach rekordów, co w tradycyjnych bazach relacyjnych byłoby nieosiągalne.
 
-Ze względu na specyfikę struktury natywnych baz grafowych SQL nie jest efektywny do obsługi grafów. Powstały następujące języki do obsługi zapytań:
+Ze względu na specyfikę struktury natywnych baz grafowych, język SQL nie jest efektywny w ich obsłudze. Z tego powodu opracowano dedykowane języki zapytań:
 \begin{itemize}
-    \item \textbf{Cypher:} Język deklaratywyny, który jest inspirowany ASCII-artem. Ma na celu wizualne odwzorowanie ścieżek w grafie. Jest używany w bazie Neo4j.
-    \item \textbf{Gremlin:} język imperatywny, służący do programistycznego przechodzenia przez graf. Używany w Apache TinkerPop.
+    \item \textbf{Cypher:} deklaratywny język zapytań, inspirowany składnią ASCII-art, mający na celu wizualne odwzorowanie ścieżek w grafie. Jest standardem w bazie Neo4j.
+    \item \textbf{Gremlin:} język imperatywny, służący do programistycznego przechodzenia grafu (ang. \emph{graph traversal}), używany w ekosystemie Apache TinkerPop.
 \end{itemize}
-Bazy grafowe znajdują zastosowanie w domenach, gdzie analiza powiązań jest ważniejsza niż prosta agregacja danych:
+Bazy grafowe znajdują zastosowanie w dziedzinach, w których analiza powiązań jest kluczowa:
 \begin{itemize}
-    \item \textbf{Systemy rekomendacyjne:} analiza zakupów w czasie rzeczywistym takich jak "Klienci, którzy kupili to, kupili również te przedmioty..."
-    \item \textbf{Wykrywanie oszustw:} śledzenie nietypowych ścieżek przepływu pieniędzy w sieciach bankowych.
-    \item \textbf{Zarządzanie tożsamością i dostepem:} modelowanie złożonych struktur organizacyjnych i uprawnień.
-    \item \textbf{Sieci społeczne:} Analiza znajomości przyjaciół przyjacieli na przykład osoby, które możesz znać na LinkedIn czy Facebooku.
+    \item \textbf{Systemy rekomendacyjne:} analiza powiązań w czasie rzeczywistym (np. sugerowanie produktów podobnych lub powiązanych).
+    \item \textbf{Wykrywanie nadużyć finansowych:} śledzenie podejrzanych przepływów kapitału w sieciach bankowych.
+    \item \textbf{Zarządzanie tożsamością i dostępem (IAM):} modelowanie złożonych, hierarchicznych struktur uprawnień.
+    \item \textbf{Sieci społecznościowe:} analiza powiązań między użytkownikami (np. algorytmy wyszukiwania znajomych).
 \end{itemize}
 \section{Wady i zalety w porównaniu z bazami relacyjnymi}
-Wybór pomiędzy relacyjną a nierelacyjną bazą danych nie jest kwestią wyższości jednego rozwiązania nad drugim, lecz wynika z analizy wymagań projektu.
-\subsection{Zalety baz NoSQl względem RDBMS}
+Wybór między relacyjną a nierelacyjną bazą danych nie polega na wykazaniu wyższości jednego rozwiązania nad drugim, lecz wynika z dopasowania technologii do specyfiki i wymagań konkretnego projektu.
+\subsection{Zalety baz NoSQL względem RDBMS}
 \begin{enumerate}
-    \item \textbf{Skalowalność horyzontalna:} bazy NoSQL natywnie wspierają partycjonowanie, co pozwala na linoiwy wzrost wydajności poprzez dodawanie tanich serwerów do klastra. Relacyjnie bazy danych głównie skalują się wertykalnie, takie rozwiązanie jest droższe i posiada ograniczenia fizyczne.
-    \item \textbf{Elastyczność schematu:} dzięki uproszczonemu modelowi dostępu, na przykład po kluczu głównym i braku narzutu związanego z utrzymywaniem relacji i integralności referencji, nierelacyjne bazy zazwyczaj oferują niższe opóźnienia przy operacjach zapisu i odczytu prostych struktur.
-    \item \textbf{Obsługa danych niestrukturyzowanych:} w przypadku danych, które nie pasują do tabel, na przykład dokumenty JSON, grafy powiązań czy strumienie danych z urządzeń IoT aplikacje są zmuszone do rozwiązań nierelacyjnych.
+    \item \textbf{Skalowalność horyzontalna:} bazy NoSQL natywnie wspierają partycjonowanie danych, co umożliwia liniowy wzrost wydajności poprzez dodawanie do klastra kolejnych serwerów. Relacyjne bazy danych (RDBMS) są skalowane głównie pionowo, co wiąże się z wysokimi kosztami i ograniczeniami sprzętowymi.
+    \item \textbf{Elastyczność schematu i niskie opóźnienia:} brak konieczności utrzymywania sztywnej struktury tabel oraz sprawdzania integralności referencyjnej pozwala na zastosowanie prostszego modelu dostępu (np. po kluczu głównym), co przekłada się na minimalizację opóźnień operacji wejścia/wyjścia.
+    \item \textbf{Obsługa danych niestrukturyzowanych:} w przypadku danych, które nie wpisują się w tradycyjny model tabelaryczny (takich jak dokumenty JSON, grafy powiązań, logi systemowe czy strumienie danych IoT), bazy NoSQL stanowią najbardziej optymalny wybór.
 \end{enumerate}
 
 \subsection{Wady i ograniczenia baz NoSQL}
 \begin{itemize}
-    \item \textbf{Gorsza spójność:} w relacyjnych bazach danych usunięcie rekordu, który jest powiązany z innymi tabelami, jest utrudnione przez klucze obce. Takie systemy wymuszają spójność danych poprzez mechanizmy zabezpieczające, które blokują usunięcie nadrzędnego wpisu, na przykład użytkownika, dopóki istnieją przypisane do niego rekordy, na przykład zamówienia. Wymusza to na programiście ręczne zarządzanie danymi, co w rozbudowanych aplikacjach jest znaczącym utrudnieniem.
-    \item \textbf{Brak standaryzacji języka zapytań:} W RDBMS dominuje standard SQL, natomiast w nierelacyjnych systemach każda baza posiada własne API lub język zapytań, co w znaczący sposób zwiększa próg wejścia u utrudnia migrację pomiędzy systemami.
-    \item \textbf{Dojrzałośc i ekosystem:} mimo rosnącej popularności wiele rozwiązań NoSQL jest młodszych od relacyjnych odpowiednikó takich jak PostgreSQL czy Oracle, co czasem przekłada się na słabsze narzędzia administracyjne, monitoringowego i mniejszą więdze powszechną.
+    \item \textbf{Brak wbudowanych mechanizmów spójności referencyjnej:} w odróżnieniu od systemów RDBMS, bazy NoSQL nie oferują natywnego wsparcia dla więzów integralności (np. kluczy obcych blokujących usunięcie powiązanych rekordów). Wymusza to na programiście ręczne zarządzanie spójnością danych na poziomie kodu aplikacji, co stanowi znaczne utrudnienie w rozbudowanych systemach.
+    \item \textbf{Brak standaryzacji języka zapytań:} w świecie baz relacyjnych powszechnym standardem jest język SQL. W systemach NoSQL niemal każde rozwiązanie oferuje własny, specyficzny interfejs programistyczny (API) lub dedykowany język zapytań, co podnosi próg wejścia i utrudnia ewentualną migrację.
+    \item \textbf{Niższy stopień dojrzałości ekosystemu:} wiele systemów NoSQL jest znacznie młodszych od dojrzałych systemów RDBMS (takich jak PostgreSQL czy Oracle), co niekiedy przekłada się na uboższy zestaw narzędzi administracyjnych oraz diagnostycznych.
 \end{itemize}
 \section{Charakterystyka baz typu key-value}
 Systemy bazujące na modelu klucz-wartość stanowią najprostszą, a zarazem fundamentalną formę przechowywania danych w NoSQL.
 \subsection{Model logiczny danych}
-W przeciwieństwie do relacyjnych baz danych, które narzucają strukturę wierszy i kolumn, bazy klucz-wartość redukują złożonośc modelu danych do zbioru par, gdzie każdemu unikalnemu kluczowi przypisana jest jedna wartość. Formalnie ów model można zapisać jako funkcję mapującą:
+W przeciwieństwie do relacyjnych baz danych, które narzucają strukturę wierszy i kolumn, bazy klucz-wartość redukują złożoność modelu danych do zbioru par, w których każdemu unikalnemu kluczowi przypisana jest dokładnie jedna wartość. Formalnie model ten można zapisać jako funkcję mapującą:
 \begin{equation}
     f: K \rightarrow V
 \end{equation}
-gdzie $K$ to zbiór unikalnych identyfikatorów, czyli kluczy, a $V$ to zbiór dowolnych wartości, czyli danych.
+gdzie $K$ to zbiór unikalnych identyfikatorów (kluczy), a $V$ to zbiór dowolnych wartości (danych).
 \subsection{Klucz i wartość}
-Klucz pełni rolę jedynego identyfikatora rekordu. W tym modelu nie występują takie pojecia jak klucz obcy czy relacja między kluczami. Klucz posiada następujące właściwości:
+Klucz pełni rolę jedynego identyfikatora rekordu. W modelu tym nie występują pojęcia klucza obcego ani relacji między kluczami. Klucz charakteryzuje się następującymi właściwościami:
 \begin{itemize}
     \item \textbf{Unikalność:} w obrębie jednej przestrzeni nazw klucz musi być unikalny.
-    \item \textbf{Rola indeksu:} klucz jest jedynym indeksowanym atrybutem. Skutkuje to tym, że wyszukiwanie rekordów jest możliwe wyłącznie poprzez podanie dokładnego klucza.
+    \item \textbf{Rola indeksu:} klucz jest jedynym indeksowanym atrybutem. Wyszukiwanie rekordów jest możliwe wyłącznie poprzez podanie dokładnego klucza.
     \item \textbf{Partycjonowanie:} klucz determinuje fizyczną lokalizację danych w klastrze.
 \end{itemize}
-Kluczową cechą wyróżniającą ten model jest traktowanie wartości jako tak zwany nieprzezroczysty blob. Silnik bazy danych nie interpretuje, nie waliduje, ani nie parsuje zawartości wartości. Dla bazy danych wartość jest ciągiem bajtów. Implikacje tego podejścia są następujące:
+Kluczową cechą wyróżniającą ten model jest traktowanie wartości jako tzw. nieprzezroczystego obiektu binarnego (ang. \emph{BLOB}). Silnik bazy danych nie interpretuje, nie waliduje ani nie parsuje wartości – dla bazy danych jest ona jedynie ciągiem bajtów. Implikacje tego podejścia są następujące:
 \begin{itemize}
-    \item \textbf{Odpowiedzialność aplikacji:} aplikacja decyduje w jakim formacie są zapisywanie dane. Tak samo jest odpowiedzialna za serializację przy zapisie czy deserializację przy odczycie. Przykładowymi formatami po stronie aplikacji są tekst, JSON, XML, obiekt binarny lub obraz.
-    \item \textbf{Brak schematu:} pod różnymi kluczami mogą kryć się dane o zupełnie różnych formatach i rozmiarach.
+    \item \textbf{Odpowiedzialność aplikacji:} aplikacja decyduje, w jakim formacie są zapisywane dane. Jest ona również odpowiedzialna za serializację przy zapisie oraz deserializację przy odczycie. Przykładowe formaty po stronie aplikacji to tekst, JSON, XML, obiekt binarny lub obraz.
+    \item \textbf{Brak schematu:} pod różnymi kluczami mogą kryć się dane o zupełnie odmiennych strukturach i rozmiarach.
 \end{itemize}
 \subsection{Interfejs i operacje}
-Ze względu na prostotę modelu, interfejs programistyczny baz klucz-wartość jest minimalistyczny i zazwyczaj ograniczony do trzech podstawowych metod:
+Ze względu na prostotę modelu interfejs programistyczny baz klucz-wartość jest minimalistyczny i zazwyczaj ograniczony do trzech podstawowych operacji:
 \begin{itemize}
     \item \textbf{PUT(klucz, wartość):} zapisanie lub nadpisanie wartości pod danym kluczem.
     \item \textbf{GET(klucz):} pobranie wartości znajdującej się pod kluczem.
     \item \textbf{DELETE(klucz):} usunięcie pary klucz-wartość.
 \end{itemize}
-Brak języka zapytań jak na przykład SQL eliminuje narzut związany z parsowaniem zapytań i planowaniem ich wykonania co w znaczący sposób wpływa na redukcję opóźnień w systemie. Główną zaletą modelu klucz-wartość jest wydajność. Dzięki zastosowaniu tablic haszujących operacje dostępu do danych charakteryzują się złożonością obliczeniową:
+Brak języka zapytań (np. SQL) eliminuje narzut związany z parsowaniem zapytań i planowaniem ich wykonania, co w znaczący sposób wpływa na redukcję opóźnień. Główną zaletą modelu klucz-wartość jest wydajność. Dzięki zastosowaniu tablic mieszających operacje dostępu do danych charakteryzują się złożonością obliczeniową:
 \begin{equation}
     O(1)
 \end{equation}
-W odróżnieniu od drzew B-Tree stosowanych w bazach relacyjnych (złożoność $0(\log n)$ wydajność baz klucz-wartość nie degraduje się drastycznie wraz ze wzrostem wolumenu danych.
+W odróżnieniu od drzew B-Tree stosowanych w bazach relacyjnych (złożoność $O(\log n)$), wydajność baz klucz-wartość nie degraduje się drastycznie wraz ze wzrostem wolumenu danych.
 \subsection{Skalowalność i ograniczenia modelu}
-Opisywany model jest przystosowani do architektury rozproszonej. Dzięki niezależności par klucz-wartość rekordy mogą myć dzielone pomiędzy wiele węzłów w klastrze. Mechanizm ten zazwyczaj opiera się na spójnym hashowaniu:
+Opisywany model jest przystosowany do architektury rozproszonej. Dzięki niezależności par klucz-wartość rekordy mogą być dzielone pomiędzy wiele węzłów w klastrze. Mechanizm ten zazwyczaj opiera się na spójnym hashowaniu:
 \begin{enumerate}
     \item System oblicza skrót z klucza: $H = hash(key)$.
-    \item Wartość $H$ determinuje do jakiego węzła trafi dany rekord.
-    \item Ponieważ ta operacja jest deterministyczna, aplikacja obsługująca system może samodzielnie obliczyć lokalizację danych ograniczając odpytywanie centralnego serwera zarządzającego.
+    \item Wartość $H$ determinuje, do którego węzła trafi dany rekord.
+    \item Ponieważ operacja ta jest deterministyczna, aplikacja kliencka może samodzielnie obliczyć lokalizację danych, ograniczając odpytywanie centralnego serwera zarządzającego.
 \end{enumerate}
 Optymalizacja pod kątem prostych operacji odczytu i zapisu wiąże się z istotnymi ograniczeniami funkcjonalnymi:
 \begin{itemize}
-    \item \textbf{Brak zapytań złożonych:} nie jest możliwe wykonywanie zapytań typu zwróć wszystkie rekordy, gdzie wartość > 100, bez pobrania wszystkich kluczy i przetworzenia ich po stronie aplikacji.
-    \item \textbf{Brak transakcyjności wielorekordowej:} operacje zazwyczaj są wykonywane w obrębie pojedyńczego klucza. Zmiana wielu kluczy jednocześnie nie gwarantuje spójności ACID. Niektóre zaawansowane systemy implementują mechanizmy transakcyjne, co jest rzadkością w czystym modelu klucz-wartość.
+    \item \textbf{Brak zapytań złożonych:} nie jest możliwe wykonywanie zapytań filtrujących (np. zwrócenie wszystkich rekordów o wartości przekraczającej dany próg) bez pobrania wszystkich kluczy i ich przetworzenia po stronie aplikacji.
+    \item \textbf{Brak transakcyjności wielorekordowej:} operacje są wykonywane w obrębie pojedynczego klucza. Zmiana wielu kluczy jednocześnie nie gwarantuje spójności ACID.
 \end{itemize}
 \section{Typowe scenariusze użycia baz klucz-wartość}
-Ze względu na swoją charakterystykę czyli wysoką wydajność prostych operacji przy jednoczesnym braku zaawansowanych możliwości zapytań, bazy klucz-wartość nie są zazwyczaj stosowane jako główny magazyn danych na systemach produkcyjnych. Pełnia głównie rolę wyspecjalizowanych komponentów rozwiązujących problemy wydajnościowe w architekturze systemów rozproszonych.
+Ze względu na swoją charakterystykę (wysoka wydajność prostych operacji przy braku zaawansowanych możliwości zapytań), bazy klucz-wartość nie są zazwyczaj stosowane jako główny magazyn danych. Pełnią one głównie rolę wyspecjalizowanych komponentów rozwiązujących problemy wydajnościowe w architekturze systemów rozproszonych.
 \subsection{Pamięć podręczna}
-Jest to najbardziej powszechne zastosowanie modelu klucz-wartość. Pamięć podręczna jest wdrażana w celu odciążenia relacyjnych baz danych i przyspieszenia czasu odpowiedzi aplikacji. W tej sytuacji baza klucz-wartość przechowuje wyniki kosztownych operacji na bazie SQL. Proces ten zazwyczaj jest realizowany w następujących krokach:
+Jest to najbardziej powszechne zastosowanie modelu klucz-wartość. Pamięć podręczna (ang. \emph{cache}) wdrażana jest w celu odciążenia relacyjnych baz danych i przyspieszenia czasu odpowiedzi aplikacji. W tej sytuacji baza klucz-wartość przechowuje wyniki kosztownych operacji na bazie SQL. Proces ten zazwyczaj realizowany jest w następujących krokach:
 \begin{enumerate}
-    \item Aplikacja otrzymuje żądanie o dane, na przykład statystyki użytkownika sprzed tygodnia.
-    \item Sprawdza czy dane istnieją w bazie pod unikalnym kluczem.
+    \item Aplikacja otrzymuje żądanie o dane (np. statystyki użytkownika).
+    \item Sprawdza, czy dane te istnieją w pamięci podręcznej pod określonym kluczem.
     \item Jeżeli dane są dostępne, są zwracane natychmiastowo.
-    \item Jeśli danych nie ma pod kluczem, aplikacja pobiera je z głównej bazy SQL, zapisuje je pod kluczem i zwraca klientowi.
+    \item Jeśli danych nie ma pod kluczem, aplikacja pobiera je z głównej bazy SQL, zapisuje pod kluczem w pamięci podręcznej i zwraca użytkownikowi.
 \end{enumerate}
-Kluczowym mechanizmem wykorzystywanym w wielu przypadkach jest TTL, czyli czas życia klucza i danych. Po upływie danego czasu usuwają się rekordy, co zapobiega przechowywaniu przestarzałych danych.
+Kluczowym mechanizmem wykorzystywanym w pamięciach podręcznych jest TTL (ang. \emph{Time to Live}), czyli czas życia klucza i danych, po którym rekordy są automatycznie usuwane, co zapobiega serwowaniu przestarzałych informacji.
 \subsection{Zarządzanie sesjami użytkowników}
-Współczesne aplikacje internetowe, które przechowują sesję używają baz klucz-wartość w celu współdzielenia stanu pomiędzy wieloma serwerami aplikacji. W przypadku mechanizmów równoważących obciążeń zapytań HTTP aplikacja przechowywałaby sesję na paru serwerach, co skutkowałoby brakiem spójności i ciągłym brakiem dostępu do treści w przypadku połączenia ze złym serwerem. Bazy klucz-wartość są idealnym rozwiązaniem dla tego problemu ze względu na:
+Współczesne aplikacje internetowe używają baz klucz-wartość do współdzielenia stanu sesji pomiędzy wieloma serwerami aplikacji. W architekturze z wieloma instancjami serwerów aplikacji i mechanizmem równoważenia obciążenia (ang. \emph{Load Balancer}), przechowywanie stanu sesji lokalnie na poszczególnych serwerach prowadziłoby do niespójności – użytkownik mógłby stracić dostęp do swojej sesji po przekierowaniu żądania na inną maszynę. Bazy klucz-wartość rozwiązują ten problem dzięki:
 \begin{itemize}
-    \item \textbf{Model dostępu:} sesja jest zawsze identyfikowana przez unikalny klucz, a zawartość to zazwyczaj zserializowany obiekt użytkownika.
-    \item \textbf{Niskie opóźnienia:} pobieranie danych sesji musi nastąpić przy każdym połączeniu HTTP, dlatego czas i koszt odczytu jest krytyczny.
+    \item \textbf{Modelowi dostępu:} sesja jest zawsze identyfikowana przez unikalny klucz, a jej wartość to najczęściej zserializowany obiekt użytkownika.
+    \item \textbf{Niskim opóźnieniom:} pobieranie danych sesji musi nastąpić przy każdym żądaniu HTTP, dlatego czas odczytu jest krytyczny.
 \end{itemize}
