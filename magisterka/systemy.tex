@@ -83,7 +83,7 @@ Memcached stosuje własny dedykowany alokator pamięci w celu rozwiązania probl
     \item Po otrzymaniu żądania zapisu obiektu Memcached wyszukuje klasę o odpowiednim rozmiarze i wolny segment, w którym zapisuje dane. W większości przypadków rozmiar obiektu jest mniejszy niż rozmiar segmentu danej klasy, co skutkuje marnowaniem pamięci.
 \end{enumerate}
 Zaletą tego rozwiązania jest eliminacja fragmentacji zewnętrznej oraz gwarancja stałego czasu alokacji. Wadą pozostaje fragmentacja wewnętrzna, polegająca na marnowaniu pamięci wewnątrz przydzielonych segmentów.
-\subsection{Architektura "Shared-Nothing" i rola klienta}
+\subsection{Architektura ,,Shared-Nothing'' i rola klienta}
 Memcached realizuje paradygmat architektury \textbf{Shared-Nothing}. Węzły w klastrze Memcached nie posiadają wiedzy o swoim wzajemnym istnieniu i nie komunikują się ze sobą. Skutkuje to brakiem mechanizmów replikacji oraz protokołu Gossip. Cała logika zarządzania klastrem spoczywa po stronie aplikacji klienckiej:
 \begin{itemize}
     \item Klient decyduje, do którego serwera zapisać dane. W celu wyboru odpowiedniego węzła najczęściej stosuje się algorytm spójnego haszowania.
@@ -149,3 +149,22 @@ Podczas poszukiwania pojedynczego klucza (np. o wartości 150) w bazie o rozmiar
 W najmniej korzystnym scenariuszu maksymalna liczba plików, które system musi przeszukać w celu weryfikacji istnienia danego klucza, określona jest wzorem:
 $$|L_0| + n$$
 gdzie $|L_0|$ to liczba nieuporządkowanych plików na poziomie zerowym, a $n$ to całkowita liczba wyższych poziomów (zazwyczaj maksymalnie 6). Zamiast skanowania milionów rekordów, system precyzyjnie identyfikuje pliki na każdym poziomie, które mogą zawierać poszukiwane dane.
+
+\subsection{Kompresja Snappy}
+LevelDB domyślnie wykorzystuje bibliotekę kompresji \textbf{Snappy} (również autorstwa Google). Algorytm ten nie dąży do maksymalnego stopnia kompresji, lecz priorytetyzuje szybkość (\textit{throughput}). W systemach LSM, gdzie dane są wielokrotnie przepisywane podczas kompaktowania, niski narzut CPU na kompresję jest krytyczny dla ogólnej wydajności systemu.
+
+\subsection{Cechy i ograniczenia modelu Embedded}
+Jako biblioteka osadzona, LevelDB posiada specyficzną charakterystykę:
+\begin{itemize}
+    \item \textbf{Brak modelu Klient-Serwer:} Nie ma tu nasłuchu na porcie sieciowym. Aplikacja komunikuje się z bazą poprzez wywołania funkcji API (np. C++, Python).
+    \item \textbf{Single Process Access:} W danym momencie tylko jeden proces systemowy może mieć otwartą bazę danych do zapisu (zastosowanie blokady plikowej).
+    \item \textbf{Iteratory i Snapshoty:} LevelDB umożliwia pobranie ,,migawki'' (Snapshot) danych w konkretnym momencie czasu oraz sekwencyjne iterowanie po posortowanych kluczach, co jest niemożliwe w systemach opartych wyłącznie na haszowaniu (jak klasyczny Memcached).
+\end{itemize}
+
+\subsection{Zastosowania}
+Ze względu na swoją lekkość i wydajność, LevelDB jest często wykorzystywane jako silnik składowania danych ,,pod maską'' innych aplikacji, np.:
+\begin{itemize}
+    \item Przeglądarka Google Chrome (implementacja IndexedDB).
+    \item Blockchain (pierwotna implementacja klienta Bitcoin Core).
+    \item Systemy logowania zdarzeń o wysokiej przepustowości zapisu.
+\end{itemize}
