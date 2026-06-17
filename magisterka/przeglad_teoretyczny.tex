@@ -27,7 +27,7 @@ Głównym założeniem baz dokumentowych jest odejście od struktury tabelaryczn
     \item \textbf{JSON (JavaScript Object Notation):} format tekstowy przystępny dla człowieka, będący powszechnym standardem w komunikacji sieciowej.
     \item \textbf{BSON (Binary JSON):} binarny odpowiednik formatu JSON, wykorzystywany m.in. przez MongoDB. Zapewnia wyższą wydajność parsowania oraz rozszerza standard o dodatkowe typy danych, takie jak daty czy dane binarne.
 \end{itemize}
-Dokumenty o zbliżonej strukturze są grupowane w kolekcjach, będących odpowiednikiem tabel w relacyjnych bazach danych. Kluczową cechą różniącą systemy dokumentowe od relacyjnych jest brak konieczności definiowania sztywnego schematu danych – każdy dokument może zawierać odmienny zestaw par klucz-wartość. Zapewnia to dużą elastyczność i sprawdza się w przypadku danych o zmiennej strukturze. Nierelacyjne bazy dokumentowe są projektowane z myślą o architekturze rozproszonej, w której skalowanie odbywa się przede wszystkim na dwóch płaszczyznach:
+Dokumenty o zbliżonej strukturze są grupowane w kolekcjach, będących odpowiednikiem tabel w relacyjnych bazach danych. Kluczową cechą różniącą systemy dokumentowe od relacyjnych jest brak konieczności definiowania sztywnego schematu danych, co oznacza, że każdy dokument może zawierać odmienny zestaw par klucz-wartość. Zapewnia to dużą elastyczność i sprawdza się w przypadku danych o zmiennej strukturze. Nierelacyjne bazy dokumentowe są projektowane z myślą o architekturze rozproszonej, w której skalowanie odbywa się przede wszystkim na dwóch płaszczyznach:
 \begin{itemize}
     \item \textbf{Replikacja:} tworzenie kopii danych na różnych węzłach, co zapewnia wysoką dostępność systemu.
     \item \textbf{Sharding:} horyzontalne partycjonowanie danych polegające na dystrybucji elementów kolekcji między wiele serwerów na podstawie wybranego klucza partycjonowania (ang. \emph{shard key}).
@@ -56,7 +56,7 @@ Większość baz szerokokolumnowych, takich jak Apache Cassandra, wykorzystuje s
         \item Projektowane jest pod kątem maksymalizacji przepustowości zapisu poprzez zamianę losowych operacji I/O na operacje sekwencyjne.
         \item Dane są zawsze dopisywane. W tle uruchamiany jest proces scalania plików oraz usuwania nieaktualnych wersji rekordów.
         \item Zaletą tego rozwiązania jest szybki zapis oraz brak fragmentacji dyskowej. Sprawdza się ono przy dynamicznie rosnących zbiorach danych.
-        \item Wadą jest natomiast nadmiarowość odczytu (ang. \emph{read amplification} – konieczność przeszukania wielu plików na dysku w celu znalezienia najnowszej wersji klucza) oraz zjawisko nadmiarowości zapisu (ang. \emph{write amplification}), wynikające z wielokrotnego przepisywania tych samych danych podczas scalania mniejszych plików w większe.
+        \item Wadą jest natomiast nadmiarowość odczytu (ang. \emph{read amplification}), czyli konieczność przeszukania wielu plików na dysku w celu znalezienia najnowszej wersji klucza, a także zjawisko nadmiarowości zapisu (ang. \emph{write amplification}), wynikające z wielokrotnego przepisywania tych samych danych podczas scalania mniejszych plików w większe.
     \end{itemize} 
 \end{itemize}
 
@@ -139,7 +139,7 @@ Klucz pełni rolę jedynego identyfikatora rekordu. W modelu tym nie występują
     \item \textbf{Rola indeksu:} klucz jest jedynym indeksowanym atrybutem. Wyszukiwanie rekordów jest możliwe wyłącznie poprzez podanie dokładnego klucza.
     \item \textbf{Partycjonowanie:} klucz determinuje fizyczną lokalizację danych w klastrze.
 \end{itemize}
-Kluczową cechą wyróżniającą ten model jest traktowanie wartości jako tzw. nieprzezroczystego obiektu binarnego (ang. \emph{BLOB}). Silnik bazy danych nie interpretuje, nie waliduje ani nie parsuje wartości – dla bazy danych jest ona jedynie ciągiem bajtów. Implikacje tego podejścia są następujące:
+Kluczową cechą wyróżniającą ten model jest traktowanie wartości jako tzw. nieprzezroczystego obiektu binarnego (ang. \emph{BLOB}). Silnik bazy danych nie interpretuje, nie waliduje ani nie parsuje wartości, traktując ją jedynie jako ciąg bajtów. Implikacje tego podejścia są następujące:
 \begin{itemize}
     \item \textbf{Odpowiedzialność aplikacji:} aplikacja decyduje, w jakim formacie są zapisywane dane. Jest ona również odpowiedzialna za serializację przy zapisie oraz deserializację przy odczycie. Przykładowe formaty po stronie aplikacji to tekst, JSON, XML, obiekt binarny lub obraz.
     \item \textbf{Brak schematu:} pod różnymi kluczami mogą kryć się dane o zupełnie odmiennych strukturach i rozmiarach.
@@ -180,7 +180,7 @@ Jest to najbardziej powszechne zastosowanie modelu klucz-wartość. Pamięć pod
 \end{enumerate}
 Kluczowym mechanizmem wykorzystywanym w pamięciach podręcznych jest TTL (ang. \emph{Time to Live}), czyli czas życia klucza i danych, po którym rekordy są automatycznie usuwane, co zapobiega serwowaniu przestarzałych informacji.
 \subsection{Zarządzanie sesjami użytkowników}
-Współczesne aplikacje internetowe używają baz klucz-wartość do współdzielenia stanu sesji pomiędzy wieloma serwerami aplikacji. W architekturze z wieloma instancjami serwerów aplikacji i mechanizmem równoważenia obciążenia (ang. \emph{Load Balancer}), przechowywanie stanu sesji lokalnie na poszczególnych serwerach prowadziłoby do niespójności – użytkownik mógłby stracić dostęp do swojej sesji po przekierowaniu żądania na inną maszynę. Bazy klucz-wartość rozwiązują ten problem dzięki:
+Współczesne aplikacje internetowe używają baz klucz-wartość do współdzielenia stanu sesji pomiędzy wieloma serwerami aplikacji. W architekturze z wieloma instancjami serwerów aplikacji i mechanizmem równoważenia obciążenia (ang. \emph{Load Balancer}), przechowywanie stanu sesji lokalnie na poszczególnych serwerach prowadziłoby do niespójności, ponieważ użytkownik mógłby stracić dostęp do swojej sesji po przekierowaniu żądania na inną maszynę. Bazy klucz-wartość rozwiązują ten problem dzięki:
 \begin{itemize}
     \item \textbf{Modelowi dostępu:} sesja jest zawsze identyfikowana przez unikalny klucz, a jej wartość to najczęściej zserializowany obiekt użytkownika.
     \item \textbf{Niskim opóźnieniom:} pobieranie danych sesji musi nastąpić przy każdym żądaniu HTTP, dlatego czas odczytu jest krytyczny.

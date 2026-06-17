@@ -61,7 +61,7 @@ Moduł \textbf{RedisBloom} dostarcza probabilistyczne struktury danych, które p
 \paragraph{Programowalność po stronie serwera}
 Redis umożliwia osadzenie logiki biznesowej bezpośrednio w warstwie bazy danych, co pozwala na minimalizację narzutu sieciowy:
 \begin{itemize}
-    \item \textbf{Skrypt Lua:} skrypty wykonywane są atomowo, co gwarantuje pełną izolację – w trakcie ich działania żadne inne zapytania nie mogą zmodyfikować stanu bazy.
+    \item \textbf{Skrypt Lua:} skrypty wykonywane są atomowo, co gwarantuje pełną izolację, ponieważ w trakcie ich działania żadne inne zapytania nie mogą zmodyfikować stanu bazy.
     \item \textbf{Funkcje Redis (Redis Functions):} stanowiące rozwinięcie skryptów Lua. Są one przechowywane bezpośrednio na serwerze bazy danych, co eliminuje konieczność przesyłania kodu skryptu przy każdym żądaniu klienta.
 \end{itemize}
 
@@ -112,9 +112,9 @@ LevelDB rezygnuje z tradycyjnego dla baz relacyjnych modelu B-Tree, optymalizuj�
 Nazwa biblioteki LevelDB wywodzi się ze specyficznej strategii organizacji plików na dysku, zwanej kompaktowaniem poziomym (ang. \emph{Leveled Compaction}). Pliki SSTable są organizowane w warstwy (poziomy):
 \begin{itemize}
     \item \textbf{Poziom 0 (L0):} trafiają tu pliki bezpośrednio zrzucane z pamięci RAM. Jest to jedyny poziom, na którym zakresy kluczy w poszczególnych plikach mogą się na siebie nakładać.
-    \item \textbf{Poziom 1+:} gdy liczba plików na poziomie 0 przekroczy określony próg, uruchamiana jest procedura kompaktowania. Pliki są scalane, duplikaty usuwane, a wyniki zapisywane na poziomie pierwszym ($L_1$). Na poziomach od $L_1$ w górę zakresy kluczy są ściśle rozdzielone – dany zakres kluczy znajduje się tylko w jednym pliku SSTable.
+    \item \textbf{Poziom 1+:} gdy liczba plików na poziomie 0 przekroczy określony próg, uruchamiana jest procedura kompaktowania. Pliki są scalane, duplikaty usuwane, a wyniki zapisywane na poziomie pierwszym ($L_1$). Na poziomach od $L_1$ w górę zakresy kluczy są ściśle rozdzielone, co oznacza, że dany zakres kluczy znajduje się tylko w jednym pliku SSTable.
 \end{itemize}
-Taka struktura gwarantuje szybkie wyszukiwanie – na wyższych poziomach wystarczy sprawdzić jeden plik, aby zlokalizować klucz (wykorzystując algorytm wyszukiwania binarnego oraz indeksy w stopce pliku). Każda kolejna warstwa charakteryzuje się dziesięciokrotnie większą pojemnością maksymalną niż poprzednia. Przykładowo, jeśli na poziomie $L_2$ znajduje się 50 plików, są one globalnie posortowane i rozłączne zakresowo:
+Taka struktura gwarantuje szybkie wyszukiwanie. Na wyższych poziomach wystarczy sprawdzić jeden plik, aby zlokalizować klucz (wykorzystując algorytm wyszukiwania binarnego oraz indeksy w stopce pliku). Każda kolejna warstwa charakteryzuje się dziesięciokrotnie większą pojemnością maksymalną niż poprzednia. Przykładowo, jeśli na poziomie $L_2$ znajduje się 50 plików, są one globalnie posortowane i rozłączne zakresowo:
 
 \begin{itemize}
     \item \texttt{Plik A:} zakres kluczy $[000 - 099]$
@@ -123,13 +123,13 @@ Taka struktura gwarantuje szybkie wyszukiwanie – na wyższych poziomach wystar
 \end{itemize}
 Pojemność maksymalną danej warstwy wyraża wzór:
 $$C_i = 10^i \times 10 \text{ MB}$$
-\subsection{Kompaktowanie – przemieszczanie danych na wyższe poziomy}
+\subsection{Kompaktowanie i przemieszczanie danych na wyższe poziomy}
 
 Załóżmy, że proces zapisu zapełnił poziom $L_1$ i jego limit $10 \text{ MB}$ został przekroczony. W tym momencie LevelDB uruchamia procedurę kompaktowania według następujących kroków:
 
 \begin{enumerate}
-    \item \textbf{Wybór pliku:} system wybiera jeden plik z poziomu $L_1$. Załóżmy, że wybrany plik zawiera klucze z zakresu $[100 - 199]$.
-    \item \textbf{Wyszukiwanie na poziomie wyższym:} LevelDB skanuje kolejny poziom ($L_{i+1}$, czyli $L_2$) w poszukiwaniu wszystkich plików, których zakresy kluczy nakładają się na przedział wybranego pliku. W tym przypadku mogą to być np. dwa pliki o zakresach $[080 - 120]$ oraz $[121 - 210]$.
+    \item \textbf{Wybór pliku:} system wybiera jeden plik z poziomu $L_1$. Załóżmy, że wybrany plik zawiera klucze z zakresu $[100-199]$.
+    \item \textbf{Wyszukiwanie na poziomie wyższym:} LevelDB skanuje kolejny poziom ($L_{i+1}$, czyli $L_2$) w poszukiwaniu wszystkich plików, których zakresy kluczy nakładają się na przedział wybranego pliku. W tym przypadku mogą to być np. dwa pliki o zakresach $[080-120]$ oraz $[121-210]$.
     \item \textbf{Scalanie danych:} strumienie danych z wybranego pliku z poziomu $L_1$ oraz dopasowanych plików z poziomu $L_2$ są wczytywane do pamięci RAM, gdzie następuje ich wielodrogowe scalanie (ang. \emph{multi-way merge}). Podczas tego procesu usuwane są nieaktualne wersje rekordów oraz znaczniki usunięcia (ang. \emph{tombstones}).
     \item \textbf{Zapis na poziomie wyższym:} ze scalonych i posortowanych danych tworzone są nowe pliki SSTable, które zostają zapisane na poziomie $L_2$. Stare pliki źródłowe są usuwane.
 \end{enumerate}
@@ -142,7 +142,7 @@ Dzięki temu, że na poziomach od $L_1$ w górę zakresy kluczy w plikach się n
 Podczas poszukiwania pojedynczego klucza (np. o wartości 150) w bazie o rozmiarze 100 GB, system nie przeszukuje całej przestrzeni dyskowej:
 \begin{itemize}
     \item na poziomie $L_1$ poszukiwany klucz może znajdować się \textbf{tylko w jednym} konkretnym pliku,
-    \item na poziomie $L_2$ sytuacja jest analogiczna – klucz może być obecny w maksymalnie jednym pliku,
+    \item na poziomie $L_2$ sytuacja jest analogiczna, ponieważ klucz może być obecny w maksymalnie jednym pliku,
     \item na poziomie $L_3$ i kolejnych proces ten przebiega identycznie.
 \end{itemize}
 
