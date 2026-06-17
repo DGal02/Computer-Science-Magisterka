@@ -65,6 +65,24 @@ Redis umożliwia osadzenie logiki biznesowej bezpośrednio w warstwie bazy danyc
     \item \textbf{Funkcje Redis (Redis Functions):} stanowiące rozwinięcie skryptów Lua. Są one przechowywane bezpośrednio na serwerze bazy danych, co eliminuje konieczność przesyłania kodu skryptu przy każdym żądaniu klienta.
 \end{itemize}
 
+\subsection{Zalety i wady}
+\begin{itemize}
+    \item \textbf{Zalety:}
+    \begin{itemize}
+        \item \textbf{Wszechstronność struktur danych:} możliwość operowania na złożonych typach bezpośrednio po stronie bazy, co opisano w rozdziale poświęconym strukturom danych.
+        \item \textbf{Wyjątkowa wydajność:} niskie opóźnienia dzięki przechowywaniu wszystkich danych w pamięci operacyjnej.
+        \item \textbf{Trwałość i wysoka dostępność:} opcjonalne zapisywanie stanu bazy na dysku oraz wbudowane mechanizmy klastrowania.
+        \item \textbf{Bogaty ekosystem i integracja:} system posiada dojrzałe biblioteki klienckie dla niemal wszystkich języków programowania oraz wsparcie społeczności, co ułatwia integrację w różnorodnych projektach.
+    \end{itemize}
+    \item \textbf{Wady:}
+    \begin{itemize}
+        \item \textbf{Wysoki koszt infrastruktury:} wymóg zmieszczenia całego zbioru danych w pamięci RAM znacząco zwiększa wydatki przy dużych bazach danych.
+        \item \textbf{Blokowanie pętli zdarzeń:} jednowątkowa natura oznacza, że pojedyncze, nieoptymalne zapytanie blokuje serwer dla innych klientów.
+        \item \textbf{Uproszczona transakcyjność:} Redis oferuje grupowanie komend bez obsługi tradycyjnego wycofywania zmian (rollback) w przypadku błędu, co przerzuca odpowiedzialność za spójność na aplikację.
+        \item \textbf{Ryzyko utraty najnowszych danych:} replikacja asynchroniczna niesie ze sobą ryzyko utraty zmian w przypadku awarii głównego serwera.
+    \end{itemize}
+\end{itemize}
+
 \section{Memcached}
 Memcached to rozproszony system buforowania obiektów w pamięci RAM. Przed upowszechnieniem systemu Redis stanowił on fundamentalny element architektury największych serwisów internetowych, takich jak Facebook, Twitter czy Wikipedia.
 W przeciwieństwie do systemu Redis, który ewoluował w stronę serwera struktur danych, Memcached pozostał klasycznym magazynem typu klucz-wartość, nieoferujączym złożonych typów danych ani mechanizmów zapewniania trwałości.
@@ -96,6 +114,25 @@ Prostota systemu wiąże się ze sztywnymi ograniczeniami, które definiują jeg
     \item \textbf{Proste typy danych:} wartościami są zawsze surowe ciągi bajtów. Brak struktur takich jak listy czy zbiory wymusza na aplikacji pobieranie i nadpisywanie całego obiektu oraz samodzielne zarządzanie serializacją i deserializacją.
     \item \textbf{Ograniczenia rozmiaru klucza i wartości:} rozmiar klucza nie może przekraczać 250 bajtów, natomiast wartość domyślnie ograniczona jest do 1 MB, co zapobiega blokowaniu wątków przy przetwarzaniu dużych obiektów.
 \end{itemize}
+
+\subsection{Zalety i wady}
+\begin{itemize}
+    \item \textbf{Zalety:}
+    \begin{itemize}
+        \item \textbf{Wydajna architektura wielowątkowa:} pełne wykorzystanie wielu rdzeni procesora bez narzutu na komunikację międzyprocesową.
+        \item \textbf{Eliminacja fragmentacji zewnętrznej:} mechanizm Slab Allocation chroni system przed degradacją wydajności pamięci.
+        \item \textbf{Skalowanie poziome:} prosta architektura Shared-Nothing ułatwia rozbudowę klastra przez dodanie kolejnych serwerów.
+        \item \textbf{Minimalny narzut pamięciowy:} brak złożonych struktur i metadanych sprawia, że sam silnik zużywa znikome ilości pamięci RAM na własne potrzeby operacyjne.
+    \end{itemize}
+    \item \textbf{Wady:}
+    \begin{itemize}
+        \item \textbf{Brak trwałości:} dane są bezpowrotnie tracone przy każdym restarcie serwera.
+        \item \textbf{Marnowanie pamięci (fragmentacja wewnętrzna):} niedopasowanie rozmiaru danych do klas Slab generuje nieużywane obszary w pamięci.
+        \item \textbf{Ubogi model danych:} obsługa wyłącznie prostych par klucz-wartość ogranicza zastosowania i wymusza serializację po stronie klienta.
+        \item \textbf{Brak wbudowanych zabezpieczeń:} domyślna konfiguracja nie posiada zaawansowanych mechanizmów kontroli dostępu, co w przeszłości prowadziło do podatności na ataki typu DDoS (amplifikacja) przy błędnej ekspozycji serwera na świat zewnętrzny.
+    \end{itemize}
+\end{itemize}
+
 \section{LevelDB}
 LevelDB to osadzona (ang. \emph{embedded}) biblioteka implementująca trwały magazyn danych typu klucz-wartość, stworzona przez inżynierów Google. W przeciwieństwie do systemów Redis czy Memcached, LevelDB nie działa jako serwer sieciowy, lecz jest konsolidowana bezpośrednio z kodem aplikacji. Rozwiązanie to stało się standardem dla implementacji struktur LSM-Tree, stanowiąc fundament dla wielu późniejszych projektów, takich jak RocksDB czy Hyperledger GoLevelDB.
 \subsection{Architektura zapisu}
@@ -169,6 +206,23 @@ Ze względu na swoją lekkość i wydajność, LevelDB jest często wykorzystywa
     \item Systemy logowania zdarzeń o wysokiej przepustowości zapisu.
 \end{itemize}
 
+\subsection{Zalety i wady}
+\begin{itemize}
+    \item \textbf{Zalety:}
+    \begin{itemize}
+        \item \textbf{Szybki zapis sekwencyjny:} dzięki architekturze LSM-Tree i zrzucaniu danych z MemTable na dysk.
+        \item \textbf{Brak narzutu sieciowego:} architektura osadzona eliminuje potrzebę komunikacji przez protokół sieciowy, co owocuje brakiem opóźnień sieciowych.
+        \item \textbf{Szybkie wyszukiwanie na wyższych poziomach:} brak nakładania się zakresów kluczy w SSTable, co znacząco skraca ścieżkę odczytu.
+        \item \textbf{Niski narzut kompresji:} integracja z biblioteką Snappy optymalizuje zużycie procesora.
+    \end{itemize}
+    \item \textbf{Wady:}
+    \begin{itemize}
+        \item \textbf{Ograniczenie do jednego procesu:} brak możliwości jednoczesnego współdzielenia zapisu przez wiele procesów systemowych.
+        \item \textbf{Zjawisko Write i Read Amplification:} konieczność ciągłego przepisywania plików w tle obciąża dysk i skraca żywotność nośników SSD.
+        \item \textbf{Ryzyko utraty spójności przy uszkodzeniu metadanych:} uszkodzenie pliku MANIFEST (na przykład na skutek awarii sprzętowej podczas zapisu) uniemożliwia otwarcie bazy, a odzyskanie danych jest utrudnione z powodu braku wbudowanych zaawansowanych narzędzi naprawczych.
+    \end{itemize}
+\end{itemize}
+
 \section{RocksDB}
 RocksDB to wysoce wydajny, osadzony magazyn danych typu klucz-wartość rozwijany przez firmę Facebook (obecnie Meta). Projekt powstał w 2012 roku jako rozwidlenie (fork) kodu biblioteki LevelDB w celu optymalizacji działania na serwerach wieloprocesorowych oraz szybkich nośnikach półprzewodnikowych (SSD). Podobnie jak pierwowzór, RocksDB bazuje na architekturze LSM-Tree, wprowadzając jednak szereg usprawnień umożliwiających skalowanie wydajności zapisu oraz odczytu.
 
@@ -205,4 +259,20 @@ W przeciwieństwie do LevelDB, RocksDB posiada zaawansowane mechanizmy kontroli 
 \begin{itemize}
     \item \textbf{Rate Limiter:} umożliwia precyzyjne ograniczenie przepustowości zapisu na dysk, co zapobiega zjawisku blokowania operacji wejścia/wyjścia (I/O) podczas intensywnego kompaktowania.
     \item \textbf{Kopie zapasowe i punkty kontrolne:} wbudowane mechanizmy umożliwiają tworzenie spójnych migawek (checkpoints) oraz kopii zapasowych w czasie działania bazy danych (hot backups) bez blokowania wątków zapisujących.
+\end{itemize}
+
+\subsection{Zalety i wady}
+\begin{itemize}
+    \item \textbf{Zalety:}
+    \begin{itemize}
+        \item \textbf{Optymalizacja pod dyski SSD i procesory wielordzeniowe:} dzięki współbieżnemu kompaktowaniu i zoptymalizowanemu zapisowi.
+        \item \textbf{Uproszczenie modyfikacji:} operator scalania (Merge) eliminuje kosztowne operacje odczyt-modyfikacja-zapis.
+        \item \textbf{Elastyczny podział danych:} mechanizm rodzin kolumn pozwala na separację struktur i konfiguracji w jednej bazie.
+        \item \textbf{Bezpieczeństwo operacyjne pod obciążeniem:} obecność limitera zapisu oraz możliwość tworzenia kopii zapasowych na gorąco.
+    \end{itemize}
+    \item \textbf{Wady:}
+    \begin{itemize}
+        \item \textbf{Ekstremalna złożoność konfiguracji:} RocksDB udostępnia setki parametrów konfiguracyjnych, co sprawia, że optymalne dostrojenie silnika wymaga eksperckiej wiedzy. Błędna konfiguracja może drastycznie pogorszyć wydajność lub doprowadzić do wyczerpania przestrzeni dyskowej.
+        \item \textbf{Narzut na zarządzanie pamięcią RAM:} szerokie możliwości optymalizacji wymagają utrzymywania licznych struktur pomocniczych w pamięci, co zwiększa ogólne zużycie RAM przez aplikację osadzającą.
+    \end{itemize}
 \end{itemize}
