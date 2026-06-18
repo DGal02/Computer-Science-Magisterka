@@ -413,3 +413,44 @@ FoundationDB charakteryzuje się rygorystycznym podejściem do testowania niezaw
         \item \textbf{Zwiększone opóźnienia zapisu:} Konieczność koordynacji transakcji rozproszonych i osiągnięcia konsensusu generuje dodatkowe opóźnienia.
     \end{itemize}
 \end{itemize}
+
+\section{BerkeleyDB}
+BerkeleyDB (BDB) to klasyczna, osadzona (ang. \emph{embedded}) biblioteka bazodanowa typu klucz-wartość, rozwijana obecnie przez firmę Oracle. Jest to jedno z najstarszych rozwiązań w klasie systemów osadzonych. W odróżnieniu od systemów klient-serwer, BerkeleyDB działa w przestrzeni adresowej procesu aplikacji, eliminując komunikację sieciową.
+
+\subsection{Metody dostępu do danych}
+Podczas gdy większość baz klucz-wartość oferuje jeden model przechowywania danych, BerkeleyDB udostępnia cztery zróżnicowane metody dostępu:
+\begin{itemize}
+    \item \textbf{B-Tree:} Tradycyjne zbalansowane drzewo. Jest to metoda domyślna, optymalizowana pod kątem zapytań punktowych oraz wyszukiwania zakresowego.
+    \item \textbf{Hash:} Tabela mieszająca. Zapewnia krótki czas dostępu dla zapytań o konkretny klucz, jednak nie wspiera przeszukiwania zakresowego.
+    \item \textbf{Recno (Record Number):} Przechowywanie danych o stałej lub zmiennej długości, w którym każdy rekord jest identyfikowany przez logiczny numer wiersza.
+    \item \textbf{Queue:} Kolejka o stałym rozmiarze rekordów, zoptymalizowana pod kątem szybkiego wstawiania na końcu i usuwania z początku (operacje typu FIFO).
+\end{itemize}
+
+\subsection{Trwałość i transakcje}
+BerkeleyDB oferuje zaawansowany podsystem transakcyjny zapewniający pełną zgodność z zasadami ACID.
+\begin{itemize}
+    \item \textbf{Dziennik zapisu (WAL):} Wszystkie modyfikacje są najpierw zapisywane w pliku dziennika przed ich fizycznym naniesieniem na plik bazy danych.
+    \item \textbf{Współbieżność wieloprocesowa:} BerkeleyDB wspiera jednoczesny dostęp wielu wątków oraz procesów systemowych do tej samej bazy danych. W celu zapobiegania konfliktom system wykorzystuje menedżer blokad (Lock Manager), który automatycznie zarządza blokadami na poziomie stron lub rekordów.
+\end{itemize}
+
+\subsection{Architektura wdrożenia i licencjonowanie}
+Brak procesu serwera sprawia, że BerkeleyDB charakteryzuje się minimalnym narzutem wydajnościowym i brakiem opóźnień sieciowych.
+System występuje w kilku edycjach, w tym w klasycznej wersji napisanej w języku C oraz jako natywna edycja dla platformy Java (Berkeley DB Java Edition).
+Biblioteka jest udostępniana na licencji dualnej: bezpłatnej licencji typu AGPL (która wymaga udostępnienia kodu źródłowego aplikacji korzystającej z biblioteki) oraz płatnej licencji komercyjnej dla projektów o zamkniętym kodzie źródłowym.
+
+\subsection{Zalety i wady}
+\begin{itemize}
+    \item \textbf{Zalety:}
+    \begin{itemize}
+        \item \textbf{Niski narzut wydajnościowy:} Architektura osadzona eliminuje komunikację przez sieć i narzut protokołów.
+        \item \textbf{Elastyczność modeli składowania:} Dostępność czterech odmiennych struktur danych pozwala na dopasowanie silnika do potrzeb aplikacji.
+        \item \textbf{Pełne transakcje ACID:} Zaawansowany system transakcyjny z obsługą wielu wątków i procesów.
+        \item \textbf{Dojrzałość i stabilność:} Rozwiązanie rozwijane od ponad trzech dekad i przetestowane w wielu krytycznych systemach.
+    \end{itemize}
+    \item \textbf{Wady:}
+    \begin{itemize}
+        \item \textbf{Skomplikowane i niskopoziomowe API:} Interfejs programistyczny biblioteki wymaga ręcznego zarządzania pamięcią, transakcjami i blokadami.
+        \item \textbf{Restrykcyjna licencja:} Licencja AGPL ogranicza możliwość stosowania biblioteki w komercyjnych projektach o zamkniętym kodzie bez zakupu licencji.
+        \item \textbf{Brak wbudowanej optymalizacji kompaktowania typu LSM:} W przypadku intensywnego usuwania i nadpisywania rekordów w modelach B-Tree/Hash pliki bazy danych mogą ulec znacznej fragmentacji, co wymaga uruchamiania ręcznych procedur defragmentacji.
+    \end{itemize}
+\end{itemize}
