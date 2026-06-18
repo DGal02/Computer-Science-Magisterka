@@ -370,3 +370,46 @@ Dla silnika Memtx Tarantool zapewnia pełną zgodność z zasadami ACID w obręb
         \item \textbf{Mniejsza popularność:} W porównaniu z bazami takimi jak Redis, Tarantool posiada mniejszą społeczność użytkowników oraz skromniejszą bazę gotowych bibliotek integracyjnych.
     \end{itemize}
 \end{itemize}
+
+\section{FoundationDB}
+FoundationDB to rozproszona baza danych typu NoSQL, która wyróżnia się specyficznym podejściem architektonicznym. W swojej podstawowej warstwie udostępnia ona minimalistyczny model klucz-wartość, gwarantując jednocześnie pełną transakcyjność ACID w skali całego klastra. System został zaprojektowany z myślą o pełnieniu roli fundamentu, na którym budowane są inne modele danych.
+
+\subsection{Architektura podziału ról (Shared-Nothing)}
+W celu osiągnięcia wysokiej skalowalności FoundationDB oddziela proces zatwierdzania transakcji od fizycznego składowania danych. Klaster składa się z procesów realizujących wyspecjalizowane role:
+\begin{itemize}
+    \item \textbf{Sequencer:} Przypisuje każdej transakcji unikalny znacznik czasu, co determinuje kolejność operacji w całym systemie.
+    \item \textbf{Proxies:} Odpowiadają za wstępne przetwarzanie żądań zatwierdzenia transakcji oraz za zbieranie danych o konfliktach.
+    \item \textbf{Resolvers:} Służą do wykrywania konfliktów współbieżności między transakcjami za pomocą optymistycznej kontroli blokad (ang. \emph{Optimistic Concurrency Control}, OCC).
+    \item \textbf{Storage Servers:} Przechowują rzeczywiste pary klucz-wartość na dyskach i obsługują zapytania odczytu.
+\end{itemize}
+
+\subsection{Globalne transakcje ACID}
+W większości skalowalnych horyzontalnie baz NoSQL rezygnuje się z transakcji wielokluczowych na rzecz spójności ostatecznej. W przypadku FoundationDB oferowane są pełne transakcje ACID obejmujące dowolne klucze rozmieszczone na różnych węzłach klastra. Transakcje te są w pełni izolowane przy użyciu technologii MVCC. W przypadku wykrycia konfliktu zapisu (np. gdy dwa procesy próbują zmodyfikować ten sam klucz w tym samym czasie), transakcja próbująca zapisać dane jako druga jest automatycznie wycofywana, co wymaga jej ponowienia przez aplikację.
+
+\subsection{Architektura wielomodelowa i warstwy (Layers)}
+Rdzeń FoundationDB nie posiada wbudowanego języka zapytań ani obsługi struktur dokumentowych. Klucze oraz wartości są traktowane jako surowe ciągi bajtów posortowane leksykograficznie. Wszelkie bogatsze funkcjonalności są realizowane poprzez warstwy (ang. \emph{Layers}):
+\begin{itemize}
+    \item Warstwa to biblioteka lub aplikacja kliencka, która mapuje specyficzny model danych na podstawowe operacje na posortowanych kluczach FoundationDB.
+    \item Istnieją gotowe warstwy realizujące interfejsy relacyjne (SQL), dokumentowe (zgodne z MongoDB API) oraz grafowe.
+    \item Dzięki temu podejściu możliwe jest korzystanie z odmiennych modeli danych w ramach różnych aplikacji przy jednoczesnym współdzieleniu tego samego klastra bazodanowego.
+\end{itemize}
+
+\subsection{Symulacja deterministyczna}
+FoundationDB charakteryzuje się rygorystycznym podejściem do testowania niezawodności. Cały kod źródłowy bazy został zaprojektowany tak, aby umożliwić uruchomienie w specjalnym środowisku symulacyjnym. Symulator umożliwia uruchomienie setek wirtualnych węzłów w jednym procesie systemowym i pozwala na kontrolowanie upływu czasu, przepływu pakietów sieciowych oraz operacji dyskowych. Umożliwia to deterministyczne wstrzykiwanie błędów, takich jak awarie dysków, opóźnienia czy podziały sieci, oraz weryfikację, czy baza danych zawsze zachowuje spójność. Każdy wykryty błąd może być powtórzony z tym samym ziarnem generatora liczb losowych, co ułatwia debugowanie trudnych do wykrycia błędów współbieżności.
+
+\subsection{Zalety i wady}
+\begin{itemize}
+    \item \textbf{Zalety:}
+    \begin{itemize}
+        \item \textbf{Pełne transakcje ACID w skali klastra:} Rzadko spotykana w świecie NoSQL gwarancja pełnej spójności dla transakcji obejmujących wiele kluczy.
+        \item \textbf{Niezrównana niezawodność:} Potwierdzona testami symulacyjnymi odporność na awarie infrastruktury sieciowej i sprzętowej.
+        \item \textbf{Podejście wielomodelowe:} Możliwość budowania dowolnych struktur danych na stabilnym fundamencie klucz-wartość przy użyciu warstw.
+        \item \textbf{Skalowanie poziome:} Liniowy wzrost wydajności klastra poprzez dodawanie kolejnych węzłów.
+    \end{itemize}
+    \item \textbf{Wady:}
+    \begin{itemize}
+        \item \textbf{Sztywne limity transakcyjne:} Pojedyncza transakcja nie może trwać dłużej niż 5 sekund, a łączny rozmiar zapisów w ramach jednej transakcji nie może przekroczyć 10 MB.
+        \item \textbf{Brak wbudowanego języka zapytań:} Warstwa podstawowa wymaga implementacji logiki wyszukiwania po stronie klienta lub warstwy pośredniczącej.
+        \item \textbf{Zwiększone opóźnienia zapisu:} Konieczność koordynacji transakcji rozproszonych i osiągnięcia konsensusu generuje dodatkowe opóźnienia.
+    \end{itemize}
+\end{itemize}
