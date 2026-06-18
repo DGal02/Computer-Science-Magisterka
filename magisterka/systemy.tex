@@ -1,5 +1,7 @@
+Rozdział ten jest poświęcony szczegółowej charakterystyce ośmiu wyselekcjonowanych nierelacyjnych baz danych typu klucz-wartość, które zostały wybrane do przeprowadzenia analizy porównawczej \cite{sadalage2012}. Metodologia testowania i porównywania wydajności tego typu systemów opiera się na uznanych standardach naukowych oraz badaniach porównawczych prowadzonych w wiodących ośrodkach akademickich i przemysłowych \cite{cooper2010, li2015}. W celu zapewnienia szerokiego spektrum badawczego, wyselekcjonowano systemy różniące się zasadniczymi założeniami architektonicznymi. Analiza obejmuje zarówno systemy przechowujące dane w pamięci operacyjnej (RAM), jak i silniki zorientowane dyskowo, a także biblioteki osadzone oraz skalowalne systemy klient-serwer. Dla każdego z systemów opisano jego model współbieżności, mechanizmy zapewniania trwałości danych, cechy specyficzne oraz zestawiono kluczowe wady i zalety z punktu widzenia zastosowań inżynierskich.
+
 \section{Redis}
-Redis (ang. \emph{Remote Dictionary Server}) to otwartoźródłowy, pamięciowy magazyn struktur danych działający w pamięci RAM. Mimo że w literaturze technicznej jest on zazwyczaj klasyfikowany jako baza klucz-wartość, często określa się go mianem serwera struktur danych, ponieważ wartości skojarzone z kluczami mogą przyjmować postać złożonych struktur, takich jak tablice mieszające, listy czy zbiory.
+Redis (ang. \emph{Remote Dictionary Server}) to otwartoźródłowy, pamięciowy magazyn struktur danych działający w pamięci RAM \cite{carlson2013}. Mimo że w literaturze technicznej jest on zazwyczaj klasyfikowany jako baza klucz-wartość, często określa się go mianem serwera struktur danych, ponieważ wartości skojarzone z kluczami mogą przyjmować postać złożonych struktur, takich jak tablice mieszające, listy czy zbiory.
 \subsection{Architektura}
 Kluczową cechą architektury Redis jest oparcie przetwarzania komend na modelu jednowątkowym z wykorzystaniem mechanizmu pętli zdarzeń (ang. \emph{event loop}). Tradycyjne operacje, takie jak usuwanie klucza komendą \texttt{DEL}, miały charakter blokujący. W nowszych wersjach systemu wprowadzono nieblokujące polecenie \texttt{UNLINK}, które wykonuje operacje zwolnienia pamięci asynchronicznie w tle. Brak wielowątkowości przy obsłudze zapytań wynika głównie z:
 \begin{itemize}
@@ -84,7 +86,7 @@ Redis umożliwia osadzenie logiki biznesowej bezpośrednio w warstwie bazy danyc
 \end{itemize}
 
 \section{Memcached}
-Memcached to rozproszony system buforowania obiektów w pamięci RAM. Przed upowszechnieniem systemu Redis stanowił on fundamentalny element architektury największych serwisów internetowych, takich jak Facebook, Twitter czy Wikipedia.
+Memcached to rozproszony system buforowania obiektów w pamięci RAM \cite{fitzpatrick2004}. Przed upowszechnieniem systemu Redis stanowił on fundamentalny element architektury największych serwisów internetowych, takich jak Facebook, Twitter czy Wikipedia.
 W przeciwieństwie do systemu Redis, który ewoluował w stronę serwera struktur danych, Memcached pozostał klasycznym magazynem typu klucz-wartość, nieoferujączym złożonych typów danych ani mechanizmów zapewniania trwałości.
 \subsection{Architektura wielowątkowa}
 Najważniejszą różnicą architektoniczną względem bazy Redis jest model współbieżności. Memcached jest systemem wielowątkowym, podczas gdy jego konkurent opiera się na przetwarzaniu jednowątkowym.
@@ -134,7 +136,7 @@ Prostota systemu wiąże się ze sztywnymi ograniczeniami, które definiują jeg
 \end{itemize}
 
 \section{LevelDB}
-LevelDB to osadzona (ang. \emph{embedded}) biblioteka implementująca trwały magazyn danych typu klucz-wartość, stworzona przez inżynierów Google. W przeciwieństwie do systemów Redis czy Memcached, LevelDB nie działa jako serwer sieciowy, lecz jest konsolidowana bezpośrednio z kodem aplikacji. Rozwiązanie to stało się standardem dla implementacji struktur LSM-Tree, stanowiąc fundament dla wielu późniejszych projektów, takich jak RocksDB czy Hyperledger GoLevelDB.
+LevelDB to osadzona (ang. \emph{embedded}) biblioteka implementująca trwały magazyn danych typu klucz-wartość, stworzona przez inżynierów Google \cite{dean2011}. W przeciwieństwie do systemów Redis czy Memcached, LevelDB nie działa jako serwer sieciowy, lecz jest konsolidowana bezpośrednio z kodem aplikacji. Rozwiązanie to stało się standardem dla implementacji struktur LSM-Tree, stanowiąc fundament dla wielu późniejszych projektów, takich jak RocksDB czy Hyperledger GoLevelDB.
 \subsection{Architektura zapisu}
 LevelDB rezygnuje z tradycyjnego dla baz relacyjnych modelu B-Tree, optymalizującego odczyt kosztem losowych operacji zapisu na dysku. Zamiast tego wykorzystuje architekturę LSM-Tree, która przekształca losowe zapisy w sekwencyjne operacje wejścia/wyjścia (I/O), co ma kluczowe znaczenie dla wydajności dysków magnetycznych (HDD) oraz żywotności dysków półprzewodnikowych (SSD).
 
@@ -224,7 +226,7 @@ Ze względu na swoją lekkość i wydajność, LevelDB jest często wykorzystywa
 \end{itemize}
 
 \section{RocksDB}
-RocksDB to wysoce wydajny, osadzony magazyn danych typu klucz-wartość rozwijany przez firmę Facebook (obecnie Meta). Projekt powstał w 2012 roku jako rozwidlenie (fork) kodu biblioteki LevelDB w celu optymalizacji działania na serwerach wieloprocesorowych oraz szybkich nośnikach półprzewodnikowych (SSD). Podobnie jak pierwowzór, RocksDB bazuje na architekturze LSM-Tree, wprowadzając jednak szereg usprawnień umożliwiających skalowanie wydajności zapisu oraz odczytu.
+RocksDB to wysoce wydajny, osadzony magazyn danych typu klucz-wartość rozwijany przez firmę Facebook (obecnie Meta) \cite{borthakur2013}. Projekt powstał w 2012 roku jako rozwidlenie (fork) kodu biblioteki LevelDB w celu optymalizacji działania na serwerach wieloprocesorowych oraz szybkich nośnikach półprzewodnikowych (SSD). Podobnie jak pierwowzór, RocksDB bazuje na architekturze LSM-Tree, wprowadzając jednak szereg usprawnień umożliwiających skalowanie wydajności zapisu oraz odczytu.
 
 \subsection{Wielowątkowość i optymalizacja pod kątem dysków SSD}
 Głównym ograniczeniem LevelDB w środowiskach serwerowych była jednowątkowa architektura procesu kompaktowania oraz zapisu. RocksDB rozwiązuje ten problem poprzez zastosowanie następujących rozwiązań:
@@ -278,7 +280,7 @@ W przeciwieństwie do LevelDB, RocksDB posiada zaawansowane mechanizmy kontroli 
 \end{itemize}
 
 \section{Couchbase}
-Couchbase Server to rozproszona, dokumentowa baza danych typu NoSQL. System ten charakteryzuje się połączeniem cech klasycznego magazynu klucz-wartość z elastycznością bazy dokumentowej przechowującej dane w formacie JSON. Rodowód systemu jest ściśle powiązany z projektami Membase oraz Memcached, co znajduje odzwierciedlenie w jego architekturze wewnętrznej.
+Couchbase Server to rozproszona, dokumentowa baza danych typu NoSQL \cite{couchbase2023}. System ten charakteryzuje się połączeniem cech klasycznego magazynu klucz-wartość z elastycznością bazy dokumentowej przechowującej dane w formacie JSON. Rodowód systemu jest ściśle powiązany z projektami Membase oraz Memcached, co znajduje odzwierciedlenie w jego architekturze wewnętrznej.
 
 \subsection{Architektura zorientowana na pamięć operacyjną}
 Couchbase opiera się na architekturze typu \emph{memory-first}. Wszystkie operacje zapisu oraz odczytu są w pierwszej kolejności kierowane do pamięci RAM, co pozwala na osiągnięcie bardzo niskich opóźnień.
@@ -326,7 +328,7 @@ Dzięki MDS możliwe jest niezależne skalowanie sprzętowe węzłów w zależno
 \end{itemize}
 
 \section{Tarantool}
-Tarantool to pamięciowy serwer aplikacji (ang. \emph{in-memory application server}) z wbudowaną bazą danych typu NoSQL. Rozwiązanie to charakteryzuje się połączeniem cech pamięciowej bazy danych o bardzo niskich opóźnieniach z platformą uruchomieniową dla kodu napisanego w języku Lua. Umożliwia to przetwarzanie danych bezpośrednio w miejscu ich składowania.
+Tarantool to pamięciowy serwer aplikacji (ang. \emph{in-memory application server}) z wbudowaną bazą danych typu NoSQL \cite{tarantool2024}. Rozwiązanie to charakteryzuje się połączeniem cech pamięciowej bazy danych o bardzo niskich opóźnieniach z platformą uruchomieniową dla kodu napisanego w języku Lua. Umożliwia to przetwarzanie danych bezpośrednio w miejscu ich składowania.
 
 \subsection{Architektura pamięciowa i model współbieżności}
 Tarantool przechowuje dane robocze w pamięci operacyjnej RAM, co zapewnia szybki dostęp do rekordów. W celu zapewnienia trwałości stosuje się tradycyjne mechanizmy w postaci zapisu dziennika zdarzeń (Write-Ahead Log) oraz periodycznego zrzucania stanu pamięci do plików migawek (snapshots).
@@ -372,7 +374,7 @@ Dla silnika Memtx Tarantool zapewnia pełną zgodność z zasadami ACID w obręb
 \end{itemize}
 
 \section{FoundationDB}
-FoundationDB to rozproszona baza danych typu NoSQL, która wyróżnia się specyficznym podejściem architektonicznym. W swojej podstawowej warstwie udostępnia ona minimalistyczny model klucz-wartość, gwarantując jednocześnie pełną transakcyjność ACID w skali całego klastra. System został zaprojektowany z myślą o pełnieniu roli fundamentu, na którym budowane są inne modele danych.
+FoundationDB to rozproszona baza danych typu NoSQL, która wyróżnia się specyficznym podejściem architektonicznym \cite{zhou2021}. W swojej podstawowej warstwie udostępnia ona minimalistyczny model klucz-wartość, gwarantując jednocześnie pełną transakcyjność ACID w skali całego klastra. System został zaprojektowany z myślą o pełnieniu roli fundamentu, na którym budowane są inne modele danych.
 
 \subsection{Architektura podziału ról (Shared-Nothing)}
 W celu osiągnięcia wysokiej skalowalności FoundationDB oddziela proces zatwierdzania transakcji od fizycznego składowania danych. Klaster składa się z procesów realizujących wyspecjalizowane role:
@@ -415,7 +417,7 @@ FoundationDB charakteryzuje się rygorystycznym podejściem do testowania niezaw
 \end{itemize}
 
 \section{BerkeleyDB}
-BerkeleyDB (BDB) to klasyczna, osadzona (ang. \emph{embedded}) biblioteka bazodanowa typu klucz-wartość, rozwijana obecnie przez firmę Oracle. Jest to jedno z najstarszych rozwiązań w klasie systemów osadzonych. W odróżnieniu od systemów klient-serwer, BerkeleyDB działa w przestrzeni adresowej procesu aplikacji, eliminując komunikację sieciową.
+BerkeleyDB (BDB) to klasyczna, osadzona (ang. \emph{embedded}) biblioteka bazodanowa typu klucz-wartość, rozwijana obecnie przez firmę Oracle \cite{olson1999}. Jest to jedno z najstarszych rozwiązań w klasie systemów osadzonych. W odróżnieniu od systemów klient-serwer, BerkeleyDB działa w przestrzeni adresowej procesu aplikacji, eliminując komunikację sieciową.
 
 \subsection{Metody dostępu do danych}
 Podczas gdy większość baz klucz-wartość oferuje jeden model przechowywania danych, BerkeleyDB udostępnia cztery zróżnicowane metody dostępu:
@@ -454,3 +456,47 @@ Biblioteka jest udostępniana na licencji dualnej: bezpłatnej licencji typu AGP
         \item \textbf{Brak wbudowanej optymalizacji kompaktowania typu LSM:} W przypadku intensywnego usuwania i nadpisywania rekordów w modelach B-Tree/Hash pliki bazy danych mogą ulec znacznej fragmentacji, co wymaga uruchamiania ręcznych procedur defragmentacji.
     \end{itemize}
 \end{itemize}
+
+\section{Podsumowanie cech architektonicznych}
+W celu umożliwienia bezpośredniego porównania badanych systemów, w tabelach \ref{tab:wdrozenie_wspolbieznosc} oraz \ref{tab:struktura_transakcje} zestawiono ich kluczowe cechy architektoniczne. Porównanie to obrazuje, jak zróżnicowane podejścia projektowe zostały zastosowane w poszczególnych silnikach w celu optymalizacji pod kątem konkretnych scenariuszy użycia.
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|p{3.2cm}|p{3.8cm}|p{4.2cm}|}
+\hline
+\textbf{Baza danych} & \textbf{Przechowywanie danych} & \textbf{Model wdrożenia} & \textbf{Model współbieżności} \\ \hline
+Redis & Pamięciowe (RAM) & Klient-Serwer & Jednowątkowy (pętla zdarzeń) \\ \hline
+Memcached & Pamięciowe (RAM) & Klient-Serwer & Wielowątkowy \\ \hline
+LevelDB & Dyskowe (SSD/HDD) & Osadzony (Embedded) & Jednowątkowy (w tle) \\ \hline
+RocksDB & Dyskowe (SSD/HDD) & Osadzony (Embedded) & Wielowątkowy (w tle) \\ \hline
+Couchbase & Hybrydowe (Memory-first) & Klient-Serwer & Wielowątkowy \\ \hline
+Tarantool & Pamięciowe (RAM) & Serwer aplikacji / Klient-Serwer & Jednowątkowy (kooperatywne włókna) \\ \hline
+FoundationDB & Dyskowe (SSD/HDD) & Klient-Serwer (rozproszony) & Wieloprocesowy \\ \hline
+BerkeleyDB & Dyskowe (SSD/HDD) & Osadzony (Embedded) & Wielowątkowy / Wieloprocesowy \\ \hline
+\end{tabular}
+\caption{Model wdrożenia i współbieżność badanych systemów bazodanowych}
+\label{tab:wdrozenie_wspolbieznosc}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|p{4.0cm}|p{4.2cm}|p{3.3cm}|}
+\hline
+\textbf{Baza danych} & \textbf{Fizyczna struktura danych} & \textbf{Wsparcie dla transakcji ACID} & \textbf{Interfejs / Dostęp} \\ \hline
+Redis & Tabela mieszająca, RAM & Uproszczone (grupowanie komend) & Dedykowane API \\ \hline
+Memcached & Tabela mieszająca, Slab alokator & Brak & Dedykowane API \\ \hline
+LevelDB & Drzewo LSM-Tree & Brak (gwarancja zapisu przez WAL) & API biblioteki (C++) \\ \hline
+RocksDB & Drzewo LSM-Tree & Brak (gwarancja zapisu przez WAL) & API biblioteki (C++) \\ \hline
+Couchbase & Smart Cache, struktura dokumentowa & Brak (atomowość na poziomie dokumentu) & Język SQL++ (N1QL) \\ \hline
+Tarantool & Silnik Memtx (B-Tree/Hash) / Vinyl (LSM) & Pełne (dla silnika Memtx) & Lua, dedykowane API \\ \hline
+FoundationDB & Drzewo B-Tree, SQLite & Pełne (globalne transakcje rozproszone) & Bajtowe API (warstwy) \\ \hline
+BerkeleyDB & Drzewo B-Tree, Hash, Queue, Recno & Pełne (lokalne transakcje ACID) & API biblioteki (C/Java) \\ \hline
+\end{tabular}
+\caption{Struktura danych i transakcyjność badanych systemów bazodanowych}
+\label{tab:struktura_transakcje}
+\end{table}
+
+Przedstawione różnice w strukturach danych oraz modelach wdrożenia mają bezpośredni wpływ na wydajność operacji wejścia/wyjścia, co zostanie poddane weryfikacji eksperymentalnej w dalszej części pracy. Analizując narzut wirtualizacji (np. WSL 2) oraz wydajność nośników SSD, badania opierają się na wcześniejszych opracowaniach dotyczących wydajności kontenerów i systemów pamięci masowej w środowiskach zwirtualizowanych \cite{felter2015, xu2013}.
+
