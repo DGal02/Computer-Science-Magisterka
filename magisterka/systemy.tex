@@ -276,3 +276,51 @@ W przeciwieństwie do LevelDB, RocksDB posiada zaawansowane mechanizmy kontroli 
         \item \textbf{Narzut na zarządzanie pamięcią RAM:} szerokie możliwości optymalizacji wymagają utrzymywania licznych struktur pomocniczych w pamięci, co zwiększa ogólne zużycie RAM przez aplikację osadzającą.
     \end{itemize}
 \end{itemize}
+
+\section{Couchbase}
+Couchbase Server to rozproszona, dokumentowa baza danych typu NoSQL. System ten charakteryzuje się połączeniem cech klasycznego magazynu klucz-wartość z elastycznością bazy dokumentowej przechowującej dane w formacie JSON. Rodowód systemu jest ściśle powiązany z projektami Membase oraz Memcached, co znajduje odzwierciedlenie w jego architekturze wewnętrznej.
+
+\subsection{Architektura zorientowana na pamięć operacyjną}
+Couchbase opiera się na architekturze typu \emph{memory-first}. Wszystkie operacje zapisu oraz odczytu są w pierwszej kolejności kierowane do pamięci RAM, co pozwala na osiągnięcie bardzo niskich opóźnień.
+\begin{itemize}
+    \item \textbf{Asynchroniczny zapis na dysk:} Zapisane dane są umieszczane w kolejce i zapisywane na dysku asynchronicznie. Zapewnia to wysoką wydajność, lecz wprowadza minimalne ryzyko utraty danych w przypadku nagłej awarii zasilania przed utrwaleniem informacji na nośniku fizycznym.
+    \item \textbf{Protokół DCP (Database Change Protocol):} Do komunikacji wewnątrz klastra, replikacji oraz strumieniowania zmian wykorzystywany jest dedykowany, wysokowydajny protokół binarny DCP. Umożliwia on przesyłanie zmian w czasie rzeczywistym bezpośrednio z pamięci RAM jednego węzła do pamięci innego węzła lub do usług pomocniczych.
+\end{itemize}
+
+\subsection{Wbudowana warstwa buforowania}
+W przeciwieństwie do wielu innych systemów bazodanowych wymagających wdrożenia zewnętrznego systemu buforowania w celu przyspieszenia odczytów, Couchbase posiada w pełni zintegrowaną warstwę cache. Warstwa ta jest kompatybilna z protokołem Memcached, co ułatwia migrację istniejących aplikacji. Pamięć podręczna jest zarządzana automatycznie przez usuwanie najrzadziej używanych obiektów (algorytm LRU) w przypadku wyczerpania dostępnej przestrzeni RAM.
+
+\subsection{Język zapytań SQL++ (N1QL)}
+Jedną z kluczowych cech Couchbase jest udostępnienie języka zapytań SQL++ (wcześniej znanego pod nazwą N1QL). Jest to deklaratywny język zapytań będący rozszerzeniem standardu SQL o obsługę danych półstrukturyzowanych (JSON).
+\begin{itemize}
+    \item Umożliwia on wykonywanie operacji złączeń (\emph{JOIN}) na dokumentach JSON, filtrowanie danych oraz agregacje.
+    \item Możliwe jest korzystanie ze znanej składni SQL bez konieczności rezygnacji z zalet elastycznego modelu dokumentowego.
+    \item Do sprawnego działania zapytań wymagane jest utworzenie odpowiednich indeksów globalnych (ang. \emph{Global Secondary Indexes}, GSI).
+\end{itemize}
+
+\subsection{Wielowymiarowe skalowanie (MDS)}
+Architektura Couchbase pozwala na podział ról w klastrze poprzez mechanizm wielowymiarowego skalowania (ang. \emph{Multidimensional Scaling}). Każdy węzeł klastra może realizować dedykowany zestaw usług:
+\begin{itemize}
+    \item \textbf{Data Service:} Odpowiada za bezpośredni zapis i odczyt danych.
+    \item \textbf{Query Service:} Analizuje zapytania SQL++ i przygotowuje plany ich wykonania.
+    \item \textbf{Index Service:} Utrzymuje indeksy dla dokumentów.
+    \item \textbf{Search Service:} Realizuje zapytania pełnotekstowe.
+\end{itemize}
+Dzięki MDS możliwe jest niezależne skalowanie sprzętowe węzłów w zależności od charakterystyki obciążenia systemu, na przykład poprzez przydzielenie szybszych dysków SSD dla węzłów indeksujących oraz większej ilości pamięci RAM dla węzłów przechowujących dane.
+
+\subsection{Zalety i wady}
+\begin{itemize}
+    \item \textbf{Zalety:}
+    \begin{itemize}
+        \item \textbf{Wyjątkowa wydajność:} Niskie opóźnienia operacji zapisu i odczytu wynikające z architektury \emph{memory-first}.
+        \item \textbf{Brak konieczności stosowania zewnętrznego cache:} Wbudowana warstwa zgodna z Memcached eliminuje potrzebę utrzymywania dodatkowej infrastruktury.
+        \item \textbf{Zaawansowany język zapytań:} Język SQL++ znacząco ułatwia pracę z dokumentami JSON i obniża próg wejścia dla programistów.
+        \item \textbf{Elastyczne skalowanie (MDS):} Możliwość precyzyjnego dopasowania zasobów serwerowych do uruchomionych usług.
+    \end{itemize}
+    \item \textbf{Wady:}
+    \begin{itemize}
+        \item \textbf{Wysokie wymagania sprzętowe:} Baza wymaga znacznych zasobów pamięci RAM do poprawnego działania i stabilnej replikacji.
+        \item \textbf{Skomplikowana administracja:} Zarządzanie klastrem, procesami rebalansowania danych oraz optymalizacja indeksów MDS wymaga zaawansowanej wiedzy.
+        \item \textbf{Narzut wydajnościowy przy braku indeksów:} Zapytania SQL++ uruchomione na polach nieindeksowanych mogą prowadzić do skanowania całej bazy, co obniża przepustowość.
+    \end{itemize}
+\end{itemize}
