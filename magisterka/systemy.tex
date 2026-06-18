@@ -324,3 +324,49 @@ Dzięki MDS możliwe jest niezależne skalowanie sprzętowe węzłów w zależno
         \item \textbf{Narzut wydajnościowy przy braku indeksów:} Zapytania SQL++ uruchomione na polach nieindeksowanych mogą prowadzić do skanowania całej bazy, co obniża przepustowość.
     \end{itemize}
 \end{itemize}
+
+\section{Tarantool}
+Tarantool to pamięciowy serwer aplikacji (ang. \emph{in-memory application server}) z wbudowaną bazą danych typu NoSQL. Rozwiązanie to charakteryzuje się połączeniem cech pamięciowej bazy danych o bardzo niskich opóźnieniach z platformą uruchomieniową dla kodu napisanego w języku Lua. Umożliwia to przetwarzanie danych bezpośrednio w miejscu ich składowania.
+
+\subsection{Architektura pamięciowa i model współbieżności}
+Tarantool przechowuje dane robocze w pamięci operacyjnej RAM, co zapewnia szybki dostęp do rekordów. W celu zapewnienia trwałości stosuje się tradycyjne mechanizmy w postaci zapisu dziennika zdarzeń (Write-Ahead Log) oraz periodycznego zrzucania stanu pamięci do plików migawek (snapshots).
+Model współbieżności opiera się na jednowątkowej pętli zdarzeń. W celu obsługi wielu jednoczesnych połączeń wykorzystuje się koncepcję kooperatywnych zielonych wątków, zwanych włóknami (ang. \emph{fibers}):
+\begin{itemize}
+    \item Włókna działają w ramach jednego wątku systemowego, co eliminuje narzut na przełączanie kontekstu przez system operacyjny.
+    \item Przełączanie między włóknami następuje w sposób kooperatywny, czyli w momencie, gdy dane włókno oczekuje na operację wejścia/wyjścia (I/O).
+    \item Dzięki temu rozwiązaniu baza danych nie wymaga stosowania blokad i mutexów przy modyfikacji struktur danych.
+\end{itemize}
+
+\subsection{Silniki składowania danych}
+Tarantool udostępnia dwa alternatywne silniki składowania danych, które mogą być używane równolegle w ramach jednej instancji:
+\begin{itemize}
+    \item \textbf{Memtx:} Domyślny silnik in-memory. Wszystkie dane są przechowywane w pamięci RAM. Obsługuje zaawansowane indeksy typu B-Tree, Hash, RTREE (przestrzenne) oraz Bitset. Jest zoptymalizowany pod kątem maksymalnej przepustowości i najniższych opóźnień.
+    \item \textbf{Vinyl:} Silnik dyskowy oparty na architekturze LSM-Tree. Zapisy są buforowane w pamięci i zrzucane na dysk w postaci posortowanych plików SSTable. Jest stosowany w sytuacjach, gdy wolumen danych przekracza fizyczny rozmiar dostępnej pamięci RAM.
+\end{itemize}
+
+\subsection{Integracja z kompilatorem LuaJIT}
+Kluczowym wyróżnikiem systemu Tarantool jest integracja z maszyną wirtualną LuaJIT (kompilator \emph{Just-In-Time} języka Lua). Język ten służy nie tylko do tworzenia prostych procedur składowanych, ale stanowi integralną część środowiska uruchomieniowego:
+\begin{itemize}
+    \item Cała logika biznesowa może być wykonywana bezpośrednio w przestrzeni adresowej bazy danych, co eliminuje narzut sieciowy związany z przesyłaniem danych między bazą a serwerem aplikacji.
+    \item Z poziomu kodu Lua zapewniony jest dostęp do pełnego ekosystemu bibliotek, co umożliwia tworzenie kompletnych mikroserwisów, serwerów HTTP czy kolejek zadań bezpośrednio w instancji Tarantool.
+\end{itemize}
+
+\subsection{Transakcyjność}
+Dla silnika Memtx Tarantool zapewnia pełną zgodność z zasadami ACID w obrębie pojedynczej instancji. Dzięki jednowątkowej strukturze i zastosowaniu optymistycznej kontroli współbieżności MVCC (ang. \emph{Multi-Version Concurrency Control}), transakcje są izolowane i nie blokują operacji odczytu.
+
+\subsection{Zalety i wady}
+\begin{itemize}
+    \item \textbf{Zalety:}
+    \begin{itemize}
+        \item \textbf{Wyjątkowa wydajność:} Przetwarzanie setek tysięcy operacji na sekundę przy minimalnych opóźnieniach dzięki architekturze in-memory.
+        \item \textbf{Elastyczność programistyczna:} Możliwość pisania kompletnych aplikacji bezpośrednio na poziomie bazy danych z wykorzystaniem LuaJIT.
+        \item \textbf{Wybór silnika składowania:} Dostępność silnika Memtx (RAM) oraz Vinyl (LSM-Tree na dysku) pozwala na optymalizację kosztów przechowywania danych.
+        \item \textbf{Transakcje ACID:} Pełna spójność danych dla operacji pamięciowych.
+    \end{itemize}
+    \item \textbf{Wady:}
+    \begin{itemize}
+        \item \textbf{Konieczność znajomości języka Lua:} Pełne wykorzystanie potencjału systemu wymaga pisania kodu w tym języku.
+        \item \textbf{Wysokie zużycie pamięci RAM:} W przypadku korzystania z silnika Memtx koszt infrastruktury rośnie liniowo wraz z objętością danych.
+        \item \textbf{Mniejsza popularność:} W porównaniu z bazami takimi jak Redis, Tarantool posiada mniejszą społeczność użytkowników oraz skromniejszą bazę gotowych bibliotek integracyjnych.
+    \end{itemize}
+\end{itemize}
