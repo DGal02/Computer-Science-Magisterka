@@ -458,7 +458,7 @@ Biblioteka jest udostępniana na licencji dualnej: bezpłatnej licencji typu AGP
 \end{itemize}
 
 \section{Podsumowanie cech architektonicznych}
-W celu umożliwienia bezpośredniego porównania badanych systemów, w tabelach \ref{tab:wdrozenie_wspolbieznosc} oraz \ref{tab:struktura_transakcje} zestawiono ich kluczowe cechy architektoniczne. Porównanie to obrazuje, jak zróżnicowane podejścia projektowe zostały zastosowane w poszczególnych silnikach w celu optymalizacji pod kątem konkretnych scenariuszy użycia.
+W celu umożliwienia bezpośredniego porównania badanych systemów, w tabelach \ref{tab:wdrozenie_wspolbieznosc}, \ref{tab:struktura_transakcje} oraz \ref{tab:klasyfikacja_cap} zestawiono ich kluczowe cechy architektoniczne oraz klasyfikację w myśl twierdzenia CAP. Porównanie to obrazuje, jak zróżnicowane podejścia projektowe zostały zastosowane w poszczególnych silnikach w celu optymalizacji pod kątem konkretnych scenariuszy użycia.
 
 \begin{table}[H]
 \centering
@@ -496,6 +496,25 @@ BerkeleyDB & Drzewo B-Tree, Hash, Queue, Recno & Pełne (lokalne transakcje ACID
 \end{tabular}
 \caption{Struktura danych i transakcyjność badanych systemów bazodanowych}
 \label{tab:struktura_transakcje}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|p{3.5cm}|p{8.0cm}|}
+\hline
+\textbf{Baza danych} & \textbf{Klasyfikacja CAP} & \textbf{Spójność danych i zachowanie przy podziale sieci} \\ \hline
+Redis & AP & Spójność ostateczna (\emph{eventual consistency}) wynikająca z asynchronicznej replikacji. Istnieje możliwość utraty części zapisów w przypadku awarii węzła głównego. \\ \hline
+Memcached & AP (nie dotyczy) & Spójność ostateczna. Brak wbudowanego mechanizmu replikacji klastrowej, a ewentualna replikacja lub partycjonowanie realizowane są po stronie aplikacji klienckiej. \\ \hline
+LevelDB & Nie dotyczy & Baza osadzona (\emph{embedded}). Silna spójność lokalna, brak mechanizmów sieciowych i replikacji wbudowanej w silnik. \\ \hline
+RocksDB & Nie dotyczy & Baza osadzona (\emph{embedded}). Silna spójność lokalna, brak wbudowanej obsługi protokołów sieciowych. \\ \hline
+Couchbase & CP & Silna spójność na poziomie klucza dzięki przypisaniu do jednego aktywnego węzła (\emph{vBucket}). Blokada dostępu następuje w przypadku braku kworum. \\ \hline
+Tarantool & CP lub AP & Konfigurowalna spójność. Możliwość pracy w trybie CP (replikacja synchroniczna oparta na protokole Raft) lub AP (replikacja asynchroniczna). \\ \hline
+FoundationDB & CP & Silna spójność i pełna izolacja transakcji ACID w trybie rozproszonym. W przypadku utraty komunikacji z kworum transakcje są blokowane. \\ \hline
+BerkeleyDB & Nie dotyczy & Baza osadzona (\emph{embedded}). Silna spójność lokalna i pełna transakcyjność ACID w obrębie systemu plików. \\ \hline
+\end{tabular}
+\caption{Klasyfikacja CAP oraz spójność danych badanych systemów bazodanowych}
+\label{tab:klasyfikacja_cap}
 \end{table}
 
 Przedstawione różnice w strukturach danych oraz modelach wdrożenia mają bezpośredni wpływ na wydajność operacji wejścia/wyjścia, co zostanie poddane weryfikacji eksperymentalnej w dalszej części pracy. Analizując narzut wirtualizacji (np. WSL 2) oraz wydajność nośników SSD, badania opierają się na wcześniejszych opracowaniach dotyczących wydajności kontenerów i systemów pamięci masowej w środowiskach zwirtualizowanych \cite{felter2015, xu2013}.
