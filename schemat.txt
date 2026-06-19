@@ -19,6 +19,7 @@
 3.6 Tarantool
 3.7 FoundationDB
 3.8 BerkeleyDB
+3.9 Podsumowanie cech architektonicznych (tabele porównawcze: model wdrożenia, struktura danych, spójność CAP, replikacja i skalowanie)
 
 4. Środowisko testowe i metodyka testów
 4.1. Wykorzystane technologie i narzędzia

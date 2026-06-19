@@ -458,7 +458,7 @@ Biblioteka jest udostępniana na licencji dualnej: bezpłatnej licencji typu AGP
 \end{itemize}
 
 \section{Podsumowanie cech architektonicznych}
-W celu umożliwienia bezpośredniego porównania badanych systemów, w tabelach \ref{tab:wdrozenie_wspolbieznosc}, \ref{tab:struktura_transakcje} oraz \ref{tab:klasyfikacja_cap} zestawiono ich kluczowe cechy architektoniczne oraz klasyfikację w myśl twierdzenia CAP. Porównanie to obrazuje, jak zróżnicowane podejścia projektowe zostały zastosowane w poszczególnych silnikach w celu optymalizacji pod kątem konkretnych scenariuszy użycia.
+W celu umożliwienia bezpośredniego porównania badanych systemów, w tabelach \ref{tab:wdrozenie_wspolbieznosc}, \ref{tab:struktura_transakcje}, \ref{tab:klasyfikacja_cap} oraz \ref{tab:skalowalnosc_replikacja} zestawiono ich kluczowe cechy architektoniczne, klasyfikację w myśl twierdzenia CAP, a także możliwości skalowania i replikacji. Porównanie to obrazuje, jak zróżnicowane podejścia projektowe zostały zastosowane w poszczególnych silnikach w celu optymalizacji pod kątem konkretnych scenariuszy użycia.
 
 \begin{table}[H]
 \centering
@@ -515,6 +515,25 @@ BerkeleyDB & Nie dotyczy & Baza osadzona (\emph{embedded}). Silna spójność lo
 \end{tabular}
 \caption{Klasyfikacja CAP oraz spójność danych badanych systemów bazodanowych}
 \label{tab:klasyfikacja_cap}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|p{5.0cm}|p{7.0cm}|}
+\hline
+\textbf{Baza danych} & \textbf{Mechanizm replikacji} & \textbf{Strategia skalowania} \\ \hline
+Redis & Asynchroniczna Master-Replica, automatyczny failover (Sentinel) & Poziome (Redis Cluster z automatycznym shardingiem), pionowe. \\ \hline
+Memcached & Brak wbudowanej replikacji serwerowej & Poziome (realizowane po stronie klienta), pionowe (architektura wielowątkowa). \\ \hline
+LevelDB & Brak (baza osadzona) & Wyłącznie pionowe (w obrębie pojedynczego systemu plików i procesu). \\ \hline
+RocksDB & Brak (baza osadzona) & Wyłącznie pionowe (w obrębie pojedynczego systemu plików i procesu). \\ \hline
+Couchbase & Aktywne/pasywne vBuckety w klastrze, replikacja międzycentrowa (XDCR) & Poziome (automatyczny dynamiczny sharding i rebalansowanie klastra). \\ \hline
+Tarantool & Synchroniczna (Raft) lub asynchroniczna Master-Replica lub Master-Master & Poziome (sharding za pomocą biblioteki \texttt{vshard}), pionowe (jednowątkowość silnika). \\ \hline
+FoundationDB & Wbudowana automatyczna replikacja dla tolerancji błędów (kworum) & Poziome (w pełni automatyczny, przezroczysty sharding i podział zakresów kluczy). \\ \hline
+BerkeleyDB & Master-Replica w wersji High Availability (replikacja zorientowana na odczyt) & Wyłącznie pionowe (osadzona baza danych dla wielu procesów i wątków). \\ \hline
+\end{tabular}
+\caption{Mechanizmy replikacji i strategie skalowania badanych systemów bazodanowych}
+\label{tab:skalowalnosc_replikacja}
 \end{table}
 
 Przedstawione różnice w strukturach danych oraz modelach wdrożenia mają bezpośredni wpływ na wydajność operacji wejścia/wyjścia, co zostanie poddane weryfikacji eksperymentalnej w dalszej części pracy. Analizując narzut wirtualizacji (np. WSL 2) oraz wydajność nośników SSD, badania opierają się na wcześniejszych opracowaniach dotyczących wydajności kontenerów i systemów pamięci masowej w środowiskach zwirtualizowanych \cite{felter2015, xu2013}.
