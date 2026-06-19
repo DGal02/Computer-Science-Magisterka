@@ -20,6 +20,30 @@ Ze względu na specyfikę działania i ograniczenia, bazy NoSQL nie są w stanie
     \item \textbf{Media społecznościowe i rekomendacje:} modelowanie złożonych relacji między użytkownikami, których odpytywanie w relacyjnych bazach prowadziłoby do drastycznego spadku wydajności wskutek zjawiska tzw. bomby złączeń (ang. \emph{JOIN Bomb}).
 \end{itemize}
 Współczesna architektura systemów informatycznych często opiera się na podejściu wielobazowym (ang. \emph{polyglot persistence}). Przykładowo, w pamięciowej bazie danych Redis przechowywane są sesje użytkowników, w dokumentowej bazie MongoDB katalogi produktów, natomiast transakcje finansowe są rejestrowane w relacyjnym systemie PostgreSQL.
+
+\subsection{Model spójności BASE}
+W tradycyjnych bazach relacyjnych spójność transakcyjna gwarantowana jest przez zasady ACID. W systemach rozproszonych NoSQL, ze względu na potrzebę skalowania poziomego, wdrożono alternatywny model spójności zwany \textbf{BASE}:
+\begin{itemize}
+    \item \textbf{Basically Available (Podstawowa dostępność):} System gwarantuje dostępność danych z perspektywy użytkownika. Mimo awarii pojedynczych węzłów system jako całość nadal odpowiada na zapytania, nawet jeśli część danych jest chwilowo niedostępna.
+    \item \textbf{Soft State (Stan płynny):} Stan danych w klastrze może się zmieniać z upływem czasu bez bezpośredniej interakcji ze strony użytkownika, co wynika z opóźnień w replikacji zmian pomiędzy węzłami.
+    \item \textbf{Eventual Consistency (Spójność ostateczna):} System gwarantuje, że przy braku nowych operacji zapisu wszystkie kopie danych w klastrze ostatecznie osiągną ten sam stan. Jest to model spójności słabszy niż w systemach ACID, lecz pozwala na znaczny wzrost wydajności operacji zapisu i odczytu.
+\end{itemize}
+
+\subsection{Twierdzenie CAP}
+Sformułowane przez Erica Brewera twierdzenie \textbf{CAP} (ang. \emph{CAP Theorem}) określa kompromisy architektoniczne systemów rozproszonych \cite{sadalage2012}. Zgodnie z tym twierdzeniem, w rozproszonym systemie komputerowym możliwe jest jednoczesne zapewnienie najwyżej dwóch z trzech następujących cech:
+\begin{itemize}
+    \item \textbf{Spójność (Consistency):} Każdy odczyt zwraca najnowszy zapis lub kończy się błędem. Wszystkie węzły w klastrze widzą te same dane w tym samym czasie.
+    \item \textbf{Dostępność (Availability):} Każde zapytanie otrzymuje poprawną odpowiedź (niebędącą błędem), bez gwarancji, że zawiera ona najnowszy zapis.
+    \item \textbf{Odporność na podział sieci (Partition Tolerance):} System działa poprawnie mimo utraty łączności lub opóźnień pakietów pomiędzy węzłami klastra.
+\end{itemize}
+
+Ponieważ w systemach rozproszonych fizyczne zakłócenia sieci są nieuniknione, odporność na podział sieci (\emph{Partition Tolerance}) musi być zawsze zapewniona. W konsekwencji projektanci systemów rozproszonych muszą dokonać wyboru między spójnością (\textbf{CP}) a dostępnością (\textbf{AP}):
+\begin{itemize}
+    \item \textbf{Systemy CP:} W przypadku podziału sieci system blokuje dostęp do niespójnych partycji, gwarantując spójność danych kosztem czasowego braku dostępności dla niektórych klientów.
+    \item \textbf{Systemy AP:} System pozostaje w pełni dostępny, akceptując zapisy i odczyty na wszystkich węzłach, co może prowadzić do tymczasowej niespójności danych pomiędzy odciętymi częściami klastra.
+\end{itemize}
+Dla baz osadzonych (LevelDB, RocksDB, BerkeleyDB), które działają lokalnie w przestrzeni adresowej jednego procesu, twierdzenie CAP nie ma bezpośredniego zastosowania, ponieważ nie napotykają one problemów związanych z partycjonowaniem sieciowym.
+
 \section{Klasyfikacja baz NoSQL}
 \subsection{Dokumentowe bazy danych}
 Głównym założeniem baz dokumentowych jest odejście od struktury tabelarycznej na rzecz elastycznych dokumentów, co umożliwia przechowywanie danych w formacie zbliżonym do struktur wykorzystywanych w nowoczesnych językach programowania. Dokumenty stanowią kontenery dla par klucz-wartość, w których wartościami mogą być zarówno typy proste (liczby, ciągi znaków), jak i złożone (tablice lub zagnieżdżone dokumenty). Większość systemów dokumentowych wykorzystuje formaty wywodzące się z języka JavaScript:
