@@ -67,6 +67,9 @@ Redis umożliwia osadzenie logiki biznesowej bezpośrednio w warstwie bazy danyc
     \item \textbf{Funkcje Redis (Redis Functions):} stanowiące rozwinięcie skryptów Lua. Są one przechowywane bezpośrednio na serwerze bazy danych, co eliminuje konieczność przesyłania kodu skryptu przy każdym żądaniu klienta.
 \end{itemize}
 
+\subsection{Licencjonowanie}
+Baza danych Redis przez wiele lat była udostępniana na liberalnej, trzyklauzulowej licencji BSD. W marcu 2024 roku (począwszy od wersji 7.4) model licencyjny został zmieniony przez firmę Redis Inc. na licencję dualną składającą się z RSALv2 (ang. \emph{Redis Source Available License v2}) oraz SSPLv1 (ang. \emph{Server Side Public License v1}), które nie spełniały kryteriów oprogramowania otwartoźródłowego według organizacji OSI (ang. \emph{Open Source Initiative}). Krok ten wywołał podział w społeczności programistycznej i doprowadził do powołania otwartoźródłowych projektów pochodnych, takich jak Valkey czy Redict. W reakcji na te wydarzenia oraz głosy społeczności, w maju 2025 roku wraz z wydaniem wersji Redis 8 wprowadzono model trójlicencyjny. Dodano w nim licencję AGPLv3 (ang. \emph{GNU Affero General Public License v3}), która jest licencją otwartoźródłową certyfikowaną przez OSI. Dzięki temu użytkownicy mogą wybrać licencję AGPLv3, co formalnie przywróciło systemowi status oprogramowania otwartoźródłowego, choć z restrykcjami typu copyleft charakterystycznymi dla licencji z rodziny GPL.
+
 \subsection{Zalety i wady}
 \begin{itemize}
     \item \textbf{Zalety:}
@@ -116,6 +119,9 @@ Prostota systemu wiąże się ze sztywnymi ograniczeniami, które definiują jeg
     \item \textbf{Proste typy danych:} wartościami są zawsze surowe ciągi bajtów. Brak struktur takich jak listy czy zbiory wymusza na aplikacji pobieranie i nadpisywanie całego obiektu oraz samodzielne zarządzanie serializacją i deserializacją.
     \item \textbf{Ograniczenia rozmiaru klucza i wartości:} rozmiar klucza nie może przekraczać 250 bajtów, natomiast wartość domyślnie ograniczona jest do 1 MB, co zapobiega blokowaniu wątków przy przetwarzaniu dużych obiektów.
 \end{itemize}
+
+\subsection{Licencjonowanie}
+System Memcached jest rozpowszechniany na uproszczonej, trzyklauzulowej licencji BSD (ang. \emph{Revised BSD License}). Jest to licencja wysoce permisywna, która pozwala na bezpłatne użytkowanie, modyfikowanie oraz dystrybucję oprogramowania w celach komercyjnych i prywatnych. Jedynym wymogiem licencyjnym jest zachowanie informacji o prawach autorskich oraz warunków licencyjnych w dystrybuowanej wersji kodu źródłowego lub dokumentacji technicznej. Rozwiązanie to nie nakłada żadnych restrykcji typu copyleft, co ułatwia jego integrację z oprogramowaniem zamkniętym.
 
 \subsection{Zalety i wady}
 \begin{itemize}
@@ -208,6 +214,9 @@ Ze względu na swoją lekkość i wydajność, LevelDB jest często wykorzystywa
     \item Systemy logowania zdarzeń o wysokiej przepustowości zapisu.
 \end{itemize}
 
+\subsection{Licencjonowanie}
+LevelDB jest projektem otwartoźródłowym rozwijanym przez firmę Google i udostępnianym na trzyklauzulowej licencji BSD (ang. \emph{New BSD License}). Taki model licencjonowania gwarantuje pełną swobodę w zakresie modyfikacji kodu, jego redystrybucji oraz wbudowywania biblioteki w produkty o charakterze komercyjnym i zamkniętym. Warunkiem koniecznym jest jedynie dołączenie oryginalnej noty o prawach autorskich oraz tekstu licencji do rozpowszechnianego oprogramowania.
+
 \subsection{Zalety i wady}
 \begin{itemize}
     \item \textbf{Zalety:}
@@ -263,6 +272,9 @@ W przeciwieństwie do LevelDB, RocksDB posiada zaawansowane mechanizmy kontroli 
     \item \textbf{Kopie zapasowe i punkty kontrolne:} wbudowane mechanizmy umożliwiają tworzenie spójnych migawek (checkpoints) oraz kopii zapasowych w czasie działania bazy danych (hot backups) bez blokowania wątków zapisujących.
 \end{itemize}
 
+\subsection{Licencjonowanie}
+Silnik RocksDB, rozwijany przez firmę Meta, charakteryzuje się dualnym modelem licencjonowania. Oprogramowanie to jest udostępniane jednocześnie na licencji Apache License 2.0 oraz GNU General Public License w wersji 2 (GPLv2). Użytkownik integrujący bibliotekę z własnym projektem ma prawo wyboru, pod którą z tych licencji chce z niej korzystać. Zastosowanie licencji Apache 2.0 eliminuje restrykcje typu copyleft i zapewnia dodatkowe gwarancje patentowe, co pozwala na powszechne wykorzystanie RocksDB w zamkniętych systemach komercyjnych.
+
 \subsection{Zalety i wady}
 \begin{itemize}
     \item \textbf{Zalety:}
@@ -310,6 +322,9 @@ Architektura Couchbase pozwala na podział ról w klastrze poprzez mechanizm wie
 \end{itemize}
 Dzięki MDS możliwe jest niezależne skalowanie sprzętowe węzłów w zależności od charakterystyki obciążenia systemu, na przykład poprzez przydzielenie szybszych dysków SSD dla węzłów indeksujących oraz większej ilości pamięci RAM dla węzłów przechowujących dane.
 
+\subsection{Licencjonowanie}
+Model licencyjny systemu Couchbase Server ulegał zmianom w miarę rozwoju projektu. Wydanie przeznaczone dla przedsiębiorstw (Enterprise Edition) jest rozpowszechniane na zasadach licencji własnościowej i wymaga zakupu subskrypcji komercyjnej. Wersja społecznościowa (Community Edition) była pierwotnie oferowana na licencji Apache 2.0, jednak w 2021 roku (od wersji 7.0) jej warunki zostały zmienione przez producenta na licencję BSL 1.1 (ang. \emph{Business Source License 1.1}). Licencja BSL 1.1 zezwala na bezpłatne użytkowanie kodu w środowiskach nieprodukcyjnych oraz w ograniczonych wdrożeniach produkcyjnych, wykluczając jednocześnie możliwość komercyjnego oferowania systemu jako usługi chmurowej. Cechą charakterystyczną tej licencji jest automatyczna konwersja kodu źródłowego do w pełni otwartej licencji Apache 2.0 po upływie zdefiniowanego czasu, zazwyczaj czterech lat.
+
 \subsection{Zalety i wady}
 \begin{itemize}
     \item \textbf{Zalety:}
@@ -356,6 +371,9 @@ Kluczowym wyróżnikiem systemu Tarantool jest integracja z maszyną wirtualną 
 \subsection{Transakcyjność}
 Dla silnika Memtx Tarantool zapewnia pełną zgodność z zasadami ACID w obrębie pojedynczej instancji. Dzięki jednowątkowej strukturze i zastosowaniu optymistycznej kontroli współbieżności MVCC (ang. \emph{Multi-Version Concurrency Control}), transakcje są izolowane i nie blokują operacji odczytu.
 
+\subsection{Licencjonowanie}
+System Tarantool jest udostępniany na liberalnej, dwuklauzulowej licencji BSD (ang. \emph{Simplified BSD License}). Licencja ta należy do kategorii licencji permisywnych i nie zawiera zapisów typu copyleft. Zapewnia to pełną swobodę w zakresie uruchamiania, modyfikowania, powielania i dystrybucji oprogramowania w projektach o charakterze komercyjnym bez konieczności otwierania kodu źródłowego tworzonych aplikacji.
+
 \subsection{Zalety i wady}
 \begin{itemize}
     \item \textbf{Zalety:}
@@ -399,6 +417,9 @@ Rdzeń FoundationDB nie posiada wbudowanego języka zapytań ani obsługi strukt
 \subsection{Symulacja deterministyczna}
 FoundationDB charakteryzuje się rygorystycznym podejściem do testowania niezawodności. Cały kod źródłowy bazy został zaprojektowany tak, aby umożliwić uruchomienie w specjalnym środowisku symulacyjnym. Symulator umożliwia uruchomienie setek wirtualnych węzłów w jednym procesie systemowym i pozwala na kontrolowanie upływu czasu, przepływu pakietów sieciowych oraz operacji dyskowych. Umożliwia to deterministyczne wstrzykiwanie błędów, takich jak awarie dysków, opóźnienia czy podziały sieci, oraz weryfikację, czy baza danych zawsze zachowuje spójność. Każdy wykryty błąd może być powtórzony z tym samym ziarnem generatora liczb losowych, co ułatwia debugowanie trudnych do wykrycia błędów współbieżności.
 
+\subsection{Licencjonowanie}
+FoundationDB jest rozpowszechniany jako oprogramowanie otwartoźródłowe. Po przejęciu projektu przez firmę Apple w 2015 roku dystrybucja została czasowo wstrzymana, lecz w 2018 roku kod źródłowy został w pełni otwarty i udostępniony na licencji Apache License 2.0. Zezwala ona na swobodne użytkowanie, modyfikowanie i rozpowszechnianie kodu źródłowego oraz plików binarnych, a także chroni użytkowników w obszarze praw patentowych. Licencja ta nie nakłada obowiązku udostępniania kodu źródłowego aplikacji korzystających z tej bazy danych.
+
 \subsection{Zalety i wady}
 \begin{itemize}
     \item \textbf{Zalety:}
@@ -417,7 +438,7 @@ FoundationDB charakteryzuje się rygorystycznym podejściem do testowania niezaw
 \end{itemize}
 
 \section{BerkeleyDB}
-BerkeleyDB (BDB) to klasyczna, osadzona (ang. \emph{embedded}) biblioteka bazodanowa typu klucz-wartość, rozwijana obecnie przez firmę Oracle \cite{olson1999}. Jest to jedno z najstarszych rozwiązań w klasie systemów osadzonych. W odróżnieniu od systemów klient-serwer, BerkeleyDB działa w przestrzeni adresowej procesu aplikacji, eliminując komunikację sieciową.
+BerkeleyDB (BDB) to klasyczna, osadzona (ang. \emph{embedded}) biblioteka bazodanowa typu klucz-wartość, rozwijana obecnie przez firmę Oracle \cite{olson1999}. Jest to jedno z najstarszych rozwiązań w klasie systemów osadzonych. W odróżnieniu od systemów klient-serwer, BerkeleyDB działa w przestrzeni adresowej procesu aplikacji, eliminując komunikację sieciową. System występuje w kilku edycjach, w tym w klasycznej wersji napisanej w języku C oraz jako natywna edycja dla platformy Java (Berkeley DB Java Edition).
 
 \subsection{Metody dostępu do danych}
 Podczas gdy większość baz klucz-wartość oferuje jeden model przechowywania danych, BerkeleyDB udostępnia cztery zróżnicowane metody dostępu:
@@ -435,10 +456,8 @@ BerkeleyDB oferuje zaawansowany podsystem transakcyjny zapewniający pełną zgo
     \item \textbf{Współbieżność wieloprocesowa:} BerkeleyDB wspiera jednoczesny dostęp wielu wątków oraz procesów systemowych do tej samej bazy danych. W celu zapobiegania konfliktom system wykorzystuje menedżer blokad (Lock Manager), który automatycznie zarządza blokadami na poziomie stron lub rekordów.
 \end{itemize}
 
-\subsection{Architektura wdrożenia i licencjonowanie}
-Brak procesu serwera sprawia, że BerkeleyDB charakteryzuje się minimalnym narzutem wydajnościowym i brakiem opóźnień sieciowych.
-System występuje w kilku edycjach, w tym w klasycznej wersji napisanej w języku C oraz jako natywna edycja dla platformy Java (Berkeley DB Java Edition).
-Biblioteka jest udostępniana na licencji dualnej: bezpłatnej licencji typu AGPL (która wymaga udostępnienia kodu źródłowego aplikacji korzystającej z biblioteki) oraz płatnej licencji komercyjnej dla projektów o zamkniętym kodzie źródłowym.
+\subsection{Licencjonowanie}
+Biblioteka BerkeleyDB jest udostępniana na warunkach licencji dualnej. W wersji bezpłatnej oprogramowanie podlega licencji AGPLv3 (ang. \emph{GNU Affero General Public License v3}), która nakłada silny obowiązek copyleft. Wymusza ona ujawnienie i udostępnienie kodu źródłowego całej aplikacji korzystającej z biblioteki w przypadku dystrybucji lub świadczenia usług przez sieć. Dla projektów komercyjnych o zamkniętym kodzie firma Oracle Corporation oferuje alternatywne licencjonowanie własnościowe, które zwalnia z ograniczeń licencji AGPLv3 w zamian za wniesienie opłat licencyjnych.
 
 \subsection{Zalety i wady}
 \begin{itemize}
@@ -458,7 +477,7 @@ Biblioteka jest udostępniana na licencji dualnej: bezpłatnej licencji typu AGP
 \end{itemize}
 
 \section{Podsumowanie cech architektonicznych}
-W celu umożliwienia bezpośredniego porównania badanych systemów, w tabelach \ref{tab:wdrozenie_wspolbieznosc}, \ref{tab:struktura_transakcje}, \ref{tab:klasyfikacja_cap} oraz \ref{tab:skalowalnosc_replikacja} zestawiono ich kluczowe cechy architektoniczne, klasyfikację w myśl twierdzenia CAP, a także możliwości skalowania i replikacji. Porównanie to obrazuje, jak zróżnicowane podejścia projektowe zostały zastosowane w poszczególnych silnikach w celu optymalizacji pod kątem konkretnych scenariuszy użycia.
+W celu umożliwienia bezpośredniego porównania badanych systemów, w tabelach \ref{tab:wdrozenie_wspolbieznosc}, \ref{tab:struktura_transakcje}, \ref{tab:klasyfikacja_cap}, \ref{tab:skalowalnosc_replikacja} oraz \ref{tab:porownanie_licencji} zestawiono ich kluczowe cechy architektoniczne, klasyfikację w myśl twierdzenia CAP, możliwości skalowania i replikacji, a także model licencjonowania. Porównanie to obrazuje, jak zróżnicowane podejścia projektowe zostały zastosowane w poszczególnych silnikach w celu optymalizacji pod kątem konkretnych scenariuszy użycia.
 
 \begin{table}[H]
 \centering
@@ -534,6 +553,25 @@ BerkeleyDB & Master-Replica w wersji High Availability (replikacja zorientowana 
 \end{tabular}
 \caption{Mechanizmy replikacji i strategie skalowania badanych systemów bazodanowych}
 \label{tab:skalowalnosc_replikacja}
+\end{table}
+
+\begin{table}[H]
+\centering
+\small
+\begin{tabular}{|l|p{4.5cm}|p{3.5cm}|p{4.5cm}|}
+\hline
+\textbf{Baza danych} & \textbf{Typ licencji} & \textbf{Właściciel / Podmiot rozwijający} & \textbf{Charakterystyka warunków} \\ \hline
+Redis & AGPLv3, RSALv2 lub SSPLv1 (dawniej BSD 3-clause) & Redis Inc. & Model trójlicencyjny od wersji 8 (w tym otwartoźródłowa AGPLv3). \\ \hline
+Memcached & BSD 3-clause & Społeczność & Licencja permisywna (open-source), brak restrykcji typu copyleft. \\ \hline
+LevelDB & BSD 3-clause & Google & Licencja permisywna (open-source), brak restrykcji typu copyleft. \\ \hline
+RocksDB & Apache 2.0 oraz GPLv2 & Meta (Facebook) & Licencja dualna, permisywna i copyleft. \\ \hline
+Couchbase & BSL 1.1 (Community Edition), Komercyjna & Couchbase Inc. & Dualna, warunkowa, konwersja do Apache 2.0 po określonym czasie. \\ \hline
+Tarantool & BSD 2-clause & Tarantool Foundation & Licencja permisywna (open-source), brak restrykcji typu copyleft. \\ \hline
+FoundationDB & Apache 2.0 & Apple Inc. & Licencja permisywna (open-source), brak restrykcji typu copyleft. \\ \hline
+BerkeleyDB & AGPLv3 oraz Komercyjna & Oracle Corporation & Licencja dualna z silnym copyleft w wersji bezpłatnej. \\ \hline
+\end{tabular}
+\caption{Porównanie licencji badanych systemów bazodanowych}
+\label{tab:porownanie_licencji}
 \end{table}
 
 Przedstawione różnice w strukturach danych oraz modelach wdrożenia mają bezpośredni wpływ na wydajność operacji wejścia/wyjścia, co zostanie poddane weryfikacji eksperymentalnej w dalszej części pracy. Analizując narzut wirtualizacji (np. WSL 2) oraz wydajność nośników SSD, badania opierają się na wcześniejszych opracowaniach dotyczących wydajności kontenerów i systemów pamięci masowej w środowiskach zwirtualizowanych \cite{felter2015, xu2013}.
