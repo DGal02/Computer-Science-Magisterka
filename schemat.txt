@@ -32,23 +32,26 @@
 4.3. Konfiguracja sieci kontenerów
 4.4. Struktura repozytorium i organizacja kodu testowego
 
-4.5. Założenia testowe
+4.5. Założenia testowe i limity zasobów (limitowanie CPU kontenerów: 1, 2, 4 rdzenie; limity RAM; warm-up; izolacja środowiska)
 4.6. Zestaw operacji testowych
-    4.6.1. Insert (write)
-    4.6.2. Read (get)
-    4.6.3. Update
-    4.6.4. Delete
-    4.6.5. Mieszane obciążenie (np. 80% read / 20% write)
+    4.6.1. Insert (write) - zapis prosty
+    4.6.2. Read (get) - odczyt punktowy
+    4.6.3. Update - modyfikacja danych
+    4.6.4. Delete - usuwanie i kompaktowanie
+    4.6.5. Mieszane obciążenie (odczyt/zapis w proporcjach: 90/10, 50/50, 10/90)
+    4.6.6. Operacje złożone: modyfikacja dokumentów JSON oraz tablic appendujących (natywnie vs emulacja w Pythonie)
 4.7. Zestaw danych testowych
-    - Rozmiar klucza, wartość, liczba rekordów (np. 10k, 100k, 1M)
-4.8. Scenariusze eksperymentów
+    - Typy i klasy rozmiarów (rekordy małe 128B, średnie 4KB, duże 100KB)
+    - Skala wolumenu danych (10k, 100k, 1M rekordów)
+4.8. Scenariusze eksperymentów i współbieżność
     - Test pojedynczego klienta
-    - Test wielowątkowy (concurrent access)
+    - Test wieloprocesowy w Pythonie (1, 2, 4, 8, 12, 16 współbieżnych procesów)
+    - Analiza specyfiki baz osadzonych (file-locking w LevelDB vs wieloprocesowość) i serwerowych (event-loop vs wielowątkowość)
 4.9. Mierzone metryki
-    - Czas średni / mediany
     - Przepustowość (ops/sec)
-    - Użycie CPU / RAM
-    - Trwałość wyników (persistence overhead)
+    - Opóźnienia średnie oraz centyle (p50, p95, p99)
+    - Zużycie zasobów kontenera (CPU %, RAM MB)
+    - Narzut zapisu trwałego (porównanie trybu fsync / WAL w RocksDB i BerkeleyDB)
 5. Wyniki eksperymentów
 5.1. Wyniki w środowisku Linux
 5.2. Wyniki w środowisku WSL

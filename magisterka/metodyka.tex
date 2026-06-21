@@ -1,0 +1,99 @@
+Rozdział ten opisuje architekturę środowiska badawczego oraz szczegółową metodykę przeprowadzenia testów porównawczych wytypowanych baz danych typu klucz-wartość. Przedstawiono w nim charakterystykę sprzętowo-programową stanowiska pomiarowego, konfigurację środowiska kontenerowego, a także założenia i scenariusze testowe zmierzające do weryfikacji wydajności badanych silników.
+
+\section{Wykorzystane technologie i narzędzia}
+W celu zapewnienia powtarzalności badań i eliminacji wpływu środowiska uruchomieniowego, badania oparto na technologiach konteneryzacji oraz automatyzacji testów:
+\begin{itemize}
+    \item \textbf{Docker i Docker Compose:} wykorzystane do stworzenia odizolowanych kontenerów dla każdego z badanych systemów bazodanowych. Pozwala to na precyzyjne przydzielanie zasobów sprzętowych, takich jak procesor czy pamięć RAM, i łatwe resetowanie stanu baz przed każdym testem.
+    \item \textbf{Python (wersja 3.14):} główny język aplikacji benchmarkującej (Benchmark Runner). Wybór ten wynika z dostępności bibliotek klienckich dla wszystkich badanych baz danych oraz łatwości tworzenia skryptów sterujących testami.
+    \item \textbf{Systemy operacyjne:} środowisko wirtualizacji WSL 2 (Windows Subsystem for Linux 2) pod kontrolą systemu Windows oraz natywny system Linux. W obu wariantach jako bazowy system operacyjny wykorzystano dystrybucję Ubuntu 24.04 LTS, co pozwala na zachowanie tożsamego środowiska pakietów w obu środowiskach testowych.
+\end{itemize}
+
+\section{Konfiguracja sprzętowa}
+Wszystkie eksperymenty badawcze przeprowadzono na jednolitej platformie sprzętowej o następującej konfiguracji:
+\begin{itemize}
+    \item \textbf{Procesor:} ośmiordzeniowy i szesnastowątkowy procesor AMD Ryzen 7 5700U (8 rdzeni fizycznych z obsługą SMT), o taktowaniu bazowym 1,8 GHz (do 4,3 GHz w trybie Boost) oraz 8 MB pamięci podręcznej L3.
+    \item \textbf{Pamięć RAM:} 16 GB pamięci LPDDR4X działającej w trybie dwukanałowym.
+    \item \textbf{Dysk twardy:} nośnik SSD M.2 PCIe NVMe o pojemności 1 TB.
+\end{itemize}
+Dla systemu wirtualizacji WSL 2 przydzielono domyślny limit wynoszący 8 GB pamięci RAM (odpowiadający połowie zasobów fizycznych platformy sprzętowej) oraz dostęp do wszystkich 16 wątków procesora.
+
+\section{Konfiguracja sieci kontenerów}
+Do komunikacji pomiędzy aplikacją testową napisaną w języku Python a kontenerami bazodanowymi wykorzystano dedykowaną, izolowaną sieć wirtualną utworzoną w silniku Docker (bridge network). W celu zbadania zachowania systemów w warunkach sieciowych zastosowano mechanizm \texttt{tc} (traffic control) w systemie Linux, co pozwoliło na symulację opóźnień na interfejsie sieciowym kontenera.
+
+\section{Struktura repozytorium i organizacja kodu testowego}
+Kod testowy został podzielony na następujące moduły:
+\begin{itemize}
+    \item \textbf{Baza kliencka (Core Runner):} główna pętla programu zarządzająca wątkami klienckimi, czasem trwania testu oraz zbieraniem metryk.
+    \item \textbf{Adaptery bazodanowe (Database Wrappers):} klasowe interfejsy implementujące jednolite operacje odczytu, zapisu, aktualizacji i usuwania dla każdej z baz danych (np. \texttt{RedisWrapper}, \texttt{RocksDBWrapper}).
+    \item \textbf{Moduł logujący:} moduł odpowiedzialny za zapisywanie wyników w formacie JSON oraz generowanie wykresów przy użyciu biblioteki \texttt{matplotlib}.
+\end{itemize}
+
+\section{Założenia testowe i limity zasobów}
+W celu zbadania skalowalności pionowej badanych baz danych, każdy z kontenerów bazodanowych był uruchamiany z precyzyjnie określonymi limitami zasobów procesora oraz pamięci operacyjnej. Zastosowanie technologii Docker umożliwiło precyzyjną izolację zasobową z wykorzystaniem mechanizmu grup kontrolnych systemu Linux (cgroups). Zdefiniowano trzy główne konfiguracje limitów CPU dla serwerów bazodanowych:
+\begin{itemize}
+    \item Limit wynoszący 1 rdzeń CPU (pełna izolacja jednowątkowa serwera).
+    \item Limit wynoszący 2 rdzenie CPU.
+    \item Limit wynoszący 4 rdzenie CPU (zaangażowanie współbieżności serwera).
+\end{itemize}
+Dodatkowo dla każdego kontenera nałożono sztywny limit pamięci RAM wynoszący 2 GB, co pozwala na zasymulowanie ograniczeń pamięciowych i wymuszenie na bazach częstszego zrzucania danych na dysk bądź uruchamiania mechanizmów usuwania kluczy (eviction).
+
+Ważnym aspektem metodologicznym przy testowaniu wydajności na jednej fizycznej maszynie jest zjawisko głodzenia procesora (ang. \emph{CPU starvation}) oraz rywalizacja o zasoby obliczeniowe. Ponieważ zarówno aplikacja benchmarkująca (klient), jak i badany silnik bazy danych (serwer) działają na tej samej platformie sprzętowej, jednoczesne pełne obciążenie wszystkich wątków przez klienta mogłoby uniemożliwić prawidłowe działanie serwera. W takim scenariuszu zmierzona wydajność nie odzwierciedlałaby wewnętrznych cech baz danych (takich jak rywalizacja o blokady czy narzuty sieciowe), lecz sprawność szeregowania zadań przez system operacyjny. W celu wyeliminowania tego problemu, nałożenie limitów na liczbę rdzeni przydzielonych dla kontenera bazy (1 do 4 rdzeni) gwarantuje, że proces bazy danych nie skonsumuje wszystkich zasobów hosta. Pozwala to na zachowanie odpowiedniego zapasu mocy obliczeniowej dla procesów klienckich Pythona oraz systemu operacyjnego, zapewniając wiarygodność pomiarów.
+
+Każdy test był poprzedzany fazą rozgrzewki (warm-up) obejmującą wykonanie 10 000 operacji próbnych, co pozwala na zapełnienie pamięci cache oraz nawiązanie połączeń sieciowych. Przed uruchomieniem kolejnego scenariusza testowego kontenery bazodanowe były restartowane, a baza była czyszczona w celu wyeliminowania wpływu fragmentacji pamięci oraz cache'u systemu plików.
+
+\section{Zestaw operacji testowych}
+Badania obejmują zarówno podstawowe, jak i zaawansowane operacje na danych:
+\begin{itemize}
+    \item \textbf{Insert (zapis prosty):} wstawianie par klucz-wartość do bazy.
+    \item \textbf{Read (odczyt punktowy):} pobieranie wartości na podstawie losowo wybranego klucza z zakresu kluczy wcześniej zapisanych.
+    \item \textbf{Update (modyfikacja):} aktualizacja wartości pod istniejącym kluczem.
+    \item \textbf{Delete (usuwanie):} usuwanie rekordów z bazy.
+    \item \textbf{Mieszane obciążenie:} testy symulujące realne systemy informatyczne w trzech proporcjach odczyt/zapis:
+    \begin{itemize}
+        \item 90\% odczytów i 10\% zapisów (profil zdominowany przez odczyt).
+        \item 50\% odczytów i 50\% zapisów (profil zbalansowany).
+        \item 10\% odczytów i 90\% zapisów (profil zdominowany przez zapis).
+    \end{itemize}
+    \item \textbf{Operacje na strukturach złożonych (natywne vs emulacja):}
+    \begin{itemize}
+        \item \textbf{Modyfikacja dokumentu JSON:} operacja polega na inkrementacji określonego pola numerycznego w obiekcie JSON. Systemy takie jak Redis (z modułem JSON), Couchbase i Tarantool realizują to zadanie bezpośrednio w silniku bazy. Systemy niewspierające natywnie struktur JSON (Memcached, LevelDB, RocksDB, BerkeleyDB, FoundationDB) realizują tę operację poprzez emulację w języku Python (pobranie surowego stringa, deserializacja do słownika, modyfikacja pola, ponowna serializacja do formatu JSON i nadpisanie całego rekordu).
+        \item \textbf{Dopisywanie do listy (Append):} dodawanie nowego elementu na koniec tablicy powiązanej z kluczem. Podobnie jak w przypadku dokumentów JSON, bazy niewspierające natywnie tej operacji realizują ją poprzez pełne pobranie tablicy do pamięci Pythona, modyfikację i ponowny zapis.
+    \end{itemize}
+\end{itemize}
+
+\section{Zestaw danych testowych}
+Do testów wykorzystano zestawy danych różniące się rozmiarem pojedynczego rekordu oraz ich łączną liczbą:
+\begin{itemize}
+    \item \textbf{Rozmiar rekordu (wartości):}
+    \begin{itemize}
+        \item Mały: 128 bajtów (odpowiednik prostych parametrów i sesji).
+        \item Średni: 4 kilobajty (odpowiednik typowych obiektów biznesowych).
+        \item Duży: 100 kilobajtów (odpowiednik większych dokumentów i grafik).
+    \end{itemize}
+    \item \textbf{Wolumen danych:} testy przeprowadzono dla trzech wolumenów: 10 000 rekordów, 100 000 rekordów oraz 1 000 000 rekordów.
+\end{itemize}
+
+\section{Scenariusze eksperymentów i współbieżność}
+Eksperymenty podzielono na dwa główne scenariusze różniące się stopniem równoległości zapytań:
+\begin{itemize}
+    \item \textbf{Scenariusz jednowątkowy (Single-Client):} określenie bazowej wydajności każdego z systemów bez narzutu na współbieżność i synchronizację.
+    \item \textbf{Scenariusz wieloprocesowy (Multi-Client):} uruchomienie benchmarku na 1, 2, 4, 8, 12 oraz 16 równoległych klientach.
+\end{itemize}
+Z uwagi na obecność mechanizmu GIL (ang. \emph{Global Interpreter Lock}) w standardowym interpreterze języka Python (CPython), zastosowanie klasycznych wątków (biblioteka \texttt{threading}) uniemożliwiłoby rzeczywiste równoległe wykonywanie kodu Pythona na wielu rdzeniach procesora. Aby obejść to ograniczenie i zapewnić pełną współbieżność po stronie klienta, benchmark zaimplementowano przy użyciu procesów systemowych (moduł \texttt{multiprocessing}). Każdy proces kliencki posiada własną przestrzeń adresową oraz niezależny interpreter, co pozwala na generowanie maksymalnego obciążenia serwera bazy danych.
+
+W tym scenariuszu kluczowym celem jest analiza zachowania systemów przy różnym stopniu obciążenia procesora, ze szczególnym uwzględnieniem charakterystyki architektury SMT (ang. \emph{Simultaneous Multithreading}) procesora AMD Ryzen 7 5700U. Procesor ten posiada 8 rdzeni fizycznych, które dzięki technologii SMT są widziane w systemie jako 16 wątków logicznych. Wątki logiczne współdzielą jednak kluczowe zasoby fizycznego rdzenia, takie jak jednostki wykonawcze (ALU, FPU) oraz pamięci podręczne L1 i L2. Z tego powodu badania obejmują skalowanie liczby klientów powyżej liczby fizycznych rdzeni (do 12 i 16 procesów). Pozwala to na zbadanie momentu saturacji (wysycenia) rdzeni fizycznych oraz zaobserwowanie, jak współdzielenie zasobów w technologii SMT wpływa na rozrzut czasów opóźnień (zjawisko jitteru) oraz spadek liniowości skalowania przepustowości.
+
+Dodatkowym aspektem poddanym analizie w tym scenariuszu jest specyfika architektury wdrożenia. Bazy serwerowe (np. Redis, Memcached, Couchbase, Tarantool, FoundationDB) obsługują zapytania poprzez gniazda sieciowe, co pozwala na naturalne skalowanie z wieloma procesami klienckimi, ale obarcza każdą operację narzutem sieciowym. Z kolei bazy osadzone (LevelDB, RocksDB, BerkeleyDB) są ładowane bezpośrednio do przestrzeni adresowej procesu klienta. W ich przypadku badanie wieloprocesowości ujawnia zasadnicze ograniczenia architektoniczne:
+\begin{itemize}
+    \item \textbf{LevelDB:} stosuje mechanizm wyłącznej blokady zapisu na poziomie plików bazy danych. Uruchomienie drugiego procesu klienckiego próbującego uzyskać dostęp do tej samej bazy skutkuje natychmiastowym błędem, co uniemożliwia współbieżny dostęp wieloprocesowy.
+    \item \textbf{RocksDB i BerkeleyDB:} udostępniają zaawansowane mechanizmy synchronizacji i współdzielenia struktur danych, co pozwala na dostęp wielu procesom (w przypadku BerkeleyDB poprzez podsystem współdzielonej pamięci środowiska). Eksperymenty mają na celu zmierzenie narzutu na synchronizację wewnątrzprocesową w porównaniu do komunikacji sieciowej baz serwerowych.
+\end{itemize}
+
+\section{Mierzone metryki}
+Podczas każdego eksperymentu rejestrowane są następujące metryki:
+\begin{itemize}
+    \item \textbf{Przepustowość (Throughput):} liczba poprawnie obsłużonych operacji na sekundę (ops/sec).
+    \item \textbf{Opóźnienie (Latency):} czas wykonania pojedynczego zapytania wyrażony w milisekundach, z uwzględnieniem wartości średniej oraz centyli (p50, p95, p99).
+    \item \textbf{Zużycie zasobów (Resource Utilization):} procentowe zużycie procesora (CPU) oraz wielkość zajętej pamięci RAM przez kontener bazy danych.
+    \item \textbf{Narzut synchronizacji dyskowej (Fsync overhead):} porównanie wydajności zapisu z włączonym oraz wyłączonym wymuszeniem synchronizacji z dyskiem (np. write-ahead log) dla wybranych baz osadzonych (RocksDB, BerkeleyDB).
+\end{itemize}
