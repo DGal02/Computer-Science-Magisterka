@@ -39,8 +39,6 @@ Dodatkowo dla każdego kontenera nałożono sztywny limit pamięci RAM wynosząc
 
 Ważnym aspektem metodologicznym przy testowaniu wydajności na jednej fizycznej maszynie jest zjawisko głodzenia procesora (ang. \emph{CPU starvation}) oraz rywalizacja o zasoby obliczeniowe. Ponieważ zarówno aplikacja benchmarkująca (klient), jak i badany silnik bazy danych (serwer) działają na tej samej platformie sprzętowej, jednoczesne pełne obciążenie wszystkich wątków przez klienta mogłoby uniemożliwić prawidłowe działanie serwera. W takim scenariuszu zmierzona wydajność nie odzwierciedlałaby wewnętrznych cech baz danych (takich jak rywalizacja o blokady czy narzuty sieciowe), lecz sprawność szeregowania zadań przez system operacyjny. W celu wyeliminowania tego problemu, nałożenie limitów na liczbę rdzeni przydzielonych dla kontenera bazy (1 do 4 rdzeni) gwarantuje, że proces bazy danych nie skonsumuje wszystkich zasobów hosta. Pozwala to na zachowanie odpowiedniego zapasu mocy obliczeniowej dla procesów klienckich Pythona oraz systemu operacyjnego, zapewniając wiarygodność pomiarów.
 
-Każdy test był poprzedzany fazą rozgrzewki (warm-up) obejmującą wykonanie 10 000 operacji próbnych, co pozwala na zapełnienie pamięci cache oraz nawiązanie połączeń sieciowych. Przed uruchomieniem kolejnego scenariusza testowego kontenery bazodanowe były restartowane, a baza była czyszczona w celu wyeliminowania wpływu fragmentacji pamięci oraz cache'u systemu plików.
-
 \section{Zestaw operacji testowych}
 Badania obejmują zarówno podstawowe, jak i zaawansowane operacje na danych:
 \begin{itemize}
