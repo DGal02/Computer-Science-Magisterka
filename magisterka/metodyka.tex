@@ -15,7 +15,13 @@ Wszystkie eksperymenty badawcze przeprowadzono na jednolitej platformie sprzęto
     \item \textbf{Pamięć RAM:} 16 GB pamięci LPDDR4X działającej w trybie dwukanałowym.
     \item \textbf{Dysk twardy:} nośnik SSD M.2 PCIe NVMe o pojemności 1 TB.
 \end{itemize}
-Dla systemu wirtualizacji WSL 2 przydzielono domyślny limit wynoszący 8 GB pamięci RAM (odpowiadający połowie zasobów fizycznych platformy sprzętowej) oraz dostęp do wszystkich 16 wątków procesora.
+W celu zapewnienia powtarzalności pomiarów w środowisku WSL 2, narzucono sztywne limity zasobów obliczeniowych i pamięciowych przydzielonych dla maszyny wirtualnej. Konfigurację tę zdefiniowano w pliku \texttt{.wslconfig} w katalogu profilu użytkownika systemu operacyjnego Windows, przydzielając maszynie wirtualnej limit 8~GB pamięci RAM (odpowiadający połowie fizycznej pamięci operacyjnej platformy sprzętowej) oraz dostęp do wszystkich 16~wątków logicznych procesora. Szczegółową konfigurację tego pliku przedstawiono na listingu~\ref{lst:wslconfig}.
+
+\begin{lstlisting}[label={lst:wslconfig},caption={Konfiguracja zasobów środowiska WSL 2 w pliku .wslconfig}]
+[wsl2]
+memory=8GB
+processors=16
+\end{lstlisting}
 
 \section{Konfiguracja sieci kontenerów}
 Do komunikacji pomiędzy aplikacją testową napisaną w języku Python a kontenerami bazodanowymi wykorzystano dedykowaną, izolowaną sieć wirtualną utworzoną w silniku Docker (bridge network). W celu zbadania zachowania systemów w warunkach sieciowych zastosowano mechanizm \texttt{tc} (traffic control) w systemie Linux, co pozwoliło na symulację opóźnień na interfejsie sieciowym kontenera.
@@ -67,9 +73,8 @@ Do testów wykorzystano zestawy danych różniące się rozmiarem pojedynczego r
     \begin{itemize}
         \item Mały: 128 bajtów (odpowiednik prostych parametrów i sesji).
         \item Średni: 4 kilobajty (odpowiednik typowych obiektów biznesowych).
-        \item Duży: 100 kilobajtów (odpowiednik większych dokumentów i grafik).
     \end{itemize}
-    \item \textbf{Wolumen danych:} testy przeprowadzono dla trzech wolumenów: 10 000 rekordów, 100 000 rekordów oraz 1 000 000 rekordów.
+    \item \textbf{Wolumen danych:} testy przeprowadzono dla trzech wolumenów: 10~000 rekordów, 100~000 rekordów oraz 1~000~000 rekordów.
 \end{itemize}
 
 \section{Scenariusze eksperymentów i współbieżność}

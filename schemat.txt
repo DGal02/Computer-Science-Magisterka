@@ -41,7 +41,7 @@
     4.6.5. Mieszane obciążenie (odczyt/zapis w proporcjach: 90/10, 50/50, 10/90)
     4.6.6. Operacje złożone: modyfikacja dokumentów JSON oraz tablic appendujących (natywnie vs emulacja w Pythonie)
 4.7. Zestaw danych testowych
-    - Typy i klasy rozmiarów (rekordy małe 128B, średnie 4KB, duże 100KB)
+    - Typy i klasy rozmiarów (rekordy małe 128B oraz średnie 4KB)
     - Skala wolumenu danych (10k, 100k, 1M rekordów)
 4.8. Scenariusze eksperymentów i współbieżność
     - Test pojedynczego klienta
