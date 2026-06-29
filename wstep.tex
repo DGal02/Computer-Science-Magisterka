@@ -13,7 +13,7 @@ Zakres pracy obejmuje:
     \item Przygotowanie zunifikowanego środowiska testowego przy użyciu technologii kontenerowej Docker oraz Docker Compose.
     \item Opracowanie dedykowanej aplikacji benchmarkującej w języku Python 3.14, implementującej interfejsy dla wszystkich ośmiu baz danych.
     \item Przeprowadzenie serii eksperymentów badawczych mierzących przepustowość i opóźnienia przy operacjach CRUD, mixed workloads, operacjach na dokumentach JSON oraz strukturach listowych.
-    \item Porównanie narzutu wirtualizacji (WSL 2 vs natywny Linux) oraz kosztów włączenia gwarancji trwałości danych (fsync/WAL).
+    \item Porównanie narzutu wirtualizacji (WSL 2 vs natywny Linux).
 \end{itemize}
 
 \section{Zakres badanych technologii}
@@ -30,7 +30,6 @@ W pracy sformułowano następujące pytania badawcze:
     \item Jak model wdrożenia (klient-serwer vs baza osadzona) wpływa na skalowalność i opóźnienia przy rosnącej liczbie współbieżnych procesów klienckich?
     \item Jaki jest rzeczywisty narzut wydajnościowy związany z emulacją operacji na strukturach złożonych (JSON, tablice) w warstwie aplikacji w porównaniu z ich natywną obsługą po stronie silnika bazy danych?
     \item W jakim stopniu technologia wirtualizacji WSL 2 degraduje wydajność operacji wejścia/wyjścia na dysk (I/O) w porównaniu do natywnego systemu Linux?
-    \item Jaki koszt w postaci spadku przepustowości niesie ze sobą wymuszenie pełnej trwałości transakcji (operacje fsync/WAL)?
 \end{enumerate}
 
 Na podstawie pytań badawczych postawiono następujące hipotezy:

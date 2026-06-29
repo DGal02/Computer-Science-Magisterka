@@ -51,7 +51,6 @@
     - Przepustowość (ops/sec)
     - Opóźnienia średnie oraz centyle (p50, p95, p99)
     - Zużycie zasobów kontenera (CPU %, RAM MB)
-    - Narzut zapisu trwałego (porównanie trybu fsync / WAL w RocksDB i BerkeleyDB)
 5. Wyniki eksperymentów
 5.1. Wyniki w środowisku Linux
 5.2. Wyniki w środowisku WSL
