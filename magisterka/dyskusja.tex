@@ -1,7 +1,7 @@
 Rozdział ten jest poświęcony szczegółowej analizie uzyskanych rezultatów eksperymentów w odniesieniu do postawionych pytań badawczych oraz hipotez. Wskazano w nim powiązania pomiędzy architekturą silników a ich charakterystyką wydajnościową, a także sformułowano praktyczne wnioski inżynierskie.
 
 \section{Wpływ architektury bazy na wyniki}
-Wykazano bezpośrednią korelację pomiędzy wewnętrzną architekturą silników bazodanowych a ich charakterystyką opóźnień. W szczególności poddano analizie zjawisko tzw. burz kompaktowania (ang. \emph{compaction storms}) występujących w silnikach opartych na strukturze drzewa LSM (LevelDB oraz RocksDB):
+Wykazano bezpośrednią korelację pomiędzy wewnętrzną architekturą silników bazodanowych a ich charakterystyką opóźnień. W szczególności poddano analizie zjawisko tzw. burz kompaktowania (ang. \emph{compaction storms}) występujących w silnikach opartych na strukturze drzewa LSM (LevelDB oraz RocksDB) \cite{oneil1996}:
 \begin{itemize}
     \item Podczas intensywnego zapisu dane są początkowo buforowane w strukturach pamięciowych (MemTable), a następnie zrzucane na dysk w postaci plików SST.
     \item W tle uruchamiane są asynchroniczne procesy kompaktowania scalające pliki na kolejnych poziomach drzewa LSM. Nakładanie się tych operacji I/O w tle z bieżącymi zapytaniami klienckimi powoduje chwilowe wysycenie przepustowości dyskowej.

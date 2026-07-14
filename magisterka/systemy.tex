@@ -480,8 +480,8 @@ W celu umożliwienia bezpośredniego porównania badanych systemów, w tabelach 
 
 \begin{table}[H]
 \centering
-\small
-\begin{tabular}{|l|p{3.2cm}|p{3.8cm}|p{4.2cm}|}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|>{\raggedright\arraybackslash}p{3.2cm}|>{\raggedright\arraybackslash}p{3.8cm}|>{\raggedright\arraybackslash}p{4.2cm}|}
 \hline
 \textbf{Baza danych} & \textbf{Przechowywanie danych} & \textbf{Model wdrożenia} & \textbf{Model współbieżności} \\ \hline
 Redis & Pamięciowe (RAM) & Klient-Serwer & Jednowątkowy (pętla zdarzeń) \\ \hline
@@ -492,15 +492,16 @@ Couchbase & Hybrydowe (Memory-first) & Klient-Serwer & Wielowątkowy \\ \hline
 Tarantool & Pamięciowe (RAM) & Serwer aplikacji / Klient-Serwer & Jednowątkowy (kooperatywne włókna) \\ \hline
 FoundationDB & Dyskowe (SSD/HDD) & Klient-Serwer (rozproszony) & Wieloprocesowy \\ \hline
 BerkeleyDB & Dyskowe (SSD/HDD) & Osadzony (Embedded) & Wielowątkowy / Wieloprocesowy \\ \hline
-\end{tabular}
+\end{tabular}%
+}
 \caption{Model wdrożenia i współbieżność badanych systemów bazodanowych}
 \label{tab:wdrozenie_wspolbieznosc}
 \end{table}
 
 \begin{table}[H]
 \centering
-\small
-\begin{tabular}{|l|p{4.0cm}|p{4.2cm}|p{3.3cm}|}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|>{\raggedright\arraybackslash}p{4.0cm}|>{\raggedright\arraybackslash}p{4.2cm}|>{\raggedright\arraybackslash}p{3.3cm}|}
 \hline
 \textbf{Baza danych} & \textbf{Fizyczna struktura danych} & \textbf{Wsparcie dla transakcji ACID} & \textbf{Interfejs / Dostęp} \\ \hline
 Redis & Tabela mieszająca, RAM & Uproszczone (grupowanie komend) & Dedykowane API \\ \hline
@@ -511,15 +512,16 @@ Couchbase & Smart Cache, struktura dokumentowa & Brak (atomowość na poziomie d
 Tarantool & Silnik Memtx (B-Tree/Hash) / Vinyl (LSM) & Pełne (dla silnika Memtx) & Lua, dedykowane API \\ \hline
 FoundationDB & Drzewo B-Tree, SQLite & Pełne (globalne transakcje rozproszone) & Bajtowe API (warstwy) \\ \hline
 BerkeleyDB & Drzewo B-Tree, Hash, Queue, Recno & Pełne (lokalne transakcje ACID) & API biblioteki (C/Java) \\ \hline
-\end{tabular}
+\end{tabular}%
+}
 \caption{Struktura danych i transakcyjność badanych systemów bazodanowych}
 \label{tab:struktura_transakcje}
 \end{table}
 
 \begin{table}[H]
 \centering
-\small
-\begin{tabular}{|l|p{3.5cm}|p{8.0cm}|}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{8.0cm}|}
 \hline
 \textbf{Baza danych} & \textbf{Klasyfikacja CAP} & \textbf{Spójność danych i zachowanie przy podziale sieci} \\ \hline
 Redis & AP & Spójność ostateczna (\emph{eventual consistency}) wynikająca z asynchronicznej replikacji. Istnieje możliwość utraty części zapisów w przypadku awarii węzła głównego. \\ \hline
@@ -530,15 +532,16 @@ Couchbase & CP & Silna spójność na poziomie klucza dzięki przypisaniu do jed
 Tarantool & CP lub AP & Konfigurowalna spójność. Możliwość pracy w trybie CP (replikacja synchroniczna oparta na protokole Raft) lub AP (replikacja asynchroniczna). \\ \hline
 FoundationDB & CP & Silna spójność i pełna izolacja transakcji ACID w trybie rozproszonym. W przypadku utraty komunikacji z kworum transakcje są blokowane. \\ \hline
 BerkeleyDB & Nie dotyczy & Baza osadzona (\emph{embedded}). Silna spójność lokalna i pełna transakcyjność ACID w obrębie systemu plików. \\ \hline
-\end{tabular}
+\end{tabular}%
+}
 \caption{Klasyfikacja CAP oraz spójność danych badanych systemów bazodanowych}
 \label{tab:klasyfikacja_cap}
 \end{table}
 
 \begin{table}[H]
 \centering
-\small
-\begin{tabular}{|l|p{5.0cm}|p{7.0cm}|}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|>{\raggedright\arraybackslash}p{5.0cm}|>{\raggedright\arraybackslash}p{7.0cm}|}
 \hline
 \textbf{Baza danych} & \textbf{Mechanizm replikacji} & \textbf{Strategia skalowania} \\ \hline
 Redis & Asynchroniczna Master-Replica, automatyczny failover (Sentinel) & Poziome (Redis Cluster z automatycznym shardingiem), pionowe. \\ \hline
@@ -549,15 +552,16 @@ Couchbase & Aktywne/pasywne vBuckety w klastrze, replikacja międzycentrowa (XDC
 Tarantool & Synchroniczna (Raft) lub asynchroniczna Master-Replica lub Master-Master & Poziome (sharding za pomocą biblioteki \texttt{vshard}), pionowe (jednowątkowość silnika). \\ \hline
 FoundationDB & Wbudowana automatyczna replikacja dla tolerancji błędów (kworum) & Poziome (w pełni automatyczny, przezroczysty sharding i podział zakresów kluczy). \\ \hline
 BerkeleyDB & Master-Replica w wersji High Availability (replikacja zorientowana na odczyt) & Wyłącznie pionowe (osadzona baza danych dla wielu procesów i wątków). \\ \hline
-\end{tabular}
+\end{tabular}%
+}
 \caption{Mechanizmy replikacji i strategie skalowania badanych systemów bazodanowych}
 \label{tab:skalowalnosc_replikacja}
 \end{table}
 
 \begin{table}[H]
 \centering
-\small
-\begin{tabular}{|l|p{4.5cm}|p{3.5cm}|p{4.5cm}|}
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|>{\raggedright\arraybackslash}p{4.5cm}|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{4.5cm}|}
 \hline
 \textbf{Baza danych} & \textbf{Typ licencji} & \textbf{Właściciel / Podmiot rozwijający} & \textbf{Charakterystyka warunków} \\ \hline
 Redis & AGPLv3, RSALv2 lub SSPLv1 (dawniej BSD 3-clause) & Redis Inc. & Model trójlicencyjny od wersji 8 (w tym otwartoźródłowa AGPLv3). \\ \hline
@@ -568,7 +572,8 @@ Couchbase & BSL 1.1 (Community Edition), Komercyjna & Couchbase Inc. & Dualna, w
 Tarantool & BSD 2-clause & Tarantool Foundation & Licencja permisywna (open-source), brak restrykcji typu copyleft. \\ \hline
 FoundationDB & Apache 2.0 & Apple Inc. & Licencja permisywna (open-source), brak restrykcji typu copyleft. \\ \hline
 BerkeleyDB & AGPLv3 oraz Komercyjna & Oracle Corporation & Licencja dualna z silnym copyleft w wersji bezpłatnej. \\ \hline
-\end{tabular}
+\end{tabular}%
+}
 \caption{Porównanie licencji badanych systemów bazodanowych}
 \label{tab:porownanie_licencji}
 \end{table}
