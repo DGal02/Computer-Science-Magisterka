@@ -90,11 +90,35 @@ Do testów wykorzystano zestawy danych różniące się rozmiarem pojedynczego r
     \item \textbf{Wolumen danych (liczba operacji):} testy CRUD przeprowadzono dla trzech wolumenów: 10~000 operacji (szybka weryfikacja), 100~000 operacji oraz 1~000~000 operacji (pełne wysycenie i stabilny pomiar wydajności).
 \end{itemize}
 
-W metodyce badań wprowadzono istotne ograniczenie systemowe dotyczące testowania scenariuszy zaawansowanych (kolejki oraz operacji JSON) dla średniego rozmiaru rekordu (4 KB). Testy te są uruchamiane \textbf{wyłącznie} dla małego rozmiaru rekordu (128 bajtów). Ograniczenie to wynika z faktu, że dla systemów emulujących te struktury po stronie klienta (np. Memcached, LevelDB, RocksDB), narzut związany z ciągłym przesyłaniem przez sieć, parsowaniem oraz serializacją obiektów o rozmiarze 4 KB w jednowątkowym interpreterze języka Python całkowicie dominuje czas wykonania zapytania. W efekcie zmierzona wydajność odzwierciedlałaby wydajność biblioteki serializującej języka Python, a nie rzeczywistą przepustowość silnika bazy danych. Dodatkowo niektóre systemy (np. Memcached) posiadają wbudowane limity i ograniczenia rozmiaru przesyłanych kluczy lub specyficzne wymagania protokołu utrudniające stabilne przesyłanie większych struktur emulowanych.
+W metodyce badań wprowadzono istotne ograniczenie systemowe dotyczące testowania scenariuszy zaawansowanych (kolejki oraz operacji JSON) dla średniego rozmiaru rekordu (4 KB). Testy te są uruchamiane \textbf{wyłącznie} dla małego rozmiaru rekordu (128 bajtów). Ograniczenie to wynika z faktu, że dla systemów emulujących te struktury po stronie klienta (np. Memcached, LevelDB, RocksDB), narzut związany z ciągłym przesyłaniem przez sieć, parsowaniem oraz serializacją obiektów o rozmiarze 4 KB w jednowątkowym interpreterze języka Python całkowicie dominuje czas wykonania zapytania. W efekcie zmierzona wydajność odzwierciedlałaby wydajność biblioteki serializującej języka Python, a nie rzeczywistą przepustowość silnika bazy danych. Dodatkowo niektóre systemy (np. Memcached) posiadają wbudowane limity i ograniczenia rozmiaru przesyłanych kluczy lub specyficzne wymagania protokołu utrudniające stabilne przesyłanie większych struktur emulowanych. Szczególnym przypadkiem jest system FoundationDB, który narzuca sztywne i restrykcyjne limity rozmiarów: maksymalny rozmiar klucza wynosi 10~KB, a wartości 100~KB. W scenariuszu emulacji kolejki FIFO (gdzie stan kolejki jest przechowywany pod pojedynczym kluczem), limit 100~KB dla wartości stanowiłby krytyczną barierę uniemożliwiającą obsługę i skalowanie kolejki przy większej liczbie komunikatów. Z tego względu w adapterze testowym FoundationDB zrezygnowano z przeprowadzenia testu kolejki (kategoria \texttt{queue} pozostała pusta).
 
 Dla scenariuszy CRUD ze średnim rozmiarem rekordu (4 KB) pominięto wolumen 1~000~000 operacji. Wynika to z faktu, iż przy 8 równoległych procesach klienckich łączna liczba unikalnych kluczy przechowywanych w bazie wynosi wówczas $8 \times 1\,000\,000 = 8\,000\,000$ rekordów o rozmiarze 4 KB, co odpowiada zbiorowi danych o łącznej objętości \textbf{32 GB}. Obciążenie to przekracza dostępną pamięć operacyjną platformy testowej i powoduje nadmierne ciśnienie pamięciowe (ang.~\emph{memory pressure}) oraz intensywną wymianę danych z dyskiem, co zafałszowałoby wyniki pomiaru wydajności silnika bazy danych.
 
 Istotnym aspektem metodologicznym jest sposób organizacji przestrzeni kluczy w scenariuszu wieloprocesowym. Każdy z niezależnych procesów klienckich operuje na \textbf{wyłącznie własnym, rozłącznym zbiorze kluczy} (zakresy kluczy są rozdzielone pomiędzy procesy bez nakładania się). Oznacza to, że łączna liczba rekordów przechowywanych jednocześnie w bazie danych rośnie \textbf{proporcjonalnie} do liczby procesów klienckich. Tym samym zużycie pamięci RAM oraz przestrzeni dyskowej przez serwer bazy danych jest wprost zależne od liczby procesów klienckich, przy czym rzeczywista wielkość tego wzrostu zależy od rodzaju wykonywanych operacji (operacje zapisu generują nowe rekordy, odczytu nie powiększają zbioru danych, a usuwania go redukują).
+
+
+\subsection{Zakres testów i specyficzne ograniczenia silników}
+W celu usystematyzowania różnic w zakresie przeprowadzonych testów oraz fizycznych ograniczeń poszczególnych systemów bazodanowych, w tabeli \ref{tab:zakres_i_ograniczenia} zestawiono stopień obsługi współbieżności, charakterystykę realizacji scenariuszy zaawansowanych oraz kluczowe ograniczenia rozmiarowe i architektoniczne nałożone przez poszczególne silniki.
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{4.0cm}|>{\raggedright\arraybackslash}p{4.0cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
+\hline
+\textbf{Baza danych} & \textbf{Dostęp wieloprocesowy} & \textbf{Scenariusz JSON} & \textbf{Scenariusz kolejki FIFO} & \textbf{Główne ograniczenia silnika i rozmiaru} \\ \hline
+Redis & Pełny (1--8 procesów) & Natywne wsparcie (zapis / odczyt / modyfikacje) & Natywne wsparcie (struktura LIST) & Brak krytycznych ograniczeń w ramach zakresu testowego. \\ \hline
+Memcached & Pełny (1--8 procesów) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Domyślny limit rekordu 1~MB zwiększony programowo do 2~MB. \\ \hline
+LevelDB & Wyłącznie 1 proces (blokada LOCK) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Brak dostępu sieciowego, wyłączna blokada katalogu bazy danych. \\ \hline
+RocksDB & Wyłącznie 1 proces (blokada LOCK) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Brak dostępu sieciowego, wyłączna blokada katalogu bazy danych. \\ \hline
+Couchbase & Pełny (1--8 procesów) & Natywne wsparcie (struktura dokumentowa) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Maksymalny rozmiar pojedynczego dokumentu (klucza/wartości) wynosi 20~MB. \\ \hline
+Tarantool & Pełny (1--8 procesów) & Natywne wsparcie (Lua/przestrzenie \texttt{map}) & Natywne wsparcie (Lua/przestrzeń indeksowana) & Brak krytycznych ograniczeń w ramach zakresu testowego. \\ \hline
+FoundationDB & Pełny (1--8 procesów) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Pominięty (brak możliwości testowania) & Sztywne limity rozmiaru: maksymalna wartość 100~KB. \\ \hline
+BerkeleyDB & Pełny (1--8 procesów, DBEnv) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Narzut na synchronizację międzyprocesową (blokady środowiska). \\ \hline
+\end{tabular}%
+}
+\caption{Zestawienie zakresu testowego oraz ograniczeń badanych systemów bazodanowych}
+\label{tab:zakres_i_ograniczenia}
+\end{table}
 
 \section{Scenariusze eksperymentów i współbieżność}
 Eksperymenty podzielono na dwa główne scenariusze różniące się stopniem równoległości zapytań:
