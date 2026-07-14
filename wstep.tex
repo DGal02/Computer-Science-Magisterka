@@ -3,6 +3,10 @@ W dobie intensywnego rozwoju systemów informatycznych, aplikacji webowych oraz 
 Rynek systemów klucz-wartość jest bardzo zróżnicowany. Dostępne są zarówno rozwiązania pamięciowe (in-memory), bazy wbudowane (embedded), jak i zaawansowane systemy rozproszone. Różnią się one od siebie architekturą, modelami współbieżności, mechanizmami zapewniania trwałości danych oraz modelami licencjonowania. Zrozumienie tych różnic i ich praktycznego wpływu na wydajność w określonych środowiskach systemowych jest kluczowe dla inżynierów projektujących nowoczesne systemy informatyczne.
 
 Niniejsza praca jest poświęcona szczegółowej analizie porównawczej ośmiu wyselekcjonowanych baz danych tego typu, reprezentujących odmienne podejścia architektoniczne: Redis, Memcached, LevelDB, RocksDB, Couchbase, Tarantool, FoundationDB oraz BerkeleyDB.
+\section{Motywacja podjęcia tematu}
+Motywacją do podjęcia niniejszego tematu badawczego było rosnące znaczenie alternatywnych technologii przechowywania danych, które wykraczają poza tradycyjny, relacyjny model oparty na języku SQL. Dynamiczny rozwój systemów rozproszonych oraz zapotrzebowanie na mikrosekundowe opóźnienia w dostępie do informacji wymusiły ewolucję w kierunku wyspecjalizowanych baz danych NoSQL.
+
+Dodatkowym czynnikiem skłaniającym do przeprowadzenia badań była potrzeba poszerzenia wiedzy i szczegółowej analizy rozwiązań wykraczających poza system Redis, stanowiący obecnie najpowszechniejszy standard rynkowy w klasie magazynów klucz-wartość. Zestawienie go z silnikami o zróżnicowanej architekturze (takimi jak transakcyjna baza BerkeleyDB, zoptymalizowany pod kątem LuaJIT Tarantool czy rozproszona baza FoundationDB) pozwala na zdefiniowanie obiektywnych kryteriów doboru silnika bazy danych w zależności od specyfiki projektowanego systemu informatycznego.
 
 \section{Cel i zakres pracy}
 Głównym celem pracy jest przeprowadzenie analizy porównawczej wydajności wybranych nierelacyjnych baz danych typu klucz-wartość w środowisku zwirtualizowanym WSL 2 oraz natywnym systemie Linux. 
@@ -35,13 +39,13 @@ W pracy sformułowano następujące pytania badawcze:
 Na podstawie pytań badawczych postawiono następujące hipotezy:
 \begin{itemize}
     \item \textbf{Hipoteza 1:} Systemy pamięciowe (Redis, Memcached, Tarantool) zapewnią najniższe opóźnienia i najwyższą przepustowość dla operacji odczytu, jednak ich skalowalność pionowa powyżej liczby fizycznych rdzeni procesora będzie ograniczona współdzieleniem zasobów w technologii SMT.
-    \item \textbf{Hipoteza 2:} Bazy osadzone (RocksDB, BerkeleyDB) wykażą wyższą wydajność zapisu w środowiskach wieloprocesowych w porównaniu do jednowątkowych systemów klient-serwer z uwagi na brak narzutu protokołu sieciowego.
+    \item \textbf{Hipoteza 2:} Bazy osadzone (LevelDB, RocksDB, BerkeleyDB) wykażą wyższą wydajność zapisu w porównaniu do jednowątkowych systemów klient-serwer z uwagi na brak narzutu protokołu sieciowego.
     \item \textbf{Hipoteza 3:} Wykonywanie modyfikacji dokumentów JSON przy użyciu emulacji w języku Python będzie wolniejsze o co najmniej rząd wielkości w porównaniu z natywnym przetwarzaniem w silnikach Redis czy Couchbase z powodu kosztów serializacji i przesyłu danych.
     \item \textbf{Hipoteza 4:} Narzut warstwy wirtualizacji w systemie WSL 2 spowoduje spadek wydajności baz zorientowanych dyskowo (LSM-Tree) podczas operacji zapisu z wymuszonym WAL w stosunku do natywnego systemu Linux.
 \end{itemize}
 
 \section{Metodyka badań}
-Badania oparto na autorskim skrypcie benchmarkującym napisanym w języku Python w wersji 3.14. W celu wyeliminowania wpływu ograniczeń interpretera (blokada GIL), obciążenie generowane jest za pomocą procesów systemowych (od 1 do 16 procesów roboczych). Wszystkie bazy danych uruchamiane są w odizolowanych kontenerach Docker w systemach operacyjnych Ubuntu 24.04 LTS (zarówno natywnie, jak i w WSL 2). W trakcie testów kontrolowane są parametry takie jak: liczba przydzielonych rdzeni CPU dla bazy danych (1, 2 lub 4 rdzenie), rozmiar rekordu (128 B oraz 4 KB) oraz wolumen danych (10k, 100k, 1M). Rejestrowane metryki obejmują przepustowość, centyle opóźnień oraz zużycie zasobów sprzętowych hosta.
+Badania oparto na autorskim skrypcie benchmarkującym napisanym w języku Python w wersji 3.14. W celu wyeliminowania wpływu ograniczeń interpretera (blokada GIL), obciążenie generowane jest za pomocą procesów systemowych (od 1 do 8 procesów roboczych). Wszystkie bazy danych uruchamiane są w odizolowanych kontenerach Docker w systemach operacyjnych Ubuntu 24.04 LTS (zarówno natywnie, jak i w WSL 2). W trakcie testów kontrolowane są parametry takie jak: liczba przydzielonych rdzeni CPU dla bazy danych (1, 2 lub 4 rdzenie), rozmiar rekordu (128 B oraz 4 KB) oraz wolumen danych (10k, 100k, 1M). Rejestrowane metryki obejmują przepustowość, centyle opóźnień oraz zużycie zasobów sprzętowych hosta.
 
 \section{Struktura pracy}
 Struktura pracy została podzielona na następujące części:

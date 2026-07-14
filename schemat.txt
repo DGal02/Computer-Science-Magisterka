@@ -32,7 +32,7 @@
 4.3. Konfiguracja sieci kontenerów
 4.4. Struktura repozytorium i organizacja kodu testowego
 
-4.5. Założenia testowe i limity zasobów (limitowanie CPU kontenerów: 1, 2, 4 rdzenie; limity RAM; warm-up; izolacja środowiska)
+4.5. Założenia testowe i limity zasobów (limitowanie CPU kontenerów: 1, 2, 4 rdzenie; brak limitów RAM; warm-up; izolacja środowiska)
 4.6. Zestaw operacji testowych
     4.6.1. Insert (write) - zapis prosty
     4.6.2. Read (get) - odczyt punktowy
@@ -45,7 +45,7 @@
     - Skala wolumenu danych (10k, 100k, 1M rekordów)
 4.8. Scenariusze eksperymentów i współbieżność
     - Test pojedynczego klienta
-    - Test wieloprocesowy w Pythonie (1, 2, 4, 8, 12, 16 współbieżnych procesów)
+    - Test wieloprocesowy w Pythonie (1, 2, 4, 8 współbieżnych procesów)
     - Analiza specyfiki baz osadzonych (file-locking w LevelDB vs wieloprocesowość) i serwerowych (event-loop vs wielowątkowość)
 4.9. Mierzone metryki
     - Przepustowość (ops/sec)

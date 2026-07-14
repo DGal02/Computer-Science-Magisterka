@@ -24,73 +24,93 @@ processors=16
 \end{lstlisting}
 
 \section{Konfiguracja sieci kontenerów}
-Do komunikacji pomiędzy aplikacją testową napisaną w języku Python a kontenerami bazodanowymi wykorzystano dedykowaną, izolowaną sieć wirtualną utworzoną w silniku Docker (bridge network). W celu zbadania zachowania systemów w warunkach sieciowych zastosowano mechanizm \texttt{tc} (traffic control) w systemie Linux, co pozwoliło na symulację opóźnień na interfejsie sieciowym kontenera.
+Do komunikacji pomiędzy aplikacją testową napisaną w języku Python, a kontenerami bazodanowymi wykorzystano dedykowaną, izolowaną sieć wirtualną utworzoną w silniku Docker (bridge network). Zapewniło to pełną izolację komunikacji benchmarkowej od zewnętrznego ruchu sieciowego hosta, gwarantując stabilne i powtarzalne parametry transmisji sieciowej podczas wszystkich serii pomiarowych.
 
 \section{Struktura repozytorium i organizacja kodu testowego}
 Kod testowy został podzielony na następujące moduły:
 \begin{itemize}
     \item \textbf{Skrypt uruchomieniowy (Benchmark Launcher):} skrypt powłoki systemowej odpowiedzialny za równoległe uruchamianie i koordynację zadanej liczby niezależnych procesów klienckich bezpośrednio z poziomu terminala.
     \item \textbf{Jednostkowy proces kliencki (Client Runner):} samodzielna instancja programu w języku Python realizująca operacje na bazie danych zgodnie z określonym profilem obciążenia oraz zapisująca własne wyniki cząstkowe w formacie JSON.
-    \item \textbf{Adaptery bazodanowe (Database Wrappers):} klasowe interfejsy implementujące jednolite operacje odczytu, zapisu, aktualizacji i usuwania dla każdej z baz danych (np. \texttt{RedisWrapper}, \texttt{RocksDBWrapper}).
+    \item \textbf{Adaptery bazodanowe (Database Wrappers):} skrypty implementujące jednolite operacje odczytu, zapisu, aktualizacji i usuwania dla każdej z baz danych.
     \item \textbf{Moduł agregujący:} skrypt odpowiedzialny za konsolidację wyników cząstkowych zebranych przez poszczególne procesy klienckie oraz generowanie wykresów zbiorczych przy użyciu biblioteki \texttt{matplotlib}.
 \end{itemize}
 
 \section{Założenia testowe i limity zasobów}
-W celu zbadania skalowalności pionowej badanych baz danych, każdy z kontenerów bazodanowych był uruchamiany z precyzyjnie określonymi limitami zasobów procesora oraz pamięci operacyjnej. Zastosowanie technologii Docker umożliwiło precyzyjną izolację zasobową z wykorzystaniem mechanizmu grup kontrolnych systemu Linux (cgroups). Zdefiniowano trzy główne konfiguracje limitów CPU dla serwerów bazodanowych:
+W celu zbadania skalowalności pionowej badanych baz danych, każdy z kontenerów bazodanowych był uruchamiany z precyzyjnie określonymi limitami zasobów procesora. Zastosowanie technologii Docker umożliwiło precyzyjną izolację zasobową z wykorzystaniem mechanizmu grup kontrolnych systemu Linux (cgroups). Zdefiniowano trzy główne konfiguracje limitów CPU dla serwerów bazodanowych:
 \begin{itemize}
     \item Limit wynoszący 1 rdzeń CPU (pełna izolacja jednowątkowa serwera).
     \item Limit wynoszący 2 rdzenie CPU.
     \item Limit wynoszący 4 rdzenie CPU (zaangażowanie współbieżności serwera).
 \end{itemize}
-Dodatkowo dla każdego kontenera nałożono sztywny limit pamięci RAM wynoszący 2 GB, co pozwala na zasymulowanie ograniczeń pamięciowych i wymuszenie na bazach częstszego zrzucania danych na dysk bądź uruchamiania mechanizmów usuwania kluczy (eviction).
+W ostatecznej konfiguracji badawczej nie stosowano sztucznych ograniczeń pamięci RAM dla kontenerów bazodanowych. Pozwoliło to silnikom bazodanowym na pełne wykorzystanie pamięci operacyjnej przydzielonej do środowiska (WSL 2/Linux) na potrzeby buforowania danych, indeksów i struktur pamięci podręcznej. Dzięki temu eliminowane jest zjawisko sztucznego wypychania danych na dysk (ang. \emph{eviction}) oraz częstych błędów strony, co umożliwia bezpośrednie badanie czystej wydajności algorytmów i mechanizmów synchronizacji silników przy zróżnicowanej liczbie rdzeni CPU.
 
-Ważnym aspektem metodologicznym przy testowaniu wydajności na jednej fizycznej maszynie jest zjawisko głodzenia procesora (ang. \emph{CPU starvation}) oraz rywalizacja o zasoby obliczeniowe. Ponieważ zarówno aplikacja benchmarkująca (klient), jak i badany silnik bazy danych (serwer) działają na tej samej platformie sprzętowej, jednoczesne pełne obciążenie wszystkich wątków przez klienta mogłoby uniemożliwić prawidłowe działanie serwera. W takim scenariuszu zmierzona wydajność nie odzwierciedlałaby wewnętrznych cech baz danych (takich jak rywalizacja o blokady czy narzuty sieciowe), lecz sprawność szeregowania zadań przez system operacyjny. W celu wyeliminowania tego problemu, nałożenie limitów na liczbę rdzeni przydzielonych dla kontenera bazy (1 do 4 rdzeni) gwarantuje, że proces bazy danych nie skonsumuje wszystkich zasobów hosta. Pozwala to na zachowanie odpowiedniego zapasu mocy obliczeniowej dla procesów klienckich Pythona oraz systemu operacyjnego, zapewniając wiarygodność pomiarów.
+Ważnym aspektem metodologicznym przy testowaniu wydajności na jednej fizycznej maszynie jest zjawisko głodzenia procesora (ang. \emph{CPU starvation}) oraz rywalizacja o zasoby obliczeniowe. Ponieważ zarówno aplikacja benchmarkująca (klient), jak i badany silnik bazy danych (serwer) działają na tej samej platformie sprzętowej, jednoczesne pełne obciążenie wszystkich wątków przez klienta mogłoby uniemożliwić prawidłowe działanie serwera. W takim scenariuszu zmierzona wydajność nie odzwierciedlałaby wewnętrznych cech baz danych (takich jak rywalizacja o blokady czy narzuty sieciowe), lecz sprawność szeregowania zadań przez system operacyjny. W celu wyeliminowania tego problemu, nałożenie limitów na liczbę rdzeni przydzielonych dla kontenera bazy (od 1 do 4 rdzeni) gwarantuje, że kontener serwera bazodanowego nie zajmuje całości dostępnych zasobów obliczeniowych, pozostawiając wystarczającą część rdzeni dla procesów klienckich aplikacji benchmarkującej.
 
 \section{Zestaw operacji testowych}
-Badania obejmują zarówno podstawowe, jak i zaawansowane operacje na danych:
+
+Badania obejmują zarówno podstawowe (CRUD), jak i zaawansowane operacje na danych, co pozwala na kompleksową ocenę sprawności silników w różnych scenariuszach użytkowych:
 \begin{itemize}
-    \item \textbf{Insert (zapis prosty):} wstawianie par klucz-wartość do bazy.
-    \item \textbf{Read (odczyt punktowy):} pobieranie wartości na podstawie losowo wybranego klucza z zakresu kluczy wcześniej zapisanych.
-    \item \textbf{Update (modyfikacja):} aktualizacja wartości pod istniejącym kluczem.
-    \item \textbf{Delete (usuwanie):} usuwanie rekordów z bazy.
-    \item \textbf{Mieszane obciążenie:} testy symulujące realne systemy informatyczne w trzech proporcjach odczyt/zapis:
+    \item \textbf{Insert (zapis prosty):} wstawianie par klucz-wartość do bazy danych. Operacja ta pozwala na ocenę wydajności zapisu sekwencyjnego bądź indeksowania nowych kluczy.
+    \item \textbf{Read (odczyt punktowy):} pobieranie wartości na podstawie losowo wybranego klucza z zakresu wcześniej wprowadzonych danych.
+    \item \textbf{Update (modyfikacja):} aktualizacja wartości (nadpisanie rekordu) pod istniejącym już kluczem.
+    \item \textbf{Delete (usuwanie):} usuwanie rekordów z bazy danych na podstawie klucza.
+    \item \textbf{Mieszane obciążenie (Mixed Workload):} scenariusz łączący operacje odczytu (GET) oraz zapisu (SET) na tym samym kluczu w ramach jednej pętli testowej (z następowym usunięciem klucza). Testy te realizowane są w trzech proporcjach:
     \begin{itemize}
         \item 90\% odczytów i 10\% zapisów (profil zdominowany przez odczyt).
         \item 50\% odczytów i 50\% zapisów (profil zbalansowany).
         \item 10\% odczytów i 90\% zapisów (profil zdominowany przez zapis).
     \end{itemize}
-    \item \textbf{Operacje na strukturach złożonych (natywne vs emulacja):}
+    Ze względu na złożoność i narzut czasowy testów mieszanych, wolumen operacji został ograniczony do stałej liczby 10~000 iteracji na proces kliencki. Większa liczba powtórzeń nie wnosi dodatkowej wartości analitycznej, a jedynie wydłuża czas trwania testu.
+    \item \textbf{Kolejka (Queue):} test symulujący działanie kolejki komunikatów typu FIFO (ang. \emph{First-In, First-Out}). Operacja ta składa się z dwóch faz:
     \begin{itemize}
-        \item \textbf{Modyfikacja dokumentu JSON:} operacja polega na inkrementacji określonego pola numerycznego w obiekcie JSON. Systemy takie jak Redis (z modułem JSON), Couchbase i Tarantool realizują to zadanie bezpośrednio w silniku bazy. Systemy niewspierające natywnie struktur JSON (Memcached, LevelDB, RocksDB, BerkeleyDB, FoundationDB) realizują tę operację poprzez emulację w języku Python (pobranie surowego stringa, deserializacja do słownika, modyfikacja pola, ponowna serializacja do formatu JSON i nadpisanie całego rekordu).
-        \item \textbf{Dopisywanie do listy (Append):} dodawanie nowego elementu na koniec tablicy powiązanej z kluczem. Podobnie jak w przypadku dokumentów JSON, bazy niewspierające natywnie tej operacji realizują ją poprzez pełne pobranie tablicy do pamięci Pythona, modyfikację i ponowny zapis.
+        \item W pierwszej fazie następuje przeplatana operacja dodawania (PUSH) oraz pobierania (POP) elementów w stosunku 2:1 (dwa dodania na jedno pobranie), co prowadzi do kontrolowanego wzrostu rozmiaru kolejki.
+        \item W drugiej fazie pobierane są pozostałe w kolejce elementy aż do jej całkowitego opróżnienia.
     \end{itemize}
+    Dla baz serwerowych o bogatej strukturze typów danych (np. Redis) operacja ta jest realizowana natywnie przy użyciu wbudowanych instrukcji listowych (np. \texttt{rpush} i \texttt{lpop}). Dla pozostałych systemów operacja ta jest emulowana programowo po stronie aplikacji w języku Python.
+    \item \textbf{Zaawansowane operacje na dokumentach JSON:} testy te badają wydajność operacji na strukturach półstrukturalnych (obiektach JSON zawierających klucze typu \texttt{payload}, \texttt{counter} oraz tablicę \texttt{tags}). Obejmują one następujący cykl:
+    \begin{itemize}
+        \item \textbf{JSON Insert:} zapisanie pełnego dokumentu JSON.
+        \item \textbf{JSON Read:} odczyt całego zapisanego dokumentu.
+        \item \textbf{JSON Read Partial:} odczyt jedynie określonego wycinka dokumentu (pola \texttt{payload}).
+        \item \textbf{JSON Update Partial:} aktualizacja wyłącznie pola \texttt{payload} wewnątrz dokumentu.
+        \item \textbf{JSON Increment:} inkrementacja pola numerycznego \texttt{counter} wewnątrz dokumentu.
+        \item \textbf{JSON Delete:} usunięcie całego dokumentu z bazy.
+    \end{itemize}
+    Podobnie jak w przypadku kolejki, systemy wspierające natywnie dokumenty JSON (np. Redis z modułem RedisJSON, Couchbase, Tarantool) wykonują te modyfikacje po stronie serwera. Systemy prostych kluczy-wartości (np. Memcached, LevelDB, RocksDB, BerkeleyDB, FoundationDB) realizują te operacje poprzez emulację kliencką (pobranie surowej wartości tekstowej, deserializacja do obiektu słownika w języku Python, modyfikacja odpowiedniego pola, ponowna serializacja do formatu JSON i nadpisanie całego rekordu w bazie).
 \end{itemize}
 
-\section{Zestaw danych testowych}
+\section{Zestaw danych testowych i ograniczenia}
 Do testów wykorzystano zestawy danych różniące się rozmiarem pojedynczego rekordu oraz ich łączną liczbą:
 \begin{itemize}
     \item \textbf{Rozmiar rekordu (wartości):}
     \begin{itemize}
-        \item Mały: 128 bajtów (odpowiednik prostych parametrów i sesji).
-        \item Średni: 4 kilobajty (odpowiednik typowych obiektów biznesowych).
+        \item Mały: 128 bajtów (odpowiednik prostych parametrów i identyfikatorów sesji).
+        \item Średni: 4 KB.
     \end{itemize}
-    \item \textbf{Wolumen danych:} testy przeprowadzono dla trzech wolumenów: 10~000 rekordów, 100~000 rekordów oraz 1~000~000 rekordów.
+    \item \textbf{Wolumen danych (liczba operacji):} testy CRUD przeprowadzono dla trzech wolumenów: 10~000 operacji (szybka weryfikacja), 100~000 operacji oraz 1~000~000 operacji (pełne wysycenie i stabilny pomiar wydajności).
 \end{itemize}
+
+W metodyce badań wprowadzono istotne ograniczenie systemowe dotyczące testowania scenariuszy zaawansowanych (kolejki oraz operacji JSON) dla średniego rozmiaru rekordu (4 KB). Testy te są uruchamiane \textbf{wyłącznie} dla małego rozmiaru rekordu (128 bajtów). Ograniczenie to wynika z faktu, że dla systemów emulujących te struktury po stronie klienta (np. Memcached, LevelDB, RocksDB), narzut związany z ciągłym przesyłaniem przez sieć, parsowaniem oraz serializacją obiektów o rozmiarze 4 KB w jednowątkowym interpreterze języka Python całkowicie dominuje czas wykonania zapytania. W efekcie zmierzona wydajność odzwierciedlałaby wydajność biblioteki serializującej języka Python, a nie rzeczywistą przepustowość silnika bazy danych. Dodatkowo niektóre systemy (np. Memcached) posiadają wbudowane limity i ograniczenia rozmiaru przesyłanych kluczy lub specyficzne wymagania protokołu utrudniające stabilne przesyłanie większych struktur emulowanych.
+
+Dla scenariuszy CRUD ze średnim rozmiarem rekordu (4 KB) pominięto wolumen 1~000~000 operacji. Wynika to z faktu, iż przy 8 równoległych procesach klienckich łączna liczba unikalnych kluczy przechowywanych w bazie wynosi wówczas $8 \times 1\,000\,000 = 8\,000\,000$ rekordów o rozmiarze 4 KB, co odpowiada zbiorowi danych o łącznej objętości \textbf{32 GB}. Obciążenie to przekracza dostępną pamięć operacyjną platformy testowej i powoduje nadmierne ciśnienie pamięciowe (ang.~\emph{memory pressure}) oraz intensywną wymianę danych z dyskiem, co zafałszowałoby wyniki pomiaru wydajności silnika bazy danych.
+
+Istotnym aspektem metodologicznym jest sposób organizacji przestrzeni kluczy w scenariuszu wieloprocesowym. Każdy z niezależnych procesów klienckich operuje na \textbf{wyłącznie własnym, rozłącznym zbiorze kluczy} (zakresy kluczy są rozdzielone pomiędzy procesy bez nakładania się). Oznacza to, że łączna liczba rekordów przechowywanych jednocześnie w bazie danych rośnie \textbf{proporcjonalnie} do liczby procesów klienckich. Tym samym zużycie pamięci RAM oraz przestrzeni dyskowej przez serwer bazy danych jest wprost zależne od liczby procesów klienckich, przy czym rzeczywista wielkość tego wzrostu zależy od rodzaju wykonywanych operacji (operacje zapisu generują nowe rekordy, odczytu nie powiększają zbioru danych, a usuwania go redukują).
 
 \section{Scenariusze eksperymentów i współbieżność}
 Eksperymenty podzielono na dwa główne scenariusze różniące się stopniem równoległości zapytań:
 \begin{itemize}
     \item \textbf{Scenariusz jednowątkowy (Single-Client):} określenie bazowej wydajności każdego z systemów bez narzutu na współbieżność i synchronizację.
-    \item \textbf{Scenariusz wieloprocesowy (Multi-Client):} uruchomienie benchmarku na 1, 2, 4, 8, 12 oraz 16 równoległych klientach.
+    \item \textbf{Scenariusz wieloprocesowy (Multi-Client):} uruchomienie benchmarku na 1, 2, 4 oraz 8 równoległych procesach klienckich.
 \end{itemize}
 Z uwagi na obecność mechanizmu GIL (ang. \emph{Global Interpreter Lock}) w standardowym interpreterze języka Python (CPython), zastosowanie klasycznych wątków (biblioteka \texttt{threading}) uniemożliwiłoby rzeczywiste równoległe wykonywanie kodu Pythona na wielu rdzeniach procesora. Zdecydowano się również na rezygnację z wbudowanej biblioteki \texttt{multiprocessing} w ramach jednego programu nadrzędnego. Wynika to z faktu, iż nie wszystkie biblioteki klienckie oraz adaptery dedykowane dla badanych baz danych w pełni i stabilnie wspierają współdzielenie zasobów w modelu wieloprocesowości Pythona (często dochodzi do konfliktów przy kopiowaniu gniazd sieciowych bądź deskryptorów plików w procesach potomnych). Aby wyeliminować te ograniczenia i zapewnić pełną, bezpieczną współbieżność po stronie klienta, benchmark zaimplementowano poprzez uruchamianie wielu niezależnych procesów Pythona bezpośrednio z poziomu terminala systemowego. Każdy proces kliencki jest uruchamiany jako osobne, autonomiczne zadanie systemowe posiadające własną przestrzeń adresową oraz niezależny interpreter, co pozwala na generowanie maksymalnego obciążenia serwera bazy danych bez ryzyka błędów sterowników klienckich.
 
-W tym scenariuszu kluczowym celem jest analiza zachowania systemów przy różnym stopniu obciążenia procesora, ze szczególnym uwzględnieniem charakterystyki architektury SMT (ang. \emph{Simultaneous Multithreading}) procesora AMD Ryzen 7 5700U. Procesor ten posiada 8 rdzeni fizycznych, które dzięki technologii SMT są widziane w systemie jako 16 wątków logicznych. Wątki logiczne współdzielą jednak kluczowe zasoby fizycznego rdzenia, takie jak jednostki wykonawcze (ALU, FPU) oraz pamięci podręczne L1 i L2. Z tego powodu badania obejmują skalowanie liczby klientów powyżej liczby fizycznych rdzeni (do 12 i 16 procesów). Pozwala to na zbadanie momentu saturacji (wysycenia) rdzeni fizycznych oraz zaobserwowanie, jak współdzielenie zasobów w technologii SMT wpływa na rozrzut czasów opóźnień (zjawisko jitteru) oraz spadek liniowości skalowania przepustowości.
+\section{Wizualizacja wyników}
+W tym scenariuszu kluczowym celem jest analiza skalowania wydajności systemów wraz ze wzrostem liczby klientów, przy czym maksymalny stopień współbieżności ograniczono do 8 procesów klienckich. Wartość ta odpowiada liczbie fizycznych rdzeni procesora AMD Ryzen 7 5700U (posiadającego 8 rdzeni fizycznych z obsługą 16 wątków logicznych w technologii SMT). Ograniczenie to sprawia, że łączna liczba aktywnych procesów klienckich nie przekracza liczby dostępnych rdzeni fizycznych platformy sprzętowej. Pozwala to planiście zadań systemu operacyjnego na przydzielenie każdemu procesowi klienckiemu osobnego rdzenia fizycznego. Zapobiega to konieczności szeregowania wielu konkurencyjnych procesów na tym samym rdzeniu fizycznym (np. w ramach technologii SMT), co prowadziłoby do rywalizacji o jednostki wykonawcze (ALU, FPU) oraz pamięci podręczne L1/L2. Dzięki temu zmierzona wydajność i czasy opóźnień lepiej odzwierciedlają rzeczywistą skalowalność samych silników baz danych, minimalizując narzuty planisty systemowego, częste przełączanie kontekstu (context switching) oraz zjawisko jitteru wywołane rywalizacją na poziomie sprzętowym.
 
-Dodatkowym aspektem poddanym analizie w tym scenariuszu jest specyfika architektury wdrożenia. Bazy serwerowe (np. Redis, Memcached, Couchbase, Tarantool, FoundationDB) obsługują zapytania poprzez gniazda sieciowe, co pozwala na naturalne skalowanie z wieloma procesami klienckimi, ale obarcza każdą operację narzutem sieciowym. Z kolei bazy osadzone (LevelDB, RocksDB, BerkeleyDB) są ładowane bezpośrednio do przestrzeni adresowej procesu klienta. W ich przypadku badanie wieloprocesowości ujawnia zasadnicze ograniczenia architektoniczne:
+Dodatkowym aspektem poddanym analizie w tym scenariuszu jest specyfika architektury wdrożenia. Bazy serwerowe (np. Redis, Memcached, Couchbase, Tarantool, FoundationDB) obsługują zapytania poprzez gniazda sieciowe, co pozwala na naturalne skalowanie z wieloma procesami klienckimi, ale obarcza każdą operację narzutem sieciowym. Z kolei bazy osadzone (LevelDB, RocksDB, BerkeleyDB) są ładowane bezpośrednio do przestrzeni adresowej procesora klienta. W ich przypadku badanie wieloprocesowości ujawnia zasadnicze ograniczenia architektoniczne:
 \begin{itemize}
-    \item \textbf{LevelDB:} stosuje mechanizm wyłącznej blokady zapisu na poziomie plików bazy danych. Uruchomienie drugiego procesu klienckiego próbującego uzyskać dostęp do tej samej bazy skutkuje natychmiastowym błędem, co uniemożliwiłoby współbieżny dostęp wieloprocesowy.
-    \item \textbf{RocksDB i BerkeleyDB:} udostępniają zaawansowane mechanizmy synchronizacji i współdzielenia struktur danych, co pozwala na dostęp wielu procesom (w przypadku BerkeleyDB poprzez podsystem współdzielonej pamięci środowiska). Eksperymenty mają na celu zmierzenie narzutu na synchronizację międzyprocesową w porównaniu do komunikacji sieciowej baz serwerowych.
+    \item \textbf{LevelDB i RocksDB:} Stosują mechanizm wyłącznej blokady (LOCK) na poziomie katalogu bazy danych. Uruchomienie drugiego procesu klienckiego próbującego uzyskać dostęp do zapisu w tej samej bazie danych skutkuje natychmiastowym błędem blokady plików, co uniemożliwia współbieżny dostęp wieloprocesowy. Wprawdzie silnik RocksDB oferuje teoretyczną możliwość jednoczesnego otwarcia bazy przez wiele procesów w trybie tylko do odczytu (ang. \emph{read-only}), jednak w kontekście realizowanych badań wariant ten jest niefunkcjonalny. Wynika to z faktu, że cykl testowy wymaga uprzedniego zasilenia bazy danymi (operacje zapisu), a scenariusze benchmarkowe obejmują również modyfikacje i usuwanie rekordów. W związku z tym pomiary dla konfiguracji wieloprocesowych nie mogą zostać przeprowadzone dla tych silników.
+    \item \textbf{BerkeleyDB:} Jako jedyna z badanych bibliotek osadzonych udostępnia mechanizmy synchronizacji i współdzielenia struktur danych w ramach środowiska bazodanowego, co pozwala na współbieżny dostęp wielu procesom klienckim. Eksperymenty mają na celu zmierzenie narzutu na synchronizację międzyprocesową w porównaniu do komunikacji sieciowej baz serwerowych.
 \end{itemize}
 
 \section{Mierzone metryki}
@@ -98,5 +118,182 @@ Podczas każdego eksperymentu rejestrowane są następujące metryki:
 \begin{itemize}
     \item \textbf{Przepustowość (Throughput):} liczba poprawnie obsłużonych operacji na sekundę (ops/sec).
     \item \textbf{Opóźnienie (Latency):} czas wykonania pojedynczego zapytania wyrażony w milisekundach, z uwzględnieniem wartości średniej oraz centyli (p50, p95, p99).
-    \item \textbf{Zużycie zasobów (Resource Utilization):} procentowe zużycie procesora (CPU) oraz wielkość zajętej pamięci RAM przez kontener bazy danych.
+    \item \textbf{Zużycie zasobów (Resource Utilization):} procentowe zużycie procesora (CPU), zajętość pamięci RAM oraz natężenie operacji wejścia/wyjścia na dysk (Block I/O) dla kontenera bazy danych (serwer) oraz kontenera aplikacji benchmarkującej (klient).
+\end{itemize}
+
+Dane o zużyciu zasobów (CPU, RAM, Block I/O) rejestrowane są za pomocą polecenia \texttt{docker stats}, które domyślnie próbkuje stan kontenerów z częstotliwością jednej próbki na sekundę. W warunkach intensywnego obciążenia systemu operacyjnego lub dużego ruchu wejścia/wyjścia mechanizm ten może pominąć pojedyncze próbki, co skutkuje lokalnymi przerwami w szeregach czasowych. Zjawisko to traktowane jest jako ograniczenie infrastrukturalne narzędzia pomiarowego i nie wpływa na wiarygodność pozostałych mierzonych metryk. Ze względu na to, że wskaźnik obciążenia dysku (Block I/O) udostępniany przez demona Docker ma charakter skumulowany, dane te są przetwarzane i prezentowane dwojako: jako różnica (delta) między wartością maksymalną a minimalną z próbkowania dla danego testu (pokazująca całkowity wolumen operacji wejścia/wyjścia), oraz na wykresach przebiegu czasowego jako skumulowany przyrost od momentu rozpoczęcia testu.
+
+\section{Implementacja i optymalizacja procedur benchmarkowych}
+
+W celu wiernego odzwierciedlenia cech wydajnościowych poszczególnych systemów bazodanowych, kod aplikacji testowej oraz konfiguracja środowiska kontenerowego zostały zoptymalizowane pod kątem eliminacji wąskich gardeł niezwiązanych z samymi silnikami bazodanowymi.
+
+\subsection{Optymalizacja konfiguracji serwera Memcached}
+W domyślnej konfiguracji serwera Memcached wielkość pojedynczego rekordu (klucz wraz z wartością) jest ograniczona do 1~MB, co mogłoby uniemożliwić realizację scenariuszy zaawansowanych przy średnim rozmiarze rekordu. Ponadto domyślne mechanizmy zwalniania pamięci (LRU) mogłyby usuwać wcześniej zapisane dane pod wpływem ciśnienia pamięciowego, zaburzając wyniki testów odczytu i modyfikacji. W celu eliminacji tych ograniczeń, kontener serwera Memcached uruchomiono z następującymi parametrami:
+\begin{itemize}
+    \item Zwiększenie maksymalnego rozmiaru rekordu do 2~MB poprzez flagę \texttt{-I 2m}.
+    \item Przydzielenie 4~GB pamięci operacyjnej za pomocą flagi \texttt{-m 4096}.
+    \item Wyłączenie mechanizmów automatycznego usuwania kluczy oraz reorganizacji pamięci podręcznej poprzez parametry \texttt{-o no\_lru\_maintainer,no\_lru\_crawler,slab\_automove=0}.
+\end{itemize}
+
+\subsection{Obsługa zakleszczeń i konfiguracja transakcji w BerkeleyDB}
+Wbudowana baza BerkeleyDB w scenariuszach wieloprocesowych realizuje blokowanie współbieżnego dostępu do stron i rekordów. W warunkach intensywnego obciążenia generowanego przez wiele niezależnych procesów klienckich systematycznie dochodzi do zjawiska rywalizacji o blokady, co skutkuje błędami zakleszczenia (ang. \emph{deadlocks}) i zgłaszaniem wyjątku \texttt{DBLockDeadlockError}.
+
+Aby zapewnić stabilność przebiegu pomiarów bez przedwczesnego przerywania wątków klienckich, w adapterze BerkeleyDB (\texttt{berkeleydb\_test.py}) zaimplementowano dedykowaną funkcję pomocniczą \texttt{\_retry}. Funkcja ta przechwytuje wyjątki zakleszczenia i automatycznie ponawia próbę wykonania danej operacji (odczytu, zapisu lub usuwania) w pętli. Pozwoliło to na ciągły pomiar wydajności bazy przy jednoczesnym uwzględnieniu narzutu na obsługę konfliktów blokowania. Ponadto w konfiguracji środowiska bazy danych (\texttt{DBEnv}) zastosowano flagę \texttt{DB\_TXN\_WRITE\_NOSYNC}, która instruuje silnik, aby zapisywał logi transakcyjne do buforów systemu operacyjnego zamiast synchronicznego wymuszania zapisu na dysk przy każdym zatwierdzeniu (\emph{fsync}).
+
+W celu umożliwienia bezpiecznego, równoległego dostępu wielu procesów klienckich do tej samej fizycznej bazy danych bez ryzyka uszkodzenia struktury plików (ang. \emph{data corruption}), konieczne było skonfigurowanie współdzielonego środowiska BerkeleyDB (\texttt{DBEnv}). Domyślne uruchomienie bazy bez włączenia podsystemów kontroli współbieżności skutkowałoby brakiem koordynacji zapisów, a w konsekwencji nieodwracalnym uszkodzeniem danych. Z tego względu środowisko bazy zostało zainicjalizowane z zestawem flag aktywujących mechanizmy transakcyjne, blokowania, logowania Write-Ahead Log oraz współdzielonej pamięci podręcznej (\texttt{DB\_INIT\_TXN}, \texttt{DB\_INIT\_LOCK}, \texttt{DB\_INIT\_LOG}, \texttt{DB\_INIT\_MPOOL}). Dodatkowo zastosowanie flag \texttt{DB\_REGISTER} oraz \texttt{DB\_RECOVER} zapewnia automatyczną detekcję stanu środowiska i przeprowadzenie procedury naprawczej w przypadku awarii jednego z procesów, zapobiegając pozostawieniu osieroconych blokad i niespójności na dysku.
+
+\subsection{Konfiguracja przestrzeni i procedury składowane w Tarantool}
+Serwer Tarantool w swojej konfiguracji (\texttt{init.lua}) został dostosowany do wydajnego przetwarzania in-memory. Przydzielono 4~GB pamięci RAM dla silnika \texttt{memtx} odpowiadającego za struktury danych w pamięci. Ponadto, w celu uniknięcia kosztów transmisji sieciowej i uproszczenia emulacji klienckiej przy złożonych testach (JSON oraz kolejka FIFO), w bazie danych zdefiniowano dedykowane przestrzenie (odpowiednik tabel):
+\begin{itemize}
+    \item \texttt{kv}: przestrzeń przeznaczona do prostego przechowywania par klucz-wartość (format: klucz tekstowy, wartość tekstowa) z indeksem głównym typu \texttt{TREE} na kluczu.
+    \item \texttt{doc}: przestrzeń dedykowana do operacji na dokumentach JSON (format: klucz tekstowy, dokument typu \texttt{map}) z indeksem głównym.
+    \item \texttt{queue}: przestrzeń symulująca kolejkę komunikatów FIFO (format: klucz kolejki, unikalny identyfikator numeryczny \texttt{unsigned}, dokument typu \texttt{map}) z indeksem złożonym na kluczu kolejki oraz identyfikatorze wiadomości.
+\end{itemize}
+Dodatkowo, bezpośrednio w silniku Tarantool zaimplementowano atomowe procedury składowane (Lua), które są wywoływane przez klienta zdalnie:
+\begin{itemize}
+    \item \texttt{queue\_pop}: wyszukuje minimalny element (FIFO) w przestrzeni kolejki, usuwa go w sposób atomowy i zwraca do klienta.
+    \item \texttt{doc\_update\_field}: dokonuje bezpośredniej i atomowej aktualizacji wskazanego pola w dokumencie bez konieczności pobierania i ponownej serializacji całego rekordu po stronie klienta.
+    \item \texttt{doc\_increment\_field}: inkrementuje wartość wskazanego pola liczbowego wewnątrz mapy dokumentu w sposób atomowy.
+    \item \texttt{doc\_get\_field}: pobiera wartość konkretnego pola z dokumentu JSON bezpośrednio z poziomu serwera bazodanowego.
+\end{itemize}
+Dzięki zastosowaniu kompilatora LuaJIT w silniku Tarantool, procedury te charakteryzują się minimalnym czasem wykonania i eliminują narzut sieciowy.
+
+\section{Metodyka syntetycznej oceny punktowej}
+
+W celu syntetycznego porównania badanych systemów wprowadzono punktowy system oceny. Pozwala on na ilościowe zestawienie cech architektonicznych, licencyjnych oraz funkcjonalnych poszczególnych rozwiązań, a także bezpośrednie włączenie wyników wydajnościowych do końcowej oceny. Wszystkie kategorie statyczne (architektoniczno-funkcjonalne) są oceniane przy użyciu wag dopasowanych do ich znaczenia projektowego (suma maks. \textbf{1200 punktów}).
+
+\subsection{Kryteria przyznawania punktów za cechy statyczne}
+
+W ramach oceny statycznej wyróżniono pięć głównych obszarów:
+\begin{itemize}
+    \item \textbf{Model licencjonowania (0 / 50 / 100 pkt):} Określa stopień elastyczności wykorzystania systemu w projektach komercyjnych i własnościowych bez konieczności udostępniania kodu źródłowego aplikacji. Ocena 100 punktów oznacza licencję wysoce permisywną bez ograniczeń typu copyleft (np. BSD, Apache 2.0). Ocena 50 punktów oznacza występowanie ograniczeń typu copyleft (np. AGPLv3) lub restrykcji komercyjnych (np. BSL 1.1). Ocena 0 punktów oznacza licencję komercyjną bądź zamkniętą bez darmowego wariantu produkcyjnego.
+    \item \textbf{Skalowanie i replikacja (0 / 250 / 500 pkt):} Ocenia natywne wsparcie systemu dla skalowania poziomego (sharding) oraz wysokiej dostępności (HA). Ocena 500 punktów oznacza wbudowane mechanizmy shardingu oraz automatycznej replikacji z obsługą przełączania awaryjnego (failover). Ocena 250 punktów oznacza ograniczone skalowanie poziome (np. po stronie aplikacji klienckiej lub bez automatycznego shardingu) lub replikację High Availability. Ocena 0 punktów oznacza architekturę czysto osadzoną (embedded), ograniczoną do jednego procesu i systemu plików.
+    \item \textbf{Wsparcie dla transakcji ACID (0 / 100 / 200 pkt):} Ocenia poziom gwarancji spójności danych przy jednoczesnych modyfikacjach. Ocena 200 punktów oznacza pełne wsparcie dla transakcji wielokluczowych (w tym rozproszonych) z zachowaniem pełnej izolacji. Ocena 100 punktów oznacza uproszczoną transakcyjność (np. atomowość na poziomie pojedynczego klucza lub grupowanie operacji bez pełnego wycofywania zmian). Ocena 0 punktów oznacza brak mechanizmów transakcyjnych.
+    \item \textbf{Dodatkowe funkcjonalności i unikalność (0 / 150 / 300 pkt):} Ocenia dostępność zaawansowanych mechanizmów wykraczających poza proste operacje Key-Value. Ocena 300 punktów oznacza wielomodelowość i bogate API (np. strumienie, wyszukiwanie pełnotekstowe, wbudowane silniki skryptowe). Ocena 150 punktów oznacza średni stopień rozszerzalności (np. Column Families, różne fizyczne metody dostępu). Ocena 0 punktów oznacza czysty silnik Key-Value bez dodatkowych struktur.
+    \item \textbf{Trwałość danych (Persistence) (0 / 50 / 100 pkt):} Ocenia domyślne gwarancje zachowania spójności danych przy nagłej awarii zasilania lub restartu systemu. Ocena 100 punktów oznacza domyślny, synchroniczny zapis transakcji lub logu operacji (WAL) na dysk fizyczny hosta przed potwierdzeniem zapisu klientowi. Ocena 50 punktów oznacza konfigurowalną lub asynchroniczną trwałość (zapis w tle lub cykliczne migawki). Ocena 0 punktów oznacza brak mechanizmów trwałości (silnik działający wyłącznie w pamięci RAM).
+\end{itemize}
+
+\subsection{Kryteria przyznawania punktów za wydajność}
+
+Z uwagi na to, że każdy test wydajnościowy (np. Insert, Read) jest uruchamiany w różnych konfiguracjach sprzętowo-programowych (kombinacja 1, 2, 4 rdzeni CPU oraz 1, 2, 4, 8 procesów klienckich, co daje 12 przypadków na jeden test), zdecydowano się na zastosowanie skali o mniejszej rozpiętości w celu uniknięcia nadmiernej dominacji punktowej pojedynczych testów.
+
+W każdej z 12 konfiguracji danego testu bazy są szeregowane, a punkty przyznawane są według poniższej skali:
+\begin{itemize}
+    \item 1. miejsce: 14 pkt
+    \item 2. miejsce: 12 pkt
+    \item 3. miejsce: 10 pkt
+    \item 4. miejsce: 8 pkt
+    \item 5. miejsce: 6 pkt
+    \item 6. miejsce: 4 pkt
+    \item 7. miejsce: 2 pkt
+    \item 8. miejsce / awaria / brak testu: 0 pkt
+\end{itemize}
+
+Taki podział pozwala precyzyjnie ocenić i nagrodzić bazy, które charakteryzują się stabilną wydajnością oraz dobrą skalowalnością przy wzroście liczby rdzeni CPU oraz współbieżnych procesów klienckich.
+
+Dodatkowo, dla zaawansowanych scenariuszy testowych (kolejka FIFO oraz 6 operacji na dokumentach JSON) wprowadza się punkty za realizację funkcjonalności:
+\begin{itemize}
+    \item \textbf{10 pkt:} pomyślne ukończenie testu z użyciem natywnego wsparcia dla danej struktury danych po stronie serwera bazy danych (np. Redis, Tarantool, Couchbase).
+    \item \textbf{5 pkt:} pomyślne ukończenie testu z wykorzystaniem programowej emulacji struktur po stronie aplikacji klienckiej w języku Python (np. LevelDB, RocksDB, BerkeleyDB, Memcached, FoundationDB).
+    \item \textbf{0 pkt:} brak możliwości przeprowadzenia testu w danej konfiguracji (np. z powodu blokad wieloprocesowych lub całkowitego braku wsparcia).
+\end{itemize}
+
+\subsection{Zestawienie punktowe cech statycznych}
+
+Tabela \ref{tab:punktacja_statyczna} przedstawia bazową punktację architektoniczno-funkcjonalną przed uwzględnieniem wyników wydajnościowych (suma maks. 1200 punktów).
+
+\begin{table}[H]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{|l|c|c|c|c|c|c|}
+\hline
+\textbf{Baza danych} & \textbf{Licencja} & \textbf{Skalowanie} & \textbf{ACID} & \textbf{Unikalność} & \textbf{Trwałość} & \textbf{Suma statyczna} \\ \hline
+FoundationDB & 100 & 500 & 200 & 300 & 100 & 1200 \\ \hline
+Tarantool & 100 & 500 & 200 & 300 & 50 & 1150 \\ \hline
+Redis & 50 & 500 & 200 & 300 & 50 & 1100 \\ \hline
+Couchbase & 50 & 500 & 100 & 300 & 50 & 1000 \\ \hline
+BerkeleyDB & 50 & 250 & 200 & 150 & 100 & 750 \\ \hline
+RocksDB & 100 & 0 & 100 & 150 & 100 & 450 \\ \hline
+Memcached & 100 & 250 & 0 & 0 & 0 & 350 \\ \hline
+LevelDB & 100 & 0 & 100 & 0 & 100 & 300 \\ \hline
+\end{tabular}%
+}
+\caption{Zestawienie punktowe cech statycznych badanych systemów}
+\label{tab:punktacja_statyczna}
+\end{table}
+
+\subsection{Uzasadnienie ocen cech statycznych}
+
+Poniżej przedstawiono szczegółowe uzasadnienie przyznanych ocen w kategoriach statycznych dla poszczególnych systemów bazodanowych:
+
+\paragraph{Redis (1100 pkt)}
+\begin{itemize}
+    \item \textbf{Model licencjonowania (50 pkt):} Przejście na model trójlicencyjny (AGPLv3, RSALv2, SSPLv1) w wersji 8 ograniczyło elastyczność komercyjną ze względu na wymogi copyleft licencji AGPLv3.
+    \item \textbf{Skalowanie i replikacja (500 pkt):} Zapewnione jest pełne wsparcie dla klastrowania poziomego (Redis Cluster) z automatycznym shardingiem i replikacją.
+    \item \textbf{Wsparcie dla transakcji ACID (200 pkt):} Mimo braku klasycznego mechanizmu wycofywania zmian (rollback), jednowątkowy model przetwarzania poleceń w połączeniu ze skryptami Lua zapewnia pełną atomowość i najwyższy stopień izolacji (Serializable) wykonywania transakcji w pamięci RAM.
+    \item \textbf{Dodatkowe funkcjonalności i unikalność (300 pkt):} Oferowany jest wyjątkowo bogaty zestaw wbudowanych struktur (m.in. listy, zbiory, strumienie, moduły RedisJSON i RediSearch).
+    \item \textbf{Trwałość danych (50 pkt):} Zastosowano asynchroniczny zapis na dysk w tle za pomocą cyklicznych migawek RDB oraz logu operacji AOF.
+\end{itemize}
+
+\paragraph{Memcached (350 pkt)}
+\begin{itemize}
+    \item \textbf{Model licencjonowania (100 pkt):} Zastosowanie trzyklauzulowej licencji BSD umożliwia dowolną integrację kodu.
+    \item \textbf{Skalowanie i replikacja (250 pkt):} Brak wbudowanego mechanizmu replikacji i shardingu po stronie serwera. Skalowanie poziome realizowane jest po stronie klienta za pomocą algorytmów skrótu (consistent hashing).
+    \item \textbf{Wsparcie dla transakcji ACID (0 pkt):} Wykazano całkowity brak wsparcia dla operacji transakcyjnych.
+    \item \textbf{Dodatkowe funkcjonalności i unikalność (0 pkt):} Klasyczny, prosty cache typu klucz-wartość bez dodatkowych struktur danych.
+    \item \textbf{Trwałość danych (0 pkt):} Przechowywanie danych odbywa się wyłącznie w pamięci RAM, bez mechanizmów trwałości dyskowej.
+\end{itemize}
+
+\paragraph{LevelDB (300 pkt)}
+\begin{itemize}
+    \item \textbf{Model licencjonowania (100 pkt):} Biblioteka udostępniana jest na liberalnej licencji BSD.
+    \item \textbf{Skalowanie i replikacja (0 pkt):} Silnik wbudowany (embedded), brak obsługi protokołów sieciowych oraz replikacji.
+    \item \textbf{Wsparcie dla transakcji ACID (100 pkt):} Zapewniona atomowość zapisu grupy operacji przy użyciu mechanizmu WriteBatch i dziennika WAL.
+    \item \textbf{Dodatkowe funkcjonalności i unikalność (0 pkt):} Podstawowy silnik LSM-Tree oferujący jedynie proste operacje zapisu, odczytu i usuwania ciągu bajtów.
+    \item \textbf{Trwałość danych (100 pkt):} Domyślny, silny zapis na dysk fizyczny do logu WAL przed potwierdzeniem zapisu klientowi.
+\end{itemize}
+
+\paragraph{RocksDB (450 pkt)}
+\begin{itemize}
+    \item \textbf{Model licencjonowania (100 pkt):} Dualna licencja (Apache 2.0 / GPLv2) pozwala na bezpieczną integrację w projektach komercyjnych.
+    \item \textbf{Skalowanie i replikacja (0 pkt):} Silnik wbudowany (embedded) bez wbudowanej obsługi sieci i replikacji.
+    \item \textbf{Wsparcie dla transakcji ACID (100 pkt):} Atomowość zapisu realizowana przez mechanizm WriteBatch i dziennik WAL.
+    \item \textbf{Dodatkowe funkcjonalności i unikalność (150 pkt):} Rozbudowane mechanizmy optymalizacji (Column Families, Merge Operators, filtry Blooma).
+    \item \textbf{Trwałość danych (100 pkt):} Domyślny, silny zapis sekwencyjny do logu WAL na dysk.
+\end{itemize}
+
+\paragraph{Couchbase (1000 pkt)}
+\begin{itemize}
+    \item \textbf{Model licencjonowania (50 pkt):} Wersja społecznościowa podlega licencji BSL 1.1, która ogranicza komercyjne zastosowania typu SaaS.
+    \item \textbf{Skalowanie i replikacja (500 pkt):} Zaawansowany automatyczny sharding (vBuckety) oraz replikacja międzycentrowa (XDCR).
+    \item \textbf{Wsparcie dla transakcji ACID (100 pkt):} Zapewniono atomowość na poziomie pojedynczego dokumentu JSON.
+    \item \textbf{Dodatkowe funkcjonalności i unikalność (300 pkt):} Silnik zapytań SQL++ (N1QL), wbudowane usługi wyszukiwania pełnotekstowego (FTS), analityki oraz zdarzeń (Eventing).
+    \item \textbf{Trwałość danych (50 pkt):} Model memory-first, zapytania potwierdzane są po zapisaniu w pamięci RAM, po czym asynchronicznie zapisywane na dysk.
+\end{itemize}
+
+\paragraph{Tarantool (1150 pkt)}
+\begin{itemize}
+    \item \textbf{Model licencjonowania (100 pkt):} Udostępniany na dwuklauzulowej licencji BSD.
+    \item \textbf{Skalowanie i replikacja (500 pkt):} Wbudowana replikacja (w tym synchroniczna oparta na protokole Raft) oraz sharding poziomy realizowany przez bibliotekę vshard.
+    \item \textbf{Wsparcie dla transakcji ACID (200 pkt):} Pełne transakcje ACID dla silnika Memtx dzięki jednowątkowej architekturze opartej na kooperatywnych włóknach (fibers).
+    \item \textbf{Dodatkowe funkcjonalności i unikalność (300 pkt):} Pełnoprawny serwer aplikacji umożliwiający uruchamianie kodu Lua bezpośrednio w procesie bazy danych.
+    \item \textbf{Trwałość danych (50 pkt):} Asynchroniczny lub okresowy zapis dziennika transakcji WAL i zrzut migawek na dysk.
+\end{itemize}
+
+\paragraph{FoundationDB (1200 pkt)}
+\begin{itemize}
+    \item \textbf{Model licencjonowania (100 pkt):} Otwarty kod udostępniany na licencji Apache 2.0.
+    \item \textbf{Skalowanie i replikacja (500 pkt):} W pełni automatyczny, przezroczysty sharding poziomy z wbudowaną replikacją tolerującą awarie węzłów.
+    \item \textbf{Wsparcie dla transakcji ACID (200 pkt):} Globalne transakcje rozproszone o najwyższym poziomie izolacji (Serializable).
+    \item \textbf{Dodatkowe funkcjonalności i unikalność (300 pkt):} Architektura oparta na warstwach (Layers), umożliwiająca emulację dokumentów czy relacji grafowych na bazie podstawowego silnika klucz-wartość.
+    \item \textbf{Trwałość danych (100 pkt):} Synchroniczny zapis transakcji na dyski wielu replik dziennika przed zatwierdzeniem operacji zapisu.
+\end{itemize}
+
+\paragraph{BerkeleyDB (750 pkt)}
+\begin{itemize}
+    \item \textbf{Model licencjonowania (50 pkt):} Licencja AGPLv3 wymusza otwarcie kodu aplikacji klienckiej lub zakup licencji komercyjnej od firmy Oracle.
+    \item \textbf{Skalowanie i replikacja (250 pkt):} Replikacja w trybie High Availability pozwalająca na skalowanie odczytów, brak jednak automatycznego shardingu poziomego.
+    \item \textbf{Wsparcie dla transakcji ACID (200 pkt):} Pełne lokalne transakcje ACID z menedżerem blokad na poziomie stron i rekordów.
+    \item \textbf{Dodatkowe funkcjonalności i unikalność (150 pkt):} Obsługa czterech różnych struktur fizycznych przechowywania danych (B-Tree, Hash, Queue, Recno).
+    \item \textbf{Trwałość danych (100 pkt):} Transakcyjne wymuszenie zapisu logu WAL na dysk hosta.
 \end{itemize}

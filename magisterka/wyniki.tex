@@ -1,0 +1,28 @@
+Rozdział ten prezentuje rezultaty przeprowadzonych eksperymentów badawczych dla wszystkich ośmiu systemów bazodanowych w środowisku natywnego systemu Linux oraz zwirtualizowanym WSL 2. Wyniki przedstawiono w formie zestawień tabelarycznych oraz wykresów porównawczych, uwzględniając podział na konfiguracje sprzętowe (rdzenie CPU) oraz obciążenie współbieżne (procesy klienckie).
+
+\section{Metodyka statystycznego przetwarzania wyników}
+
+W celu zapewnienia rzetelności naukowej oraz wyeliminowania wpływu losowych zakłóceń systemowych na wyniki pomiarów, każda seria testowa była powtarzana wielokrotnie. Zebrane dane surowe zostały poddane obróbce statystycznej:
+\begin{itemize}
+    \item \textbf{Średnia arytmetyczna:} wyznaczona dla przepustowości (ops/sec) oraz opóźnień jako główny wskaźnik bazowej wydajności.
+    \item \textbf{Odchylenie standardowe oraz przedziały ufności (Confidence Intervals):} obliczone dla opóźnień z poziomem ufności 95\%. Pozwala to na określenie stabilności pracy danego silnika bazodanowego pod obciążeniem oraz wykazanie, czy różnice wydajnościowe między systemami są statystycznie istotne, czy też wynikają z losowego szumu pomiarowego.
+    \item \textbf{Opóźnienia ogonowe (Tail Latency):} analizowane za pomocą centyli p95 oraz p99 w celu zbadania zachowania systemów w sytuacjach krytycznych (np. podczas kompaktowania danych lub intensywnego zapisu do WAL).
+\end{itemize}
+
+\section{Wyniki w środowisku Linux}
+% TODO: Zamieścić szczegółowe opisy wyników pomiarowych przepustowości i opóźnień w natywnym systemie Linux.
+
+\section{Wyniki w środowisku WSL}
+% TODO: Zamieścić szczegółowe opisy wyników pomiarowych przepustowości i opóźnień w środowisku WSL 2.
+
+\section{Porównanie środowisk}
+% TODO: Dokonać analizy porównawczej wydajności w obu środowiskach, oceniając narzut wirtualizacji oraz stabilność pomiarów.
+
+\section{Porównanie między bazami}
+% TODO: Zestawić bezpośrednie wyniki poszczególnych silników bazodanowych w zróżnicowanych scenariuszach (CRUD, JSON, kolejka).
+
+\section{Wizualizacja wyników}
+% TODO: Wstawić wykresy punktowe zużycia zasobów oraz wykresy wydajności (ops/sec) w funkcji liczby procesów klienckich.
+
+\section{Analiza wydajnościowa i interpretacja}
+% TODO: Przeprowadzić szczegółową interpretację uzyskanych wyników wydajnościowych.

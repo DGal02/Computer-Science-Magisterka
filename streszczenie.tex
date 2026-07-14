@@ -1,22 +1,23 @@
-
 \pagestyle{plain}
 
 \begin{center}
     \textbf{\textit{Streszczenie}}
 \end{center}
 
-% \indent Praca inżynierska przedstawia projektowanie układu sterowania i nadzoru dla aktywnego uchwytu zwanego także goniometrem, który pozwala stabilizować zadaną orientację instrumentu optycznego (np. teleskopu). Głównym celem  jest zapewnienie zdalnego sterowania z możliwością zadawania trajektorii oraz śledzenia zadanej pozycji. Ruch konstrukcji zachodzi za pomocą mechanizmu śrubowego połączonego z silnikami krokowymi, co umożliwia zmianę położenia układu w osiach X i Y. Zarządzanie sygnałami referencyjnymi odbywa się z poziomu aplikacji webowej, która komunikuje się z urządzeniem za pośrednictwem protokołu Ethernet. Serwer do komunikacji został zaimplementowany na mikrokontrolerze przy użyciu systemu czasu rzeczywistego FreeRTOS. Odczyt aktualnej pozycji umożliwia interfejs SPI, a uzyskane dane są następnie wykorzystywane w pętli sprzężenia zwrotnego do regulacji położenia. W tym celu zastosowano regulator dwupołożeniowy z elementem strefy nieczułości. 
-% \newline \\
-% \noindent
-% \textbf{Słowa kluczowe:} \textit{aktywny goniometr, zdalne sterowanie, Ethernet, silniki krokowe, mikrokontroler, FreeRTOS, SPI}
+Niniejsza praca magisterska poświęcona jest analizie porównawczej wybranych nierelacyjnych baz danych typu klucz-wartość (Redis, Memcached, LevelDB, RocksDB, Couchbase, Tarantool, FoundationDB oraz BerkeleyDB) w środowisku zwirtualizowanym WSL 2 oraz natywnym systemie Linux. Głównym celem pracy było zbadanie wpływu architektury silnika bazy danych oraz modelu wdrożenia na przepustowość, opóźnienia oraz efektywność zasobową w zróżnicowanych scenariuszach obciążenia (operacje CRUD, obciążenia mieszane, operacje na dokumentach JSON oraz strukturach listowych). W ramach badań zaprojektowano i zaimplementowano aplikację benchmarkującą w języku Python, która pozwoliła na symulację obciążenia wieloprocesowego. Wyniki pomiarów poddano szczegółowej analizie statystycznej, uwzględniając odchylenia standardowe oraz opóźnienia ogonowe (centyle p95 i p99). Pozwoliło to na sformułowanie praktycznych rekomendacji wdrożeniowych dotyczących wyboru odpowiedniego silnika bazodanowego w zależności od specyfiki realizowanego projektu.
 
-\vspace{1cm}
+\par\vspace{0.5cm}
+\noindent
+\textbf{Słowa kluczowe:} \textit{bazy danych NoSQL, systemy klucz-wartość, benchmark, WSL 2, Linux, wydajność baz danych, opóźnienia ogonowe}
+
+\vspace{1.5cm}
 
 \begin{center}
     \textbf{\textit{Abstract}}
 \end{center}
 
-% \indent The engineering thesis presents the design process of a control and monitoring system for a goniometer, which allows for stabilizing the desired orientation of an optical instrument (e.g., a telescope). The main goal of the goniometer was to facilitate remote control with the capability to define trajectories and attain the target position. The actuation of the structure is achieved by using a screw mechanism connected to stepper motors, allowing the system's position to be adjusted along the X and Y axes. Signal reference management is carried out through a web application that communicates with the device via the Ethernet protocol. The communication server has been implemented on a microcontroller using FreeRTOS, a real-time operating system. Data is received via the SPI interface and is used in a feedback loop for position regulation, with a two-position regulator featuring a dead zone.
-% \newline \\
-% \noindent
-% \textbf{Keywords:} \textit{active goniometer, remote control, ethernet, stepper motors, microcontroller, FreeRTOS, SPI}
+This master's thesis presents a comparative performance analysis of selected non-relational key-value databases (Redis, Memcached, LevelDB, RocksDB, Couchbase, Tarantool, FoundationDB, and BerkeleyDB) in the WSL 2 virtualized environment and the native Linux operating system. The primary objective of the study was to evaluate the impact of database engine architecture and deployment model on throughput, latency, and resource efficiency under diverse workload scenarios (CRUD operations, mixed workloads, JSON document manipulations, and list-based operations). A dedicated benchmarking application was designed and implemented in Python to simulate multi-process client workloads. The experimental results were subjected to detailed statistical analysis, focusing on standard deviations and tail latencies (p95 and p99 centiles). This enabled the formulation of practical architectural recommendations for selecting the optimal database engine based on specific system requirements.
+
+\par\vspace{0.5cm}
+\noindent
+\textbf{Keywords:} \textit{NoSQL databases, key-value systems, benchmark, WSL 2, Linux, database performance, tail latency}
