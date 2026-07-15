@@ -1,0 +1,24 @@
+% Tabela wygenerowana automatycznie
+\begin{table}[ht]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcrrccrrcc}
+\toprule
+ & \multicolumn{2}{c}{\textbf{Zapis (Insert)}} & \multicolumn{2}{c}{\textbf{Odczyt (Read)}} & \multicolumn{2}{c}{\textbf{Aktualizacja (Update)}} & \multicolumn{2}{c}{\textbf{Usuwanie (Delete)}} \\
+\cmidrule(r){2-3} \cmidrule(r){4-5} \cmidrule(r){6-7} \cmidrule(r){8-9}
+Baza danych & Przep. [op./s] & p99 [ms] & Przep. [op./s] & p99 [ms] & Przep. [op./s] & p99 [ms] & Przep. [op./s] & p99 [ms] \\
+\midrule
+Redis & 19774.6 & 0.714 & 22596.2 & 0.618 & 18916.7 & 0.807 & 19120.7 & 0.734 \\
+Memcached & 377578.4 & 0.123 & 40019.0 & 0.320 & 307154.2 & 0.111 & 633930.4 & 0.120 \\
+LevelDB* & 340108.4 & 0.009 & 813082.7 & 0.002 & 369838.3 & 0.008 & 406969.4 & 0.006 \\
+RocksDB* & 279401.7 & 0.011 & 641488.1 & 0.005 & 269668.6 & 0.009 & 300654.7 & 0.008 \\
+Couchbase & 7620.2 & 1.548 & 10008.3 & 1.221 & 7535.1 & 1.709 & 8172.7 & 1.633 \\
+Tarantool & 11751.8 & 1.336 & 14133.4 & 1.128 & 11644.6 & 1.363 & 11447.1 & 1.352 \\
+FoundationDB & 1654.1 & 7.591 & 4483.3 & 3.107 & 1542.1 & 9.833 & 1138.8 & 32.723 \\
+BerkeleyDB & 36319.9 & 1.056 & 278156.6 & 0.163 & 52911.3 & 0.505 & 39640.1 & 0.684 \\
+\bottomrule
+\end{tabular}%
+}
+\caption{Porównanie przepustowości i opóźnień p99 dla operacji CRUD (Rekord 128 B, środowisko WSL, 4 CPU, 8 procesów klienckich, *dla LevelDB/RocksDB 1 proces)}
+\label{tab:porownanie_crud_wsl}
+\end{table}

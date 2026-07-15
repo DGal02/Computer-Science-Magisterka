@@ -1,0 +1,26 @@
+% Tabela wygenerowana automatycznie
+\begin{table}[ht]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llcrrrrr}
+\toprule
+Operacja & CPU & Klienci & Przepustowość [op./s] & Średnia [ms] & Mediana (p50) [ms] & p95 [ms] & p99 [ms] \\
+\midrule
+Aktualizacja (Update) & 1 CPU & 1 & 263115.7 & 0.0038 & 0.0032 & 0.0063 & 0.0103 \\
+Aktualizacja (Update) & 2 CPU & 1 & 262235.6 & 0.0038 & 0.0032 & 0.0064 & 0.0108 \\
+Aktualizacja (Update) & 4 CPU & 1 & 268522.2 & 0.0037 & 0.0032 & 0.0064 & 0.0103 \\
+Odczyt (Read) & 1 CPU & 1 & 445350.6 & 0.0022 & 0.0016 & 0.0051 & 0.0070 \\
+Odczyt (Read) & 2 CPU & 1 & 524922.7 & 0.0019 & 0.0015 & 0.0051 & 0.0074 \\
+Odczyt (Read) & 4 CPU & 1 & 514124.1 & 0.0019 & 0.0015 & 0.0050 & 0.0074 \\
+Usuwanie (Delete) & 1 CPU & 1 & 314001.2 & 0.0032 & 0.0029 & 0.0035 & 0.0077 \\
+Usuwanie (Delete) & 2 CPU & 1 & 301261.1 & 0.0033 & 0.0031 & 0.0037 & 0.0082 \\
+Usuwanie (Delete) & 4 CPU & 1 & 317714.8 & 0.0031 & 0.0029 & 0.0035 & 0.0080 \\
+Zapis (Insert) & 1 CPU & 1 & 255191.3 & 0.0039 & 0.0033 & 0.0063 & 0.0139 \\
+Zapis (Insert) & 2 CPU & 1 & 264023.9 & 0.0038 & 0.0032 & 0.0061 & 0.0121 \\
+Zapis (Insert) & 4 CPU & 1 & 275271.5 & 0.0036 & 0.0031 & 0.0062 & 0.0098 \\
+\bottomrule
+\end{tabular}%
+}
+\caption{Wyniki wydajnościowe i opóźnienia operacji bazy danych ROCKSDB (Rozmiar rekordu: 128 B, 100k operacji/klient)}
+\label{tab:latency_rocksdb_small_100000}
+\end{table}

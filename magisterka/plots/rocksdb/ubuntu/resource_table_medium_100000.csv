@@ -1,0 +1,13 @@
+Operacja,CPU Limit,Procesy Klienckie,CPU Klient [%],RAM Klient [MiB],Odczyt Klient [MiB],Zapis Klient [MiB],Liczba probek
+Aktualizacja (Update),1,1,97.645,100.32,0.0,215.04,2
+Aktualizacja (Update),2,1,133.765,91.015,0.0,378.8800000000001,2
+Aktualizacja (Update),4,1,142.03,94.25,0.0,245.76,2
+Odczyt (Read),1,1,98.375,114.19,0.0,153.5999999999999,2
+Odczyt (Read),2,1,133.98,17.01,0.0,0.0,1
+Odczyt (Read),4,1,145.975,94.3,0.0,204.79999999999995,2
+Usuwanie (Delete),1,1,97.77,53.91,0.0,0.0,1
+Usuwanie (Delete),2,1,72.025,30.054,0.0,30.7199999999998,2
+Usuwanie (Delete),4,1,176.51,98.16,0.0,0.0,1
+Zapis (Insert),1,1,99.87666666666668,117.22666666666665,0.0,808.52,3
+Zapis (Insert),2,1,144.5,93.09,0.0,510.68000000000006,2
+Zapis (Insert),4,1,158.155,107.5,0.0,573.44,2

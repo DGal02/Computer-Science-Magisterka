@@ -1,0 +1,28 @@
+% Tabela wygenerowana automatycznie przez skrypt plots/process_results.py
+\begin{table}[ht]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llcccc}
+\toprule
+Baza danych & System operacyjny & Rozmiar ładunku & Typ obciążenia & Limit CPU & Próbki \\
+\midrule
+LEVELDB & UBUNTU & 128 B & 1M & 4 CPU & 5 \\
+LEVELDB & UBUNTU & 4 KB & 100k & 4 CPU & 3 \\
+LEVELDB & WSL & 128 B & 1M & 4 CPU & 4 \\
+LEVELDB & WSL & 4 KB & 100k & 4 CPU & 7 \\
+MEMCACHED & UBUNTU & 128 B & 1M & 4 CPU & 12 \\
+MEMCACHED & UBUNTU & 4 KB & 100k & 4 CPU & 4 \\
+MEMCACHED & WSL & 128 B & 1M & 4 CPU & 11 \\
+MEMCACHED & WSL & 4 KB & 100k & 4 CPU & 4 \\
+REDIS & UBUNTU & 4 KB & 100k & 4 CPU & 19 \\
+ROCKSDB & UBUNTU & 128 B & 1M & 4 CPU & 5 \\
+ROCKSDB & UBUNTU & 4 KB & 100k & 4 CPU & 2 \\
+ROCKSDB & WSL & 128 B & 1M & 4 CPU & 4 \\
+ROCKSDB & WSL & 4 KB & 100k & 4 CPU & 4 \\
+TARANTOOL & UBUNTU & 4 KB & 100k & 4 CPU & 18 \\
+\bottomrule
+\end{tabular}%
+}
+\caption{Konfiguracje testowe niespełniające kryterium minimalnej liczby 30 próbek dla wykresów zużycia zasobów}
+\label{tab:resource_samples_skipped}
+\end{table}

@@ -9,20 +9,227 @@ W celu zapewnienia rzetelności naukowej oraz wyeliminowania wpływu losowych za
     \item \textbf{Opóźnienia ogonowe (Tail Latency):} analizowane za pomocą centyli p95 oraz p99 w celu zbadania zachowania systemów w sytuacjach krytycznych (np. podczas kompaktowania danych lub intensywnego zapisu do WAL).
 \end{itemize}
 
-\section{Wyniki w środowisku Linux}
-% TODO: Zamieścić szczegółowe opisy wyników pomiarowych przepustowości i opóźnień w natywnym systemie Linux.
+\section{Wyniki i analiza wydajnościowa w środowisku natywnym Linux (Ubuntu)}
+\label{sec:wyniki_linux}
 
-\section{Wyniki w środowisku WSL}
-% TODO: Zamieścić szczegółowe opisy wyników pomiarowych przepustowości i opóźnień w środowisku WSL 2.
+Analiza uzyskanych wyników wydajnościowych w środowisku natywnego systemu Linux (Ubuntu) została przeprowadzona w podziale na trzy główne klasy architektoniczne systemów bazodanowych. Pozwala to na bezpośrednie porównanie silników o zbliżonej charakterystyce konstrukcyjnej.
 
-\section{Porównanie środowisk}
-% TODO: Dokonać analizy porównawczej wydajności w obu środowiskach, oceniając narzut wirtualizacji oraz stabilność pomiarów.
+\subsection{Silniki in-memory (Redis, Memcached)}
 
-\section{Porównanie między bazami}
-% TODO: Zestawić bezpośrednie wyniki poszczególnych silników bazodanowych w zróżnicowanych scenariuszach (CRUD, JSON, kolejka).
+Systemy operujące w całości w pamięci RAM charakteryzują się najwyższą wydajnością wśród rozwiązań klient-serwer.
+Podczas testów CRUD w środowisku Ubuntu system Memcached wykazał najwyższą bezwzględną przepustowość, osiągając blisko 390 tys. op./s dla zapisu i ponad 650 tys. op./s dla operacji odczytu w konfiguracji 4 CPU i 8 klientów. Jest to rezultat uproszczonej architektury wielowątkowej i braku obsługi trwałości danych.
+System Redis osiągał stabilne wyniki na poziomie od 22 tys. do 25 tys. op./s. Choć przepustowość ta jest niższa niż w przypadku Memcached, wynika to bezpośrednio z jednowątkowej pętli zdarzeń oraz narzutu związanego z ciągłym zapisem do logu transakcji AOF (Append Only File). Opóźnienia p99 dla Redisa nie przekraczały 0,15 ms przy małym obciążeniu, wykazując wysokie bezpieczeństwo operacji kosztem maksymalnej przepustowości.
 
-\section{Wizualizacja wyników}
-% TODO: Wstawić wykresy punktowe zużycia zasobów oraz wykresy wydajności (ops/sec) w funkcji liczby procesów klienckich.
+Na rysunku \ref{fig:inmemory_payload} zaprezentowano porównanie wpływu rozmiaru rekordu na przepustowość dla silników in-memory, natomiast rysunek \ref{fig:inmemory_advanced} przedstawia ich wydajność w scenariuszach zaawansowanych.
 
-\section{Analiza wydajnościowa i interpretacja}
-% TODO: Przeprowadzić szczegółową interpretację uzyskanych wyników wydajnościowych.
+\begin{figure}[H]
+    \centering
+    \subfigure[Redis]{\includegraphics[width=0.48\textwidth]{magisterka/plots/redis/ubuntu/payload_comparison.pdf}}
+    \subfigure[Memcached]{\includegraphics[width=0.48\textwidth]{magisterka/plots/memcached/ubuntu/payload_comparison.pdf}}
+    \caption{Porównanie przepustowości silników in-memory w zależności od rozmiaru rekordu (Ubuntu)}
+    \label{fig:inmemory_payload}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \subfigure[Redis]{\includegraphics[width=0.48\textwidth]{magisterka/plots/redis/ubuntu/advanced_scenarios.pdf}}
+    \subfigure[Memcached]{\includegraphics[width=0.48\textwidth]{magisterka/plots/memcached/ubuntu/advanced_scenarios.pdf}}
+    \caption{Wydajność silników in-memory w scenariuszach zaawansowanych (Ubuntu)}
+    \label{fig:inmemory_advanced}
+\end{figure}
+
+\subsection{Biblioteki osadzone i wbudowane (LevelDB, RocksDB, BerkeleyDB)}
+
+Biblioteki wbudowane eliminują komunikację sieciową, co przekłada się na specyficzny profil wydajnościowy.
+Zarówno LevelDB, jak i RocksDB osiągały najwyższe przepustowości jednostkowe, przekraczające 820 tys. op./s dla odczytu oraz 180 tys. op./s dla zapisu w konfiguracji z jednym procesem klienckim. Ograniczenie do jednego klienta wynika z braku wbudowanej obsługi współbieżnego zapisu z wielu procesów, przez co próby współbieżnego uruchomienia kończyły się blokadą bazy.
+BerkeleyDB wykazała unikalne właściwości, łącząc architekturę osadzoną z obsługą wielu procesów dzięki wykorzystaniu środowiska współdzielonego (shared environment). Pozwoliło to na stabilne skalowanie zapisu do 38 tys. op./s oraz odczytu do 290 tys. op./s przy 8 współbieżnych procesach klienckich. Wydajność ta plasuje BerkeleyDB jako wysoce efektywne rozwiązanie dla systemów lokalnych wymagających dostępu wieloprocesowego.
+
+Na rysunku \ref{fig:embedded_payload} zaprezentowano porównanie wpływu rozmiaru rekordu na przepustowość dla bibliotek osadzonych, natomiast rysunek \ref{fig:embedded_advanced} przedstawia ich wydajność w scenariuszach zaawansowanych.
+
+\begin{figure}[H]
+    \centering
+    \subfigure[LevelDB]{\includegraphics[width=0.32\textwidth]{magisterka/plots/leveldb/ubuntu/payload_comparison.pdf}}
+    \subfigure[RocksDB]{\includegraphics[width=0.32\textwidth]{magisterka/plots/rocksdb/ubuntu/payload_comparison.pdf}}
+    \subfigure[BerkeleyDB]{\includegraphics[width=0.32\textwidth]{magisterka/plots/berkeleydb/ubuntu/payload_comparison.pdf}}
+    \caption{Porównanie przepustowości bibliotek osadzonych w zależności od rozmiaru rekordu (Ubuntu)}
+    \label{fig:embedded_payload}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \subfigure[LevelDB]{\includegraphics[width=0.32\textwidth]{magisterka/plots/leveldb/ubuntu/advanced_scenarios.pdf}}
+    \subfigure[RocksDB]{\includegraphics[width=0.32\textwidth]{magisterka/plots/rocksdb/ubuntu/advanced_scenarios.pdf}}
+    \subfigure[BerkeleyDB]{\includegraphics[width=0.32\textwidth]{magisterka/plots/berkeleydb/ubuntu/advanced_scenarios.pdf}}
+    \caption{Wydajność bibliotek osadzonych w scenariuszach zaawansowanych (Ubuntu)}
+    \label{fig:embedded_advanced}
+\end{figure}
+
+\subsection{Zaawansowane bazy hybrydowe i rozproszone (Tarantool, Couchbase, FoundationDB)}
+
+Silniki wielomodelowe i rozproszone stawiają na bogatą funkcjonalność i elastyczność struktury danych.
+Tarantool, jako baza hybrydowa in-memory z trwałym zapisem dyskowym, osiągał wyniki rzędu 50--65 tys. op./s dla zapisu i odczytu, co przewyższało wydajność Redisa. Zastosowanie kompilacji JIT (Just-In-Time) oraz asynchronicznego silnika transakcyjnego pozwoliło na efektywne wykorzystanie zasobów procesora.
+Couchbase i FoundationDB wykazywały najniższą przepustowość (odpowiednio ok. 8--12 tys. op./s oraz 1,5--4 tys. op./s) przy jednocześnie wyższych opóźnieniach p99. W przypadku FoundationDB opóźnienia dochodziły do 35 ms. Jest to bezpośredni narzut rozproszonej architektury transakcyjnej z pełnym wsparciem ACID na poziomie klastra, w której każda modyfikacja wymaga koordynacji transakcji i wykrywania konfliktów.
+
+Na rysunku \ref{fig:hybrid_payload} zaprezentowano porównanie wpływu rozmiaru rekordu na przepustowość dla baz hybrydowych i rozproszonych, natomiast rysunek \ref{fig:hybrid_advanced} przedstawia ich wydajność w scenariuszach zaawansowanych.
+
+\begin{figure}[H]
+    \centering
+    \subfigure[Tarantool]{\includegraphics[width=0.32\textwidth]{magisterka/plots/tarantool/ubuntu/payload_comparison.pdf}}
+    \subfigure[Couchbase]{\includegraphics[width=0.32\textwidth]{magisterka/plots/couchbase/ubuntu/payload_comparison.pdf}}
+    \subfigure[FoundationDB]{\includegraphics[width=0.32\textwidth]{magisterka/plots/foundationdb/ubuntu/payload_comparison.pdf}}
+    \caption{Porównanie przepustowości baz hybrydowych i rozproszonych w zależności od rozmiaru rekordu (Ubuntu)}
+    \label{fig:hybrid_payload}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \subfigure[Tarantool]{\includegraphics[width=0.32\textwidth]{magisterka/plots/tarantool/ubuntu/advanced_scenarios.pdf}}
+    \subfigure[Couchbase]{\includegraphics[width=0.32\textwidth]{magisterka/plots/couchbase/ubuntu/advanced_scenarios.pdf}}
+    \subfigure[FoundationDB]{\includegraphics[width=0.32\textwidth]{magisterka/plots/foundationdb/ubuntu/advanced_scenarios.pdf}}
+    \caption{Wydajność baz hybrydowych i rozproszonych w scenariuszach zaawansowanych (Ubuntu)}
+    \label{fig:hybrid_advanced}
+\end{figure}
+
+\section{Wyniki w środowisku zwirtualizowanym (WSL 2)}
+\label{sec:wyniki_wsl}
+
+Środowisko WSL 2 wprowadza warstwę wirtualizacji opartą o mikro-hiperwizor Hyper-V.
+Ogólny profil wydajnościowy badanych systemów w WSL 2 zachował zbliżone proporcje do uzyskanych na natywnym systemie Linux. Silniki wbudowane nadal dominowały w scenariuszach jednowątkowych, a Memcached i Redis pozostawały najszybszymi systemami klient-serwer.
+Największą stabilność i najmniejszy spadek wydajności w środowisku WSL 2 wykazały systemy działające w całości w pamięci RAM (Redis, Memcached) przy operacjach niegenerujących ruchu dyskowego. Z kolei bazy intensywnie korzystające z zapisu dyskowego (Couchbase, FoundationDB) wykazały silną degradację wydajności związaną z wirtualizacją systemu plików i narzutem na synchronizację buforów dyskowych.
+
+Szczegółowe tabele wydajnościowe oraz statystyki zużycia zasobów dla wszystkich pojedynczych konfiguracji i systemów w środowisku WSL 2 zostały przeniesione do Dodatku \ref{chap:dodatek_tabele_wsl}.
+
+\subsection{Silniki in-memory (Redis, Memcached) w WSL 2}
+
+Na rysunku \ref{fig:inmemory_payload_wsl} zaprezentowano porównanie wpływu rozmiaru rekordu na przepustowość dla silników in-memory w WSL 2, natomiast rysunek \ref{fig:inmemory_advanced_wsl} przedstawia ich wydajność w scenariuszach zaawansowanych.
+
+\begin{figure}[H]
+    \centering
+    \subfigure[Redis]{\includegraphics[width=0.48\textwidth]{magisterka/plots/redis/wsl/payload_comparison.pdf}}
+    \subfigure[Memcached]{\includegraphics[width=0.48\textwidth]{magisterka/plots/memcached/wsl/payload_comparison.pdf}}
+    \caption{Porównanie przepustowości silników in-memory w zależności od rozmiaru rekordu (WSL 2)}
+    \label{fig:inmemory_payload_wsl}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \subfigure[Redis]{\includegraphics[width=0.48\textwidth]{magisterka/plots/redis/wsl/advanced_scenarios.pdf}}
+    \subfigure[Memcached]{\includegraphics[width=0.48\textwidth]{magisterka/plots/memcached/wsl/advanced_scenarios.pdf}}
+    \caption{Wydajność silników in-memory w scenariuszach zaawansowanych (WSL 2)}
+    \label{fig:inmemory_advanced_wsl}
+\end{figure}
+
+\subsection{Biblioteki osadzone i wbudowane (LevelDB, RocksDB, BerkeleyDB) w WSL 2}
+
+Na rysunku \ref{fig:embedded_payload_wsl} zaprezentowano porównanie wpływu rozmiaru rekordu na przepustowość dla bibliotek osadzonych w WSL 2, natomiast rysunek \ref{fig:embedded_advanced_wsl} przedstawia ich wydajność w scenariuszach zaawansowanych.
+
+\begin{figure}[H]
+    \centering
+    \subfigure[LevelDB]{\includegraphics[width=0.32\textwidth]{magisterka/plots/leveldb/wsl/payload_comparison.pdf}}
+    \subfigure[RocksDB]{\includegraphics[width=0.32\textwidth]{magisterka/plots/rocksdb/wsl/payload_comparison.pdf}}
+    \subfigure[BerkeleyDB]{\includegraphics[width=0.32\textwidth]{magisterka/plots/berkeleydb/wsl/payload_comparison.pdf}}
+    \caption{Porównanie przepustowości bibliotek osadzonych w zależności od rozmiaru rekordu (WSL 2)}
+    \label{fig:embedded_payload_wsl}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \subfigure[LevelDB]{\includegraphics[width=0.32\textwidth]{magisterka/plots/leveldb/wsl/advanced_scenarios.pdf}}
+    \subfigure[RocksDB]{\includegraphics[width=0.32\textwidth]{magisterka/plots/rocksdb/wsl/advanced_scenarios.pdf}}
+    \subfigure[BerkeleyDB]{\includegraphics[width=0.32\textwidth]{magisterka/plots/berkeleydb/wsl/advanced_scenarios.pdf}}
+    \caption{Wydajność bibliotek osadzonych w scenariuszach zaawansowanych (WSL 2)}
+    \label{fig:embedded_advanced_wsl}
+\end{figure}
+
+\subsection{Zaawansowane bazy hybrydowe i rozproszone (Tarantool, Couchbase, FoundationDB) w WSL 2}
+
+Na rysunku \ref{fig:hybrid_payload_wsl} zaprezentowano porównanie wpływu rozmiaru rekordu na przepustowość dla baz hybrydowych i rozproszonych w WSL 2, natomiast rysunek \ref{fig:hybrid_advanced_wsl} przedstawia ich wydajność w scenariuszach zaawansowanych.
+
+\begin{figure}[H]
+    \centering
+    \subfigure[Tarantool]{\includegraphics[width=0.32\textwidth]{magisterka/plots/tarantool/wsl/payload_comparison.pdf}}
+    \subfigure[Couchbase]{\includegraphics[width=0.32\textwidth]{magisterka/plots/couchbase/wsl/payload_comparison.pdf}}
+    \subfigure[FoundationDB]{\includegraphics[width=0.32\textwidth]{magisterka/plots/foundationdb/wsl/payload_comparison.pdf}}
+    \caption{Porównanie przepustowości baz hybrydowych i rozproszonych w zależności od rozmiaru rekordu (WSL 2)}
+    \label{fig:hybrid_payload_wsl}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \subfigure[Tarantool]{\includegraphics[width=0.32\textwidth]{magisterka/plots/tarantool/wsl/advanced_scenarios.pdf}}
+    \subfigure[Couchbase]{\includegraphics[width=0.32\textwidth]{magisterka/plots/couchbase/wsl/advanced_scenarios.pdf}}
+    \subfigure[FoundationDB]{\includegraphics[width=0.32\textwidth]{magisterka/plots/foundationdb/wsl/advanced_scenarios.pdf}}
+    \caption{Wydajność baz hybrydowych i rozproszonych w scenariuszach zaawansowanych (WSL 2)}
+    \label{fig:hybrid_advanced_wsl}
+\end{figure}
+
+\subsection{Przebieg zużycia zasobów w czasie w środowisku WSL 2}
+
+Przebieg sekundowego zużycia zasobów w czasie dla największych wolumenów obciążenia (mały rekord 128 B, wolumen 1M operacji oraz średni rekord 4 KB, wolumen 100k operacji) w środowisku WSL 2 zestawiono dla wybranych systemów na rysunkach \ref{fig:wsl_resources_small_1m} oraz \ref{fig:wsl_resources_medium_100k}.
+
+\begin{figure}[H]
+    \centering
+    \subfigure[Redis]{\includegraphics[width=0.32\textwidth]{magisterka/plots/redis/wsl/resource_utilization_small_1000000.pdf}}
+    \subfigure[Tarantool]{\includegraphics[width=0.32\textwidth]{magisterka/plots/tarantool/wsl/resource_utilization_small_1000000.pdf}}
+    \subfigure[BerkeleyDB]{\includegraphics[width=0.32\textwidth]{magisterka/plots/berkeleydb/wsl/resource_utilization_small_1000000.pdf}}
+    \subfigure[Couchbase]{\includegraphics[width=0.48\textwidth]{magisterka/plots/couchbase/wsl/resource_utilization_small_1000000.pdf}}
+    \subfigure[FoundationDB]{\includegraphics[width=0.48\textwidth]{magisterka/plots/foundationdb/wsl/resource_utilization_small_1000000.pdf}}
+    \caption{Przebieg zużycia zasobów w czasie: mały rekord 128 B, wolumen 1M operacji (WSL 2)}
+    \label{fig:wsl_resources_small_1m}
+\end{figure}
+
+\begin{figure}[H]
+    \centering
+    \subfigure[Redis]{\includegraphics[width=0.32\textwidth]{magisterka/plots/redis/wsl/resource_utilization_medium_100000.pdf}}
+    \subfigure[Tarantool]{\includegraphics[width=0.32\textwidth]{magisterka/plots/tarantool/wsl/resource_utilization_medium_100000.pdf}}
+    \subfigure[BerkeleyDB]{\includegraphics[width=0.32\textwidth]{magisterka/plots/berkeleydb/wsl/resource_utilization_medium_100000.pdf}}
+    \subfigure[Couchbase]{\includegraphics[width=0.48\textwidth]{magisterka/plots/couchbase/wsl/resource_utilization_medium_100000.pdf}}
+    \subfigure[FoundationDB]{\includegraphics[width=0.48\textwidth]{magisterka/plots/foundationdb/wsl/resource_utilization_medium_100000.pdf}}
+    \caption{Przebieg zużycia zasobów w czasie: średni rekord 4 KB, wolumen 100k operacji (WSL 2)}
+    \label{fig:wsl_resources_medium_100k}
+\end{figure}
+
+\section{Porównanie środowisk: Natywny Linux vs Wirtualizacja WSL 2}
+\label{sec:porownanie_srodowisk}
+
+Bezpośrednie porównanie wyników uzyskanych w środowisku Ubuntu oraz WSL 2 ujawnia narzut wirtualizacji w zależności od profilu obciążenia silnika:
+\begin{itemize}
+    \item \textbf{Narzut sieciowy (Loopback):} Dla baz sieciowych (Redis, Memcached) narzut wirtualizacji przy operacjach CRUD w pamięci RAM był minimalny i wynosił od 4\% do 8\%. Nowoczesna architektura sieciowa WSL 2 oparta na protokole AF\_VSOCK skutecznie ogranicza opóźnienia komunikacji międzykontenerowej.
+    \item \textbf{Narzut wirtualizacji dyskowej:} Systemy intensywnie korzystające z dysku (Couchbase, FoundationDB) zanotowały spadek przepustowości w WSL 2 o 25\% do 40\% w porównaniu z natywnym Linuxem. Narzut ten wynika z pośredniczenia systemu plików Windows (VHDX) w operacjach zapisu i odczytu z dysku SSD hosta oraz konieczności translacji wywołań \texttt{fsync}.
+    \item \textbf{Zasobochłonność klienta:} Interpreter języka Python w środowisku WSL 2 charakteryzował się wyższym i mniej stabilnym zużyciem procesora (CPU jitter). Przełożyło się to na wzrost opóźnień ogonowych p95 i p99 o 12\% do 18\% dla wszystkich badanych baz danych w porównaniu do natywnego systemu Ubuntu.
+\end{itemize}
+
+\section{Zbiorcze zestawienie porównawcze silników}
+\label{sec:porownanie_miedzy_bazami}
+
+W celu dokonania obiektywnej oceny i bezpośredniego porównania wydajności oraz charakterystyki zasobochłonności wszystkich ośmiu badanych systemów bazodanowych, zestawiono wyniki pomiarowe uzyskane w obu środowiskach dla konfiguracji o najwyższym obciążeniu fizycznym (limit 4 rdzeni CPU dla kontenerów oraz maksymalna współbieżność 8 procesów klienckich, z wyjątkiem systemów wbudowanych LevelDB i RocksDB, które uruchomiono dla 1 klienta).
+
+Porównanie przepustowości (operacji na sekundę) oraz opóźnień p99 dla małego rekordu (128 B) przedstawiono w tabelach \ref{tab:porownanie_crud_wsl} (dla WSL 2) oraz \ref{tab:porownanie_crud_ubuntu} (dla natywnego systemu Ubuntu).
+
+\input{magisterka/tabelka_porownawcza_wydajnosc_wsl.tex}
+\input{magisterka/tabelka_porownawcza_wydajnosc_ubuntu.tex}
+
+Porównanie profilu zużycia zasobów sprzętowych (CPU, RAM oraz natężenie operacji dyskowych Block I/O) dla kontenerów serwerów bazodanowych podczas operacji zapisu i odczytu zestawiono w tabelach \ref{tab:porownanie_zasobow_wsl} (dla WSL 2) oraz \ref{tab:porownanie_zasobow_ubuntu} (dla natywnego systemu Ubuntu).
+
+\input{magisterka/tabelka_porownawcza_zasoby_wsl.tex}
+\input{magisterka/tabelka_porownawcza_zasoby_ubuntu.tex}
+
+\section{Końcowy ranking i ocena syntetyczna}
+\label{sec:ranking_koncowy}
+
+W celu syntetycznego podsumowania przeprowadzonych badań, opracowano końcowy ranking badanych systemów bazodanowych. Ranking ten łączy ocenę cech statycznych (architektura, licencjonowanie, transakcyjność, trwałość, unikalność -- maks. 1500 pkt), ocenę funkcjonalną scenariuszy zaawansowanych (zapis i odczyt JSON oraz kolejka FIFO -- maks. 700 pkt) oraz dynamiczną ocenę wydajnościową (rankingi we wszystkich 240 scenariuszach pomiarowych w środowisku Ubuntu -- maks. 3360 pkt).
+
+Zestawienie końcowej punktacji wielokryterialnej przedstawiono w tabeli \ref{tab:ranking_koncowy}.
+
+\input{magisterka/tabelka_ranking_koncowy.tex}
+
+Analiza wyników końcowego rankingu wielokryterialnego pozwala na sformułowanie następujących wniosków:
+\begin{itemize}
+    \item \textbf{1. miejsce: Redis (4180 pkt)} -- Redis zwyciężył w rankingu dzięki idealnie zbilansowanemu profilowi. Uzyskał bardzo wysokie noty zarówno za cechy statyczne i funkcjonalne (pełne natywne wsparcie dla JSON i kolejki FIFO), jak i wysoką oraz stabilną wydajność w testach CRUD pod obciążeniem wielowątkowym.
+    \item \textbf{2. miejsce: Tarantool (4090 pkt)} -- System uplasował się tuż za liderem. Podobnie jak Redis, oferuje natywne zaawansowane struktury danych, a zastosowanie asynchronicznego silnika transakcyjnego Memtx i kompilatora JIT zapewniło mu doskonałą wydajność, wyższą od Redisa w testach zapisu dyskowego.
+    \item \textbf{3. miejsce: BerkeleyDB (3936 pkt)} -- Wysoka lokata tego systemu to rezultat unikalnego połączenia wydajności silnika osadzonego ze wsparciem dla dostępu wieloprocesowego (współdzielone środowisko pamięciowe). Pozwoliło mu to na zdobywanie wysokich ocen punktowych w scenariuszach współbieżnych, gdzie pozostałe bazy wbudowane zostały zablokowane.
+    \item \textbf{4. miejsce: Memcached (3674 pkt)} -- Zdobywca najwyższej noty za wydajność (2974 pkt) stracił szansę na wyższe miejsce w rankingu ze względu na surową architekturę in-memory, brak trwałości dyskowej oraz konieczność emulacji struktur JSON/kolejki FIFO po stronie klienta.
+    \item \textbf{5. miejsce: Couchbase (3162 pkt)} -- Couchbase zajął stabilną, środkową pozycję. Oferuje zaawansowany sharding i natywne API JSON, ale narzut rozproszonej koordynacji sieciowej przełożył się na umiarkowaną przepustowość w testach CRUD.
+    \item \textbf{6. miejsce: FoundationDB (2524 pkt)} -- Mimo najwyższej oceny za cechy statyczne (w pełni transakcyjna baza ACID o architekturze distributed), wysoki narzut transakcyjny oraz brak testu kolejki i konieczność emulacji JSON obniżyły jego łączną ocenę punktową.
+    \item \textbf{7. miejsce: RocksDB (1700 pkt) oraz 8. miejsce: LevelDB (1464 pkt)} -- Silniki te zostały silnie sklasyfikowane na dolnych pozycjach rankingu ze względu na całkowity brak możliwości pracy wieloprocesowej w testach współbieżnych (co skutkowało zerowymi punktami w 75\% konfiguracji wydajnościowych) oraz niskie oceny za skalowalność poziomą i brak natywnego API dla zaawansowanych struktur danych.
+\end{itemize}

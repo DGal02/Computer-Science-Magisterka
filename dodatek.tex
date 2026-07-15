@@ -1,46 +1,157 @@
 \appendix % Rozpoczęcie dodatków
 
-\chapter{Dodatek: Schemat elektryczny}
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\textwidth]{pictures/schemat_elektryczny/Inżynierka (5).pdf}
-\end{figure}
+\chapter{Dodatek: Repozytorium kodu aplikacji benchmarkującej}
+\label{chap:dodatek_repozytorium}
+Kod źródłowy aplikacji benchmarkującej w języku Python, skrypty orkiestracji kontenerów Docker, skrypty agregacji wyników oraz kody generatora wizualizacji i tabel statystycznych znajdują się w poniższym repozytorium online: \\
+\url{https://github.com/DGal02/Computer-Science-Magisterka}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\textwidth]{pictures/schemat_elektryczny/Inżynierka (6).pdf}
-\end{figure}
+\chapter{Dodatek: Szczegółowe tabele wydajnościowe w środowisku WSL 2}
+\label{chap:dodatek_tabele_wsl}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\textwidth]{pictures/schemat_elektryczny/Inżynierka (7).pdf}
-\end{figure}
+W niniejszym dodatku przedstawiono szczegółowe tabele wydajnościowe (opóźnienia p50, p95, p99 oraz przepustowość) oraz statystyki zużycia zasobów (CPU, RAM) uzyskane w środowisku wirtualizacji WSL 2 dla wszystkich badanych systemów bazodanowych.
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\textwidth]{pictures/schemat_elektryczny/Inżynierka (8).pdf}
-\end{figure}
+\section{Silniki in-memory (Redis, Memcached) -- WSL 2}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\textwidth]{pictures/schemat_elektryczny/Inżynierka (9).pdf}
-\end{figure}
+\subsection{System Redis (WSL 2)}
+\input{magisterka/plots/redis/wsl/latency_table_small_100000.tex}
+\input{magisterka/plots/redis/wsl/latency_table_small_1000000.tex}
+\input{magisterka/plots/redis/wsl/latency_table_medium_100000.tex}
+\input{magisterka/plots/redis/wsl/resource_table_small_1000000.tex}
+\input{magisterka/plots/redis/wsl/resource_table_medium_100000.tex}
+\clearpage
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\textwidth]{pictures/schemat_elektryczny/Inżynierka (10).pdf}
-\end{figure}
+\subsection{System Memcached (WSL 2)}
+\input{magisterka/plots/memcached/wsl/latency_table_small_100000.tex}
+\input{magisterka/plots/memcached/wsl/latency_table_small_1000000.tex}
+\input{magisterka/plots/memcached/wsl/latency_table_medium_100000.tex}
+\input{magisterka/plots/memcached/wsl/resource_table_small_1000000.tex}
+\input{magisterka/plots/memcached/wsl/resource_table_medium_100000.tex}
+\clearpage
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\textwidth]{pictures/schemat_elektryczny/Inżynierka (11).pdf}
-\end{figure}
+\section{Biblioteki osadzone (LevelDB, RocksDB, BerkeleyDB) -- WSL 2}
 
-\begin{figure}[H]
-    \centering
-    \includegraphics[width=0.85\textwidth]{pictures/schemat_elektryczny/Inżynierka (12).pdf}
-\end{figure}
+\subsection{System LevelDB (WSL 2)}
+\input{magisterka/plots/leveldb/wsl/latency_table_small_100000.tex}
+\input{magisterka/plots/leveldb/wsl/latency_table_small_1000000.tex}
+\input{magisterka/plots/leveldb/wsl/latency_table_medium_100000.tex}
+\input{magisterka/plots/leveldb/wsl/resource_table_small_1000000.tex}
+\input{magisterka/plots/leveldb/wsl/resource_table_medium_100000.tex}
+\clearpage
 
-\chapter{Dodatek: Użyte kody w aplikacji}
-Repozytorium online z aplikacją webową: \\ https://github.com/DGal02/AirInzynierkaReact2024 \\
-Repozytorium online z aplikacją na STM32: \\ https://github.com/DGal02/AirInzynierkaSTM2024
+\subsection{System RocksDB (WSL 2)}
+\input{magisterka/plots/rocksdb/wsl/latency_table_small_100000.tex}
+\input{magisterka/plots/rocksdb/wsl/latency_table_small_1000000.tex}
+\input{magisterka/plots/rocksdb/wsl/latency_table_medium_100000.tex}
+\input{magisterka/plots/rocksdb/wsl/resource_table_small_1000000.tex}
+\input{magisterka/plots/rocksdb/wsl/resource_table_medium_100000.tex}
+\clearpage
+
+\subsection{System BerkeleyDB (WSL 2)}
+\input{magisterka/plots/berkeleydb/wsl/latency_table_small_100000.tex}
+\input{magisterka/plots/berkeleydb/wsl/latency_table_small_1000000.tex}
+\input{magisterka/plots/berkeleydb/wsl/latency_table_medium_100000.tex}
+\input{magisterka/plots/berkeleydb/wsl/resource_table_small_1000000.tex}
+\input{magisterka/plots/berkeleydb/wsl/resource_table_medium_100000.tex}
+\clearpage
+
+\section{Bazy hybrydowe i rozproszone (Tarantool, Couchbase, FoundationDB) -- WSL 2}
+
+\subsection{System Tarantool (WSL 2)}
+\input{magisterka/plots/tarantool/wsl/latency_table_small_100000.tex}
+\input{magisterka/plots/tarantool/wsl/latency_table_small_1000000.tex}
+\input{magisterka/plots/tarantool/wsl/latency_table_medium_100000.tex}
+\input{magisterka/plots/tarantool/wsl/resource_table_small_1000000.tex}
+\input{magisterka/plots/tarantool/wsl/resource_table_medium_100000.tex}
+\clearpage
+
+\subsection{System Couchbase (WSL 2)}
+\input{magisterka/plots/couchbase/wsl/latency_table_small_100000.tex}
+\input{magisterka/plots/couchbase/wsl/latency_table_small_1000000.tex}
+\input{magisterka/plots/couchbase/wsl/latency_table_medium_100000.tex}
+\input{magisterka/plots/couchbase/wsl/resource_table_small_1000000.tex}
+\input{magisterka/plots/couchbase/wsl/resource_table_medium_100000.tex}
+\clearpage
+
+\subsection{System FoundationDB (WSL 2)}
+\input{magisterka/plots/foundationdb/wsl/latency_table_small_100000.tex}
+\input{magisterka/plots/foundationdb/wsl/latency_table_small_1000000.tex}
+\input{magisterka/plots/foundationdb/wsl/latency_table_medium_100000.tex}
+\input{magisterka/plots/foundationdb/wsl/resource_table_small_1000000.tex}
+\input{magisterka/plots/foundationdb/wsl/resource_table_medium_100000.tex}
+\clearpage
+
+
+\chapter{Dodatek: Szczegółowe tabele wydajnościowe w środowisku natywnym Ubuntu}
+\label{chap:dodatek_tabele_ubuntu}
+
+W niniejszym dodatku przedstawiono szczegółowe tabele wydajnościowe (opóźnienia p50, p95, p99 oraz przepustowość) oraz statystyki zużycia zasobów (CPU, RAM) uzyskane w środowisku natywnego systemu operacyjnego Linux (Ubuntu) dla wszystkich badanych systemów bazodanowych.
+
+\section{Silniki in-memory (Redis, Memcached) -- Ubuntu}
+
+\subsection{System Redis (Ubuntu)}
+\input{magisterka/plots/redis/ubuntu/latency_table_small_100000.tex}
+\input{magisterka/plots/redis/ubuntu/latency_table_small_1000000.tex}
+\input{magisterka/plots/redis/ubuntu/latency_table_medium_100000.tex}
+\input{magisterka/plots/redis/ubuntu/resource_table_small_1000000.tex}
+\input{magisterka/plots/redis/ubuntu/resource_table_medium_100000.tex}
+\clearpage
+
+\subsection{System Memcached (Ubuntu)}
+\input{magisterka/plots/memcached/ubuntu/latency_table_small_100000.tex}
+\input{magisterka/plots/memcached/ubuntu/latency_table_small_1000000.tex}
+\input{magisterka/plots/memcached/ubuntu/latency_table_medium_100000.tex}
+\input{magisterka/plots/memcached/ubuntu/resource_table_small_1000000.tex}
+\input{magisterka/plots/memcached/ubuntu/resource_table_medium_100000.tex}
+\clearpage
+
+\section{Biblioteki osadzone (LevelDB, RocksDB, BerkeleyDB) -- Ubuntu}
+
+\subsection{System LevelDB (Ubuntu)}
+\input{magisterka/plots/leveldb/ubuntu/latency_table_small_100000.tex}
+\input{magisterka/plots/leveldb/ubuntu/latency_table_small_1000000.tex}
+\input{magisterka/plots/leveldb/ubuntu/latency_table_medium_100000.tex}
+\input{magisterka/plots/leveldb/ubuntu/resource_table_small_1000000.tex}
+\input{magisterka/plots/leveldb/ubuntu/resource_table_medium_100000.tex}
+\clearpage
+
+\subsection{System RocksDB (Ubuntu)}
+\input{magisterka/plots/rocksdb/ubuntu/latency_table_small_100000.tex}
+\input{magisterka/plots/rocksdb/ubuntu/latency_table_small_1000000.tex}
+\input{magisterka/plots/rocksdb/ubuntu/latency_table_medium_100000.tex}
+\input{magisterka/plots/rocksdb/ubuntu/resource_table_small_1000000.tex}
+\input{magisterka/plots/rocksdb/ubuntu/resource_table_medium_100000.tex}
+\clearpage
+
+\subsection{System BerkeleyDB (Ubuntu)}
+\input{magisterka/plots/berkeleydb/ubuntu/latency_table_small_100000.tex}
+\input{magisterka/plots/berkeleydb/ubuntu/latency_table_small_1000000.tex}
+\input{magisterka/plots/berkeleydb/ubuntu/latency_table_medium_100000.tex}
+\input{magisterka/plots/berkeleydb/ubuntu/resource_table_small_1000000.tex}
+\input{magisterka/plots/berkeleydb/ubuntu/resource_table_medium_100000.tex}
+\clearpage
+
+\section{Bazy hybrydowe i rozproszone (Tarantool, Couchbase, FoundationDB) -- Ubuntu}
+
+\subsection{System Tarantool (Ubuntu)}
+\input{magisterka/plots/tarantool/ubuntu/latency_table_small_100000.tex}
+\input{magisterka/plots/tarantool/ubuntu/latency_table_small_1000000.tex}
+\input{magisterka/plots/tarantool/ubuntu/latency_table_medium_100000.tex}
+\input{magisterka/plots/tarantool/ubuntu/resource_table_small_1000000.tex}
+\input{magisterka/plots/tarantool/ubuntu/resource_table_medium_100000.tex}
+\clearpage
+
+\subsection{System Couchbase (Ubuntu)}
+\input{magisterka/plots/couchbase/ubuntu/latency_table_small_100000.tex}
+\input{magisterka/plots/couchbase/ubuntu/latency_table_small_1000000.tex}
+\input{magisterka/plots/couchbase/ubuntu/latency_table_medium_100000.tex}
+\input{magisterka/plots/couchbase/ubuntu/resource_table_small_1000000.tex}
+\input{magisterka/plots/couchbase/ubuntu/resource_table_medium_100000.tex}
+\clearpage
+
+\subsection{System FoundationDB (Ubuntu)}
+\input{magisterka/plots/foundationdb/ubuntu/latency_table_small_100000.tex}
+\input{magisterka/plots/foundationdb/ubuntu/latency_table_small_1000000.tex}
+\input{magisterka/plots/foundationdb/ubuntu/latency_table_medium_100000.tex}
+\input{magisterka/plots/foundationdb/ubuntu/resource_table_small_1000000.tex}
+\input{magisterka/plots/foundationdb/ubuntu/resource_table_medium_100000.tex}
+\clearpage

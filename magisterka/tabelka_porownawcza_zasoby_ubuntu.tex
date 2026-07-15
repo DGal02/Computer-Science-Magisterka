@@ -1,0 +1,24 @@
+% Tabela wygenerowana automatycznie
+\begin{table}[ht]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{lcrccrcc}
+\toprule
+ & \multicolumn{3}{c}{\textbf{Zapis (Insert)}} & \multicolumn{3}{c}{\textbf{Odczyt (Read)}} \\
+\cmidrule(r){2-4} \cmidrule(r){5-7}
+Baza danych & CPU DB & RAM DB [MiB] & We/Wy DB [MiB] & CPU DB & RAM DB [MiB] & We/Wy DB [MiB] \\
+\midrule
+Redis & 67.5\% & 23.9 & 0.1/13.7 & 45.8\% & 27.3 & 0.0/0.0 \\
+Memcached & 24.4\% & 24.9 & 0.0/0.0 & 51.0\% & 25.0 & 0.0/0.0 \\
+LevelDB* & 0.0\% & 0.0 & 0.0/0.0 & 0.0\% & 0.0 & 0.0/0.0 \\
+RocksDB* & 0.0\% & 0.0 & 0.0/0.0 & 0.0\% & 0.0 & 0.0/0.0 \\
+Couchbase & 180.4\% & 421.2 & 0.0/102.0 & 114.7\% & 430.1 & 0.0/0.0 \\
+Tarantool & 111.0\% & 33.3 & 0.0/0.0 & 44.9\% & 36.1 & 0.0/45.9 \\
+FoundationDB & 75.1\% & 120.8 & 0.0/98.0 & 90.4\% & 137.2 & 0.0/12.0 \\
+BerkeleyDB & 0.0\% & 0.0 & 0.0/0.0 & 0.0\% & 0.0 & 0.0/0.0 \\
+\bottomrule
+\end{tabular}%
+}
+\caption{Porównanie zużycia zasobów (średnie CPU bazy, RAM bazy oraz skumulowane We/Wy odczyt/zapis) dla operacji CRUD (Rekord 128 B, środowisko UBUNTU, 4 CPU, 8 procesów klienckich, *dla LevelDB/RocksDB 1 proces)}
+\label{tab:porownanie_zasobow_ubuntu}
+\end{table}

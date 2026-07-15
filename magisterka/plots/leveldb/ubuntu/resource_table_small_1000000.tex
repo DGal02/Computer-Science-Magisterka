@@ -1,0 +1,26 @@
+% Tabela wygenerowana automatycznie
+\begin{table}[ht]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llcrrcc}
+\toprule
+Operacja & CPU & Klienci & CPU Kl. [\%] & RAM Kl. [MiB] & We/Wy Kl. [MiB] & Próbki \\
+\midrule
+Aktualizacja (Update) & 1 CPU & 1 & 100.0\% & 33.1 & 0.0/321.0 & 6 \\
+Aktualizacja (Update) & 2 CPU & 1 & 126.5\% & 32.6 & 0.0/343.0 & 5 \\
+Aktualizacja (Update) & 4 CPU & 1 & 129.7\% & 32.3 & 0.0/330.0 & 5 \\
+Odczyt (Read) & 1 CPU & 1 & 98.7\% & 29.6 & 0.0/0.0 & 4 \\
+Odczyt (Read) & 2 CPU & 1 & 107.9\% & 29.5 & 0.0/6.0 & 4 \\
+Odczyt (Read) & 4 CPU & 1 & 107.3\% & 29.4 & 0.0/19.0 & 4 \\
+Usuwanie (Delete) & 1 CPU & 1 & 100.1\% & 37.9 & 0.0/99.0 & 5 \\
+Usuwanie (Delete) & 2 CPU & 1 & 109.2\% & 32.5 & 0.0/26.0 & 4 \\
+Usuwanie (Delete) & 4 CPU & 1 & 124.3\% & 33.3 & 0.0/24.0 & 4 \\
+Zapis (Insert) & 1 CPU & 1 & 99.8\% & 28.8 & 0.0/408.2 & 6 \\
+Zapis (Insert) & 2 CPU & 1 & 117.8\% & 29.1 & 0.0/371.0 & 5 \\
+Zapis (Insert) & 4 CPU & 1 & 139.9\% & 28.9 & 0.0/400.6 & 5 \\
+\bottomrule
+\end{tabular}%
+}
+\caption{Zużycie zasobów kontenera aplikacji klienckiej (wbudowany silnik LEVELDB, Rozmiar rekordu: 128 B, 1000k)}
+\label{tab:resources_leveldb_small_1000000}
+\end{table}

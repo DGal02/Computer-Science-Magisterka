@@ -145,7 +145,9 @@ Podczas każdego eksperymentu rejestrowane są następujące metryki:
     \item \textbf{Zużycie zasobów (Resource Utilization):} procentowe zużycie procesora (CPU), zajętość pamięci RAM oraz natężenie operacji wejścia/wyjścia na dysk (Block I/O) dla kontenera bazy danych (serwer) oraz kontenera aplikacji benchmarkującej (klient).
 \end{itemize}
 
-Dane o zużyciu zasobów (CPU, RAM, Block I/O) rejestrowane są za pomocą polecenia \texttt{docker stats}, które domyślnie próbkuje stan kontenerów z częstotliwością jednej próbki na sekundę. W warunkach intensywnego obciążenia systemu operacyjnego lub dużego ruchu wejścia/wyjścia mechanizm ten może pominąć pojedyncze próbki, co skutkuje lokalnymi przerwami w szeregach czasowych. Zjawisko to traktowane jest jako ograniczenie infrastrukturalne narzędzia pomiarowego i nie wpływa na wiarygodność pozostałych mierzonych metryk. Ze względu na to, że wskaźnik obciążenia dysku (Block I/O) udostępniany przez demona Docker ma charakter skumulowany, dane te są przetwarzane i prezentowane dwojako: jako różnica (delta) między wartością maksymalną a minimalną z próbkowania dla danego testu (pokazująca całkowity wolumen operacji wejścia/wyjścia), oraz na wykresach przebiegu czasowego jako skumulowany przyrost od momentu rozpoczęcia testu. W celu zapewnienia czytelności i odpowiedniej wartości analitycznej wizualizacji, wykresy przebiegu zużycia zasobów w czasie są generowane wyłącznie dla konfiguracji testowych, w których zebrano co najmniej 15 próbek pomiarowych. W przypadku krótszych testów, dla których zebrano mniej niż 15 próbek z narzędzia \texttt{docker stats}, proces generowania wykresu jest automatycznie pomijany ze względu na zbyt małą liczbę punktów pomiarowych do sporządzenia reprezentatywnego profilu obciążenia w czasie.
+Dane o zużyciu zasobów (CPU, RAM, Block I/O) rejestrowane są za pomocą polecenia \texttt{docker stats}, które domyślnie próbkuje stan kontenerów z częstotliwością jednej próbki na sekundę. W warunkach intensywnego obciążenia systemu operacyjnego lub dużego ruchu wejścia/wyjścia mechanizm ten może pominąć pojedyncze próbki, co skutkuje lokalnymi przerwami w szeregach czasowych. Zjawisko to traktowane jest jako ograniczenie infrastrukturalne narzędzia pomiarowego i nie wpływa na wiarygodność pozostałych mierzonych metryk. Ze względu na to, że wskaźnik obciążenia dysku (Block I/O) udostępniany przez demona Docker ma charakter skumulowany, dane te są przetwarzane i prezentowane dwojako: jako różnica (delta) między wartością maksymalną a minimalną z próbkowania dla danego testu (pokazująca całkowity wolumen operacji wejścia/wyjścia), oraz na wykresach przebiegu czasowego jako skumulowany przyrost od momentu rozpoczęcia testu. W celu zapewnienia czytelności i odpowiedniej wartości analitycznej wizualizacji, wykresy przebiegu zużycia zasobów w czasie są generowane wyłącznie dla konfiguracji testowych, w których zebrano co najmniej 30 próbek pomiarowych. W przypadku krótszych testów, dla których zebrano mniej niż 30 próbek z narzędzia \texttt{docker stats}, proces generowania wykresu jest automatycznie pomijany ze względu na zbyt małą liczbę punktów pomiarowych do sporządzenia reprezentatywnego profilu obciążenia w czasie. Zestawienie konfiguracji testowych, które nie spełniły tego wymagania i zostały pominięte przy generowaniu wykresów zużycia zasobów w czasie, przedstawiono w tabeli~\ref{tab:resource_samples_skipped}.
+
+\input{magisterka/tabelka_zasobow_skipped}
 
 \section{Implementacja i optymalizacja procedur benchmarkowych}
 
@@ -184,7 +186,7 @@ Dzięki zastosowaniu kompilatora LuaJIT w silniku Tarantool, procedury te charak
 
 \section{Metodyka syntetycznej oceny punktowej}
 
-W celu syntetycznego porównania badanych systemów wprowadzono punktowy system oceny. Pozwala on na ilościowe zestawienie cech architektonicznych, licencyjnych oraz funkcjonalnych poszczególnych rozwiązań, a także bezpośrednie włączenie wyników wydajnościowych do końcowej oceny. Wszystkie kategorie statyczne (architektoniczno-funkcjonalne) są oceniane przy użyciu wag dopasowanych do ich znaczenia projektowego (suma maks. \textbf{1200 punktów}).
+W celu syntetycznego porównania badanych systemów wprowadzono punktowy system oceny. Pozwala on na ilościowe zestawienie cech architektonicznych, licencyjnych oraz funkcjonalnych poszczególnych rozwiązań, a także bezpośrednie włączenie wyników wydajnościowych do końcowej oceny. Wszystkie kategorie statyczne (architektoniczno-funkcjonalne) są oceniane przy użyciu wag dopasowanych do ich znaczenia projektowego (suma maks. \textbf{1500 punktów}).
 
 \subsection{Kryteria przyznawania punktów za cechy statyczne}
 
@@ -192,8 +194,8 @@ W ramach oceny statycznej wyróżniono pięć głównych obszarów:
 \begin{itemize}
     \item \textbf{Model licencjonowania (0 / 50 / 100 pkt):} Określa stopień elastyczności wykorzystania systemu w projektach komercyjnych i własnościowych bez konieczności udostępniania kodu źródłowego aplikacji. Ocena 100 punktów oznacza licencję wysoce permisywną bez ograniczeń typu copyleft (np. BSD, Apache 2.0). Ocena 50 punktów oznacza występowanie ograniczeń typu copyleft (np. AGPLv3) lub restrykcji komercyjnych (np. BSL 1.1). Ocena 0 punktów oznacza licencję komercyjną bądź zamkniętą bez darmowego wariantu produkcyjnego.
     \item \textbf{Skalowanie i replikacja (0 / 250 / 500 pkt):} Ocenia natywne wsparcie systemu dla skalowania poziomego (sharding) oraz wysokiej dostępności (HA). Ocena 500 punktów oznacza wbudowane mechanizmy shardingu oraz automatycznej replikacji z obsługą przełączania awaryjnego (failover). Ocena 250 punktów oznacza ograniczone skalowanie poziome (np. po stronie aplikacji klienckiej lub bez automatycznego shardingu) lub replikację High Availability. Ocena 0 punktów oznacza architekturę czysto osadzoną (embedded), ograniczoną do jednego procesu i systemu plików.
-    \item \textbf{Wsparcie dla transakcji ACID (0 / 100 / 200 pkt):} Ocenia poziom gwarancji spójności danych przy jednoczesnych modyfikacjach. Ocena 200 punktów oznacza pełne wsparcie dla transakcji wielokluczowych (w tym rozproszonych) z zachowaniem pełnej izolacji. Ocena 100 punktów oznacza uproszczoną transakcyjność (np. atomowość na poziomie pojedynczego klucza lub grupowanie operacji bez pełnego wycofywania zmian). Ocena 0 punktów oznacza brak mechanizmów transakcyjnych.
-    \item \textbf{Dodatkowe funkcjonalności i unikalność (0 / 150 / 300 pkt):} Ocenia dostępność zaawansowanych mechanizmów wykraczających poza proste operacje Key-Value. Ocena 300 punktów oznacza wielomodelowość i bogate API (np. strumienie, wyszukiwanie pełnotekstowe, wbudowane silniki skryptowe). Ocena 150 punktów oznacza średni stopień rozszerzalności (np. Column Families, różne fizyczne metody dostępu). Ocena 0 punktów oznacza czysty silnik Key-Value bez dodatkowych struktur.
+    \item \textbf{Wsparcie dla transakcji ACID (0 / 150 / 300 pkt):} Ocenia poziom gwarancji spójności danych przy jednoczesnych modyfikacjach. Ocena 300 punktów oznacza pełne wsparcie dla transakcji wielokluczowych (w tym rozproszonych) z zachowaniem pełnej izolacji. Ocena 150 punktów oznacza uproszczoną transakcyjność (np. atomowość na poziomie pojedynczego klucza lub grupowanie operacji bez pełnego wycofywania zmian). Ocena 0 punktów oznacza brak mechanizmów transakcyjnych.
+    \item \textbf{Dodatkowe funkcjonalności i unikalność (0 / 250 / 500 pkt):} Ocenia dostępność zaawansowanych mechanizmów wykraczających poza proste operacje Key-Value. Ocena 500 punktów oznacza wielomodelowość i bogate API (np. strumienie, wyszukiwanie pełnotekstowe, wbudowane silniki skryptowe). Ocena 250 punktów oznacza średni stopień rozszerzalności (np. Column Families, różne fizyczne metody dostępu). Ocena 0 punktów oznacza czysty silnik Key-Value bez dodatkowych struktur.
     \item \textbf{Trwałość danych (Persistence) (0 / 50 / 100 pkt):} Ocenia domyślne gwarancje zachowania spójności danych przy nagłej awarii zasilania lub restartu systemu. Ocena 100 punktów oznacza domyślny, synchroniczny zapis transakcji lub logu operacji (WAL) na dysk fizyczny hosta przed potwierdzeniem zapisu klientowi. Ocena 50 punktów oznacza konfigurowalną lub asynchroniczną trwałość (zapis w tle lub cykliczne migawki). Ocena 0 punktów oznacza brak mechanizmów trwałości (silnik działający wyłącznie w pamięci RAM).
 \end{itemize}
 
@@ -215,6 +217,8 @@ W każdej z 12 konfiguracji danego testu bazy są szeregowane, a punkty przyznaw
 
 Taki podział pozwala precyzyjnie ocenić i nagrodzić bazy, które charakteryzują się stabilną wydajnością oraz dobrą skalowalnością przy wzroście liczby rdzeni CPU oraz współbieżnych procesów klienckich.
 
+Warto podkreślić, że do ostatecznej oceny punktowej (w rankingu końcowym) brane są pod uwagę wyłącznie wyniki wydajnościowe uzyskane w środowisku natywnego systemu Linux (Ubuntu). Wynika to z faktu, że w rzeczywistych wdrożeniach produkcyjnych systemy bazodanowe powinny być uruchamiane bezpośrednio na dedykowanych systemach operacyjnych Linux w celu zapewnienia maksymalnej wydajności i stabilności, podczas gdy środowisko wirtualizacji WSL 2 (Windows Subsystem for Linux 2) ma charakter deweloperski i służy przede wszystkim do lokalnych prac programistycznych.
+
 Dodatkowo, dla zaawansowanych scenariuszy testowych (kolejka FIFO oraz 6 operacji na dokumentach JSON) wprowadza się punkty za realizację funkcjonalności:
 \begin{itemize}
     \item \textbf{10 pkt:} pomyślne ukończenie testu z użyciem natywnego wsparcia dla danej struktury danych po stronie serwera bazy danych (np. Redis, Tarantool, Couchbase).
@@ -224,7 +228,7 @@ Dodatkowo, dla zaawansowanych scenariuszy testowych (kolejka FIFO oraz 6 operacj
 
 \subsection{Zestawienie punktowe cech statycznych}
 
-Tabela \ref{tab:punktacja_statyczna} przedstawia bazową punktację architektoniczno-funkcjonalną przed uwzględnieniem wyników wydajnościowych (suma maks. 1200 punktów).
+Tabela \ref{tab:punktacja_statyczna} przedstawia bazową punktację architektoniczno-funkcjonalną przed uwzględnieniem wyników wydajnościowych (suma maks. 1500 punktów).
 
 \begin{table}[H]
 \centering
@@ -232,14 +236,14 @@ Tabela \ref{tab:punktacja_statyczna} przedstawia bazową punktację architektoni
 \begin{tabular}{|l|c|c|c|c|c|c|}
 \hline
 \textbf{Baza danych} & \textbf{Licencja} & \textbf{Skalowanie} & \textbf{ACID} & \textbf{Unikalność} & \textbf{Trwałość} & \textbf{Suma statyczna} \\ \hline
-FoundationDB & 100 & 500 & 200 & 300 & 100 & 1200 \\ \hline
-Tarantool & 100 & 500 & 200 & 300 & 50 & 1150 \\ \hline
-Redis & 50 & 500 & 200 & 300 & 50 & 1100 \\ \hline
-Couchbase & 50 & 500 & 100 & 300 & 50 & 1000 \\ \hline
-BerkeleyDB & 50 & 250 & 200 & 150 & 100 & 750 \\ \hline
-RocksDB & 100 & 0 & 100 & 150 & 100 & 450 \\ \hline
+FoundationDB & 100 & 500 & 300 & 500 & 100 & 1500 \\ \hline
+Tarantool & 100 & 500 & 300 & 500 & 50 & 1450 \\ \hline
+Redis & 50 & 500 & 300 & 500 & 50 & 1400 \\ \hline
+Couchbase & 50 & 500 & 150 & 500 & 50 & 1250 \\ \hline
+BerkeleyDB & 50 & 250 & 300 & 250 & 100 & 950 \\ \hline
+RocksDB & 100 & 0 & 150 & 250 & 100 & 600 \\ \hline
 Memcached & 100 & 250 & 0 & 0 & 0 & 350 \\ \hline
-LevelDB & 100 & 0 & 100 & 0 & 100 & 300 \\ \hline
+LevelDB & 100 & 0 & 150 & 0 & 100 & 350 \\ \hline
 \end{tabular}%
 }
 \caption{Zestawienie punktowe cech statycznych badanych systemów}
@@ -250,12 +254,12 @@ LevelDB & 100 & 0 & 100 & 0 & 100 & 300 \\ \hline
 
 Poniżej przedstawiono szczegółowe uzasadnienie przyznanych ocen w kategoriach statycznych dla poszczególnych systemów bazodanowych:
 
-\paragraph{Redis (1100 pkt)}
+\paragraph{Redis (1400 pkt)}
 \begin{itemize}
     \item \textbf{Model licencjonowania (50 pkt):} Przejście na model trójlicencyjny (AGPLv3, RSALv2, SSPLv1) w wersji 8 ograniczyło elastyczność komercyjną ze względu na wymogi copyleft licencji AGPLv3.
     \item \textbf{Skalowanie i replikacja (500 pkt):} Zapewnione jest pełne wsparcie dla klastrowania poziomego (Redis Cluster) z automatycznym shardingiem i replikacją.
-    \item \textbf{Wsparcie dla transakcji ACID (200 pkt):} Mimo braku klasycznego mechanizmu wycofywania zmian (rollback), jednowątkowy model przetwarzania poleceń w połączeniu ze skryptami Lua zapewnia pełną atomowość i najwyższy stopień izolacji (Serializable) wykonywania transakcji w pamięci RAM.
-    \item \textbf{Dodatkowe funkcjonalności i unikalność (300 pkt):} Oferowany jest wyjątkowo bogaty zestaw wbudowanych struktur (m.in. listy, zbiory, strumienie, moduły RedisJSON i RediSearch).
+    \item \textbf{Wsparcie dla transakcji ACID (300 pkt):} Mimo braku klasycznego mechanizmu wycofywania zmian (rollback), jednowątkowy model przetwarzania poleceń w połączeniu ze skryptami Lua zapewnia pełną atomowość i najwyższy stopień izolacji (Serializable) wykonywania transakcji w pamięci RAM.
+    \item \textbf{Dodatkowe funkcjonalności i unikalność (500 pkt):} Oferowany jest wyjątkowo bogaty zestaw wbudowanych struktur (m.in. listy, zbiory, strumienie, moduły RedisJSON i RediSearch).
     \item \textbf{Trwałość danych (50 pkt):} Zastosowano asynchroniczny zapis na dysk w tle za pomocą cyklicznych migawek RDB oraz logu operacji AOF.
 \end{itemize}
 
@@ -268,56 +272,56 @@ Poniżej przedstawiono szczegółowe uzasadnienie przyznanych ocen w kategoriach
     \item \textbf{Trwałość danych (0 pkt):} Przechowywanie danych odbywa się wyłącznie w pamięci RAM, bez mechanizmów trwałości dyskowej.
 \end{itemize}
 
-\paragraph{LevelDB (300 pkt)}
+\paragraph{LevelDB (350 pkt)}
 \begin{itemize}
     \item \textbf{Model licencjonowania (100 pkt):} Biblioteka udostępniana jest na liberalnej licencji BSD.
     \item \textbf{Skalowanie i replikacja (0 pkt):} Silnik wbudowany (embedded), brak obsługi protokołów sieciowych oraz replikacji.
-    \item \textbf{Wsparcie dla transakcji ACID (100 pkt):} Zapewniona atomowość zapisu grupy operacji przy użyciu mechanizmu WriteBatch i dziennika WAL.
+    \item \textbf{Wsparcie dla transakcji ACID (150 pkt):} Zapewniona atomowość zapisu grupy operacji przy użyciu mechanizmu WriteBatch i dziennika WAL.
     \item \textbf{Dodatkowe funkcjonalności i unikalność (0 pkt):} Podstawowy silnik LSM-Tree oferujący jedynie proste operacje zapisu, odczytu i usuwania ciągu bajtów.
     \item \textbf{Trwałość danych (100 pkt):} Domyślny, silny zapis na dysk fizyczny do logu WAL przed potwierdzeniem zapisu klientowi.
 \end{itemize}
 
-\paragraph{RocksDB (450 pkt)}
+\paragraph{RocksDB (600 pkt)}
 \begin{itemize}
     \item \textbf{Model licencjonowania (100 pkt):} Dualna licencja (Apache 2.0 / GPLv2) pozwala na bezpieczną integrację w projektach komercyjnych.
     \item \textbf{Skalowanie i replikacja (0 pkt):} Silnik wbudowany (embedded) bez wbudowanej obsługi sieci i replikacji.
-    \item \textbf{Wsparcie dla transakcji ACID (100 pkt):} Atomowość zapisu realizowana przez mechanizm WriteBatch i dziennik WAL.
-    \item \textbf{Dodatkowe funkcjonalności i unikalność (150 pkt):} Rozbudowane mechanizmy optymalizacji (Column Families, Merge Operators, filtry Blooma).
+    \item \textbf{Wsparcie dla transakcji ACID (150 pkt):} Atomowość zapisu realizowana przez mechanizm WriteBatch i dziennik WAL.
+    \item \textbf{Dodatkowe funkcjonalności i unikalność (250 pkt):} Rozbudowane mechanizmy optymalizacji (Column Families, Merge Operators, filtry Blooma).
     \item \textbf{Trwałość danych (100 pkt):} Domyślny, silny zapis sekwencyjny do logu WAL na dysk.
 \end{itemize}
 
-\paragraph{Couchbase (1000 pkt)}
+\paragraph{Couchbase (1250 pkt)}
 \begin{itemize}
     \item \textbf{Model licencjonowania (50 pkt):} Wersja społecznościowa podlega licencji BSL 1.1, która ogranicza komercyjne zastosowania typu SaaS.
     \item \textbf{Skalowanie i replikacja (500 pkt):} Zaawansowany automatyczny sharding (vBuckety) oraz replikacja międzycentrowa (XDCR).
-    \item \textbf{Wsparcie dla transakcji ACID (100 pkt):} Zapewniono atomowość na poziomie pojedynczego dokumentu JSON.
-    \item \textbf{Dodatkowe funkcjonalności i unikalność (300 pkt):} Silnik zapytań SQL++ (N1QL), wbudowane usługi wyszukiwania pełnotekstowego (FTS), analityki oraz zdarzeń (Eventing).
+    \item \textbf{Wsparcie dla transakcji ACID (150 pkt):} Zapewniono atomowość na poziomie pojedynczego dokumentu JSON.
+    \item \textbf{Dodatkowe funkcjonalności i unikalność (500 pkt):} Silnik zapytań SQL++ (N1QL), wbudowane usługi wyszukiwania pełnotekstowego (FTS), analityki oraz zdarzeń (Eventing).
     \item \textbf{Trwałość danych (50 pkt):} Model memory-first, zapytania potwierdzane są po zapisaniu w pamięci RAM, po czym asynchronicznie zapisywane na dysk.
 \end{itemize}
 
-\paragraph{Tarantool (1150 pkt)}
+\paragraph{Tarantool (1450 pkt)}
 \begin{itemize}
     \item \textbf{Model licencjonowania (100 pkt):} Udostępniany na dwuklauzulowej licencji BSD.
     \item \textbf{Skalowanie i replikacja (500 pkt):} Wbudowana replikacja (w tym synchroniczna oparta na protokole Raft) oraz sharding poziomy realizowany przez bibliotekę vshard.
-    \item \textbf{Wsparcie dla transakcji ACID (200 pkt):} Pełne transakcje ACID dla silnika Memtx dzięki jednowątkowej architekturze opartej na kooperatywnych włóknach (fibers).
-    \item \textbf{Dodatkowe funkcjonalności i unikalność (300 pkt):} Pełnoprawny serwer aplikacji umożliwiający uruchamianie kodu Lua bezpośrednio w procesie bazy danych.
+    \item \textbf{Wsparcie dla transakcji ACID (300 pkt):} Pełne transakcje ACID dla silnika Memtx dzięki jednowątkowej architekturze opartej na kooperatywnych włóknach (fibers).
+    \item \textbf{Dodatkowe funkcjonalności i unikalność (500 pkt):} Pełnoprawny serwer aplikacji umożliwiający uruchamianie kodu Lua bezpośrednio w procesie bazy danych.
     \item \textbf{Trwałość danych (50 pkt):} Asynchroniczny lub okresowy zapis dziennika transakcji WAL i zrzut migawek na dysk.
 \end{itemize}
 
-\paragraph{FoundationDB (1200 pkt)}
+\paragraph{FoundationDB (1500 pkt)}
 \begin{itemize}
     \item \textbf{Model licencjonowania (100 pkt):} Otwarty kod udostępniany na licencji Apache 2.0.
     \item \textbf{Skalowanie i replikacja (500 pkt):} W pełni automatyczny, przezroczysty sharding poziomy z wbudowaną replikacją tolerującą awarie węzłów.
-    \item \textbf{Wsparcie dla transakcji ACID (200 pkt):} Globalne transakcje rozproszone o najwyższym poziomie izolacji (Serializable).
-    \item \textbf{Dodatkowe funkcjonalności i unikalność (300 pkt):} Architektura oparta na warstwach (Layers), umożliwiająca emulację dokumentów czy relacji grafowych na bazie podstawowego silnika klucz-wartość.
+    \item \textbf{Wsparcie dla transakcji ACID (300 pkt):} Globalne transakcje rozproszone o najwyższym poziomie izolacji (Serializable).
+    \item \textbf{Dodatkowe funkcjonalności i unikalność (500 pkt):} Architektura oparta na warstwach (Layers), umożliwiająca emulację dokumentów czy relacji grafowych na bazie podstawowego silnika klucz-wartość.
     \item \textbf{Trwałość danych (100 pkt):} Synchroniczny zapis transakcji na dyski wielu replik dziennika przed zatwierdzeniem operacji zapisu.
 \end{itemize}
 
-\paragraph{BerkeleyDB (750 pkt)}
+\paragraph{BerkeleyDB (950 pkt)}
 \begin{itemize}
     \item \textbf{Model licencjonowania (50 pkt):} Licencja AGPLv3 wymusza otwarcie kodu aplikacji klienckiej lub zakup licencji komercyjnej od firmy Oracle.
     \item \textbf{Skalowanie i replikacja (250 pkt):} Replikacja w trybie High Availability pozwalająca na skalowanie odczytów, brak jednak automatycznego shardingu poziomego.
-    \item \textbf{Wsparcie dla transakcji ACID (200 pkt):} Pełne lokalne transakcje ACID z menedżerem blokad na poziomie stron i rekordów.
-    \item \textbf{Dodatkowe funkcjonalności i unikalność (150 pkt):} Obsługa czterech różnych struktur fizycznych przechowywania danych (B-Tree, Hash, Queue, Recno).
+    \item \textbf{Wsparcie dla transakcji ACID (300 pkt):} Pełne lokalne transakcje ACID z menedżerem blokad na poziomie stron i rekordów.
+    \item \textbf{Dodatkowe funkcjonalności i unikalność (250 pkt):} Obsługa czterech różnych struktur fizycznych przechowywania danych (B-Tree, Hash, Queue, Recno).
     \item \textbf{Trwałość danych (100 pkt):} Transakcyjne wymuszenie zapisu logu WAL na dysk hosta.
 \end{itemize}

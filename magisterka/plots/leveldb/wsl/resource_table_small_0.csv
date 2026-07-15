@@ -1,0 +1,31 @@
+Operacja,CPU Limit,Procesy Klienckie,CPU Klient [%],RAM Klient [MiB],Odczyt Klient [MiB],Zapis Klient [MiB],Liczba probek
+Dokument JSON: Aktualizacja,1,1,99.32,15.02,0.0,0.0,1
+Dokument JSON: Aktualizacja,2,1,107.13,24.54,0.0,0.0,1
+Dokument JSON: Aktualizacja,4,1,199.06,19.83,0.0,0.0,1
+Dokument JSON: Inkrementacja,1,1,99.32,15.02,0.0,0.0,1
+Dokument JSON: Inkrementacja,2,1,82.89,2.785,0.0,0.0,1
+Dokument JSON: Inkrementacja,4,1,35.86,2.75,0.0,0.0,1
+Dokument JSON: Odczyt,1,1,79.34,24.8,0.0,0.0,1
+Dokument JSON: Odczyt,2,1,153.32,19.76,0.0,0.0,1
+Dokument JSON: Odczyt,4,1,169.29,4.512,0.0,0.0,1
+Dokument JSON: Odczyt częściowy,1,1,76.87,14.5,0.0,0.0,1
+Dokument JSON: Odczyt częściowy,2,1,153.32,19.76,0.0,0.0,1
+Dokument JSON: Odczyt częściowy,4,1,169.29,4.512,0.0,0.0,1
+Dokument JSON: Usuwanie,1,1,31.92,3.383,0.0,0.0,1
+Dokument JSON: Usuwanie,2,1,0.0,2.785,0.0,0.0,1
+Dokument JSON: Usuwanie,4,1,35.86,2.75,0.0,0.0,1
+Dokument JSON: Zapis,1,1,81.52,19.68,0.0,0.0,1
+Dokument JSON: Zapis,2,1,103.78,2.719,0.0,0.0,1
+Dokument JSON: Zapis,4,1,195.14,19.49,0.0,0.0,1
+Kolejka (push/pop),1,1,98.9698947368421,46.30484210526316,0.0,7538.42,95
+Kolejka (push/pop),2,1,118.7228048780488,45.53218292682927,0.0,7540.559999999999,82
+Kolejka (push/pop),4,1,119.59296296296296,45.61925925925926,0.0,7527.62,81
+Mieszany (10W/90R),1,1,84.91,68.63,0.0,0.0,1
+Mieszany (10W/90R),2,1,63.84,27.75,0.0,0.0,1
+Mieszany (10W/90R),4,1,160.95,49.38,0.0,0.0,1
+Mieszany (50/50),1,1,84.91,68.63,0.0,0.0,1
+Mieszany (50/50),2,1,63.84,27.75,0.0,0.0,1
+Mieszany (50/50),4,1,160.95,49.38,0.0,0.0,1
+Mieszany (90W/10R),1,1,84.91,68.63,0.0,0.0,1
+Mieszany (90W/10R),2,1,63.84,27.75,0.0,0.0,1
+Mieszany (90W/10R),4,1,160.95,49.38,0.0,0.0,1

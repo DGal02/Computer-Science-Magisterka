@@ -1,0 +1,26 @@
+% Tabela wygenerowana automatycznie
+\begin{table}[ht]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llcrrrrr}
+\toprule
+Operacja & CPU & Klienci & Przepustowość [op./s] & Średnia [ms] & Mediana (p50) [ms] & p95 [ms] & p99 [ms] \\
+\midrule
+Aktualizacja (Update) & 1 CPU & 1 & 3386.9 & 0.2953 & 0.0070 & 1.2148 & 1.5203 \\
+Aktualizacja (Update) & 2 CPU & 1 & 3367.2 & 0.2970 & 0.0071 & 1.2134 & 1.5202 \\
+Aktualizacja (Update) & 4 CPU & 1 & 3171.7 & 0.3153 & 0.0077 & 1.2192 & 1.5390 \\
+Odczyt (Read) & 1 CPU & 1 & 345608.2 & 0.0029 & 0.0018 & 0.0062 & 0.0109 \\
+Odczyt (Read) & 2 CPU & 1 & 418594.4 & 0.0024 & 0.0018 & 0.0061 & 0.0110 \\
+Odczyt (Read) & 4 CPU & 1 & 422705.0 & 0.0024 & 0.0018 & 0.0062 & 0.0112 \\
+Usuwanie (Delete) & 1 CPU & 1 & 323432.3 & 0.0031 & 0.0023 & 0.0028 & 0.0068 \\
+Usuwanie (Delete) & 2 CPU & 1 & 301950.9 & 0.0033 & 0.0023 & 0.0028 & 0.0062 \\
+Usuwanie (Delete) & 4 CPU & 1 & 348112.8 & 0.0029 & 0.0023 & 0.0028 & 0.0065 \\
+Zapis (Insert) & 1 CPU & 1 & 8689.7 & 0.1151 & 0.0072 & 0.0733 & 1.2278 \\
+Zapis (Insert) & 2 CPU & 1 & 9325.4 & 0.1072 & 0.0069 & 0.0602 & 1.2113 \\
+Zapis (Insert) & 4 CPU & 1 & 9567.3 & 0.1045 & 0.0069 & 0.0592 & 1.2089 \\
+\bottomrule
+\end{tabular}%
+}
+\caption{Wyniki wydajnościowe i opóźnienia operacji bazy danych LEVELDB (Rozmiar rekordu: 4 KB, 100k operacji/klient)}
+\label{tab:latency_leveldb_medium_100000}
+\end{table}

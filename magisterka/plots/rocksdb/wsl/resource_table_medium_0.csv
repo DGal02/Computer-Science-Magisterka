@@ -1,0 +1,10 @@
+Operacja,CPU Limit,Procesy Klienckie,CPU Klient [%],RAM Klient [MiB],Odczyt Klient [MiB],Zapis Klient [MiB],Liczba probek
+Mieszany (10W/90R),1,1,46.33,225.65,0.0,30.72000000000025,2
+Mieszany (10W/90R),2,1,68.75,6.887,0.0,0.0,1
+Mieszany (10W/90R),4,1,191.95,212.1,0.0,0.0,1
+Mieszany (50/50),1,1,46.33,225.65,0.0,30.72000000000025,2
+Mieszany (50/50),2,1,68.75,6.887,0.0,0.0,1
+Mieszany (50/50),4,1,191.95,212.1,0.0,0.0,1
+Mieszany (90W/10R),1,1,46.33,225.65,0.0,30.72000000000025,2
+Mieszany (90W/10R),2,1,68.75,6.887,0.0,0.0,1
+Mieszany (90W/10R),4,1,191.95,212.1,0.0,0.0,1

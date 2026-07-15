@@ -1,0 +1,26 @@
+% Tabela wygenerowana automatycznie
+\begin{table}[ht]
+\centering
+\resizebox{\textwidth}{!}{%
+\begin{tabular}{llcrrcc}
+\toprule
+Operacja & CPU & Klienci & CPU Kl. [\%] & RAM Kl. [MiB] & We/Wy Kl. [MiB] & Próbki \\
+\midrule
+Aktualizacja (Update) & 1 CPU & 1 & 99.7\% & 24.3 & 0.0/0.0 & 1 \\
+Aktualizacja (Update) & 2 CPU & 1 & 123.2\% & 28.9 & 0.0/15.1 & 2 \\
+Aktualizacja (Update) & 4 CPU & 1 & 158.9\% & 33.0 & 0.0/15.1 & 2 \\
+Odczyt (Read) & 1 CPU & 1 & 95.5\% & 37.2 & 0.0/0.0 & 1 \\
+Odczyt (Read) & 2 CPU & 1 & 105.4\% & 3.4 & 0.0/0.0 & 1 \\
+Odczyt (Read) & 4 CPU & 1 & 134.5\% & 20.8 & 0.0/0.0 & 1 \\
+Usuwanie (Delete) & 1 CPU & 1 & 97.2\% & 50.1 & 0.0/0.7 & 2 \\
+Usuwanie (Delete) & 2 CPU & 1 & 125.4\% & 21.1 & 0.0/0.0 & 1 \\
+Usuwanie (Delete) & 4 CPU & 1 & 188.4\% & 26.4 & 0.0/0.0 & 1 \\
+Zapis (Insert) & 1 CPU & 1 & 96.0\% & 43.7 & 0.0/28.6 & 2 \\
+Zapis (Insert) & 2 CPU & 1 & 124.4\% & 20.1 & 0.0/0.0 & 1 \\
+Zapis (Insert) & 4 CPU & 1 & 158.7\% & 20.0 & 0.0/0.0 & 1 \\
+\bottomrule
+\end{tabular}%
+}
+\caption{Zużycie zasobów kontenera aplikacji klienckiej (wbudowany silnik ROCKSDB, Rozmiar rekordu: 128 B, 100k)}
+\label{tab:resources_rocksdb_small_100000}
+\end{table}
