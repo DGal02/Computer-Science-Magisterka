@@ -1,16 +1,20 @@
 \appendix % Rozpoczęcie dodatków
 
-\chapter{Dodatek: Repozytorium kodu aplikacji benchmarkującej}
+\chapter{Dodatek: Repozytoria kodu i zasobów projektowych}
 \label{chap:dodatek_repozytorium}
-Kod źródłowy aplikacji benchmarkującej w języku Python, skrypty orkiestracji kontenerów Docker, skrypty agregacji wyników oraz kody generatora wizualizacji i tabel statystycznych znajdują się w poniższym repozytorium online: \\
-\url{https://github.com/DGal02/Computer-Science-Magisterka}
+Pełny pakiet replikacyjny przeprowadzonych badań, w tym kod źródłowy aplikacji benchmarkującej w języku Python, konfiguracje orkiestracji kontenerów Docker, skrypty agregacji wyników oraz kody generatora wizualizacji, został udostępniony w otwartych repozytoriach w serwisie GitHub:
+\begin{itemize}
+    \item \textbf{Główne repozytorium pracy magisterskiej (tekst pracy w LaTeX oraz zintegrowane wyniki):} \\ \url{https://github.com/DGal02/Computer-Science-Magisterka}
+    \item \textbf{Repozytorium generatora wykresów i przetworzonych danych:} \\ \url{https://github.com/DGal02/Computer-Science-Magisterka-Wykresy}
+    \item \textbf{Repozytorium kodu silnika aplikacji benchmarkującej (Python):} \\ \url{https://github.com/DGal02/CS2026-Master-Benchmark}
+\end{itemize}
 
 \chapter{Dodatek: Szczegółowe tabele wydajnościowe w środowisku WSL 2}
 \label{chap:dodatek_tabele_wsl}
 
 W niniejszym dodatku przedstawiono szczegółowe tabele wydajnościowe (opóźnienia p50, p95, p99 oraz przepustowość) oraz statystyki zużycia zasobów (CPU, RAM) uzyskane w środowisku wirtualizacji WSL 2 dla wszystkich badanych systemów bazodanowych.
 
-\section{Silniki in-memory (Redis, Memcached) -- WSL 2}
+\section{Silniki in-memory (Redis, Memcached) w środowisku WSL 2}
 
 \subsection{System Redis (WSL 2)}
 \input{magisterka/plots/redis/wsl/latency_table_small_100000.tex}
@@ -28,7 +32,7 @@ W niniejszym dodatku przedstawiono szczegółowe tabele wydajnościowe (opóźni
 \input{magisterka/plots/memcached/wsl/resource_table_medium_100000.tex}
 \clearpage
 
-\section{Biblioteki osadzone (LevelDB, RocksDB, BerkeleyDB) -- WSL 2}
+\section{Biblioteki osadzone (LevelDB, RocksDB, BerkeleyDB) w środowisku WSL 2}
 
 \subsection{System LevelDB (WSL 2)}
 \input{magisterka/plots/leveldb/wsl/latency_table_small_100000.tex}
@@ -54,7 +58,7 @@ W niniejszym dodatku przedstawiono szczegółowe tabele wydajnościowe (opóźni
 \input{magisterka/plots/berkeleydb/wsl/resource_table_medium_100000.tex}
 \clearpage
 
-\section{Bazy hybrydowe i rozproszone (Tarantool, Couchbase, FoundationDB) -- WSL 2}
+\section{Bazy hybrydowe i rozproszone (Tarantool, Couchbase, FoundationDB) w środowisku WSL 2}
 
 \subsection{System Tarantool (WSL 2)}
 \input{magisterka/plots/tarantool/wsl/latency_table_small_100000.tex}
@@ -86,7 +90,7 @@ W niniejszym dodatku przedstawiono szczegółowe tabele wydajnościowe (opóźni
 
 W niniejszym dodatku przedstawiono szczegółowe tabele wydajnościowe (opóźnienia p50, p95, p99 oraz przepustowość) oraz statystyki zużycia zasobów (CPU, RAM) uzyskane w środowisku natywnego systemu operacyjnego Linux (Ubuntu) dla wszystkich badanych systemów bazodanowych.
 
-\section{Silniki in-memory (Redis, Memcached) -- Ubuntu}
+\section{Silniki in-memory (Redis, Memcached) w środowisku Ubuntu}
 
 \subsection{System Redis (Ubuntu)}
 \input{magisterka/plots/redis/ubuntu/latency_table_small_100000.tex}
@@ -104,7 +108,7 @@ W niniejszym dodatku przedstawiono szczegółowe tabele wydajnościowe (opóźni
 \input{magisterka/plots/memcached/ubuntu/resource_table_medium_100000.tex}
 \clearpage
 
-\section{Biblioteki osadzone (LevelDB, RocksDB, BerkeleyDB) -- Ubuntu}
+\section{Biblioteki osadzone (LevelDB, RocksDB, BerkeleyDB) w środowisku Ubuntu}
 
 \subsection{System LevelDB (Ubuntu)}
 \input{magisterka/plots/leveldb/ubuntu/latency_table_small_100000.tex}
@@ -130,7 +134,7 @@ W niniejszym dodatku przedstawiono szczegółowe tabele wydajnościowe (opóźni
 \input{magisterka/plots/berkeleydb/ubuntu/resource_table_medium_100000.tex}
 \clearpage
 
-\section{Bazy hybrydowe i rozproszone (Tarantool, Couchbase, FoundationDB) -- Ubuntu}
+\section{Bazy hybrydowe i rozproszone (Tarantool, Couchbase, FoundationDB) w środowisku Ubuntu}
 
 \subsection{System Tarantool (Ubuntu)}
 \input{magisterka/plots/tarantool/ubuntu/latency_table_small_100000.tex}

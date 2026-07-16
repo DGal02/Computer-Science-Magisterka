@@ -106,14 +106,14 @@ W celu usystematyzowania różnic w zakresie przeprowadzonych testów oraz fizyc
 \begin{tabular}{|l|>{\raggedright\arraybackslash}p{3.5cm}|>{\raggedright\arraybackslash}p{4.0cm}|>{\raggedright\arraybackslash}p{4.0cm}|>{\raggedright\arraybackslash}p{5.5cm}|}
 \hline
 \textbf{Baza danych} & \textbf{Dostęp wieloprocesowy} & \textbf{Scenariusz JSON} & \textbf{Scenariusz kolejki FIFO} & \textbf{Główne ograniczenia silnika i rozmiaru} \\ \hline
-Redis & Pełny (1--8 procesów) & Natywne wsparcie (zapis / odczyt / modyfikacje) & Natywne wsparcie (struktura LIST) & Brak krytycznych ograniczeń w ramach zakresu testowego. \\ \hline
-Memcached & Pełny (1--8 procesów) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Domyślny limit rekordu 1~MB zwiększony programowo do 2~MB. \\ \hline
+Redis & Pełny (1-8 procesów) & Natywne wsparcie (zapis / odczyt / modyfikacje) & Natywne wsparcie (struktura LIST) & Brak krytycznych ograniczeń w ramach zakresu testowego. \\ \hline
+Memcached & Pełny (1-8 procesów) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Domyślny limit rekordu 1~MB zwiększony programowo do 2~MB. \\ \hline
 LevelDB & Wyłącznie 1 proces (blokada LOCK) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Brak dostępu sieciowego, wyłączna blokada katalogu bazy danych. \\ \hline
 RocksDB & Wyłącznie 1 proces (blokada LOCK) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Brak dostępu sieciowego, wyłączna blokada katalogu bazy danych. \\ \hline
-Couchbase & Pełny (1--8 procesów) & Natywne wsparcie (struktura dokumentowa) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Maksymalny rozmiar pojedynczego dokumentu (klucza/wartości) wynosi 20~MB. \\ \hline
-Tarantool & Pełny (1--8 procesów) & Natywne wsparcie (Lua/przestrzenie \texttt{map}) & Natywne wsparcie (Lua/przestrzeń indeksowana) & Brak krytycznych ograniczeń w ramach zakresu testowego. \\ \hline
-FoundationDB & Pełny (1--8 procesów) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Pominięty (brak możliwości testowania) & Sztywne limity rozmiaru: maksymalna wartość 100~KB. \\ \hline
-BerkeleyDB & Pełny (1--8 procesów, DBEnv) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Narzut na synchronizację międzyprocesową (blokady środowiska). \\ \hline
+Couchbase & Pełny (1-8 procesów) & Natywne wsparcie (struktura dokumentowa) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Maksymalny rozmiar pojedynczego dokumentu (klucza/wartości) wynosi 20~MB. \\ \hline
+Tarantool & Pełny (1-8 procesów) & Natywne wsparcie (Lua/przestrzenie \texttt{map}) & Natywne wsparcie (Lua/przestrzeń indeksowana) & Brak krytycznych ograniczeń w ramach zakresu testowego. \\ \hline
+FoundationDB & Pełny (1-8 procesów) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Pominięty (brak możliwości testowania) & Sztywne limity rozmiaru: maksymalna wartość 100~KB. \\ \hline
+BerkeleyDB & Pełny (1-8 procesów, DBEnv) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Emulacja kliencka (wyłącznie dla rekordu 128 B) & Narzut na synchronizację międzyprocesową (blokady środowiska). \\ \hline
 \end{tabular}%
 }
 \caption{Zestawienie zakresu testowego oraz ograniczeń badanych systemów bazodanowych}
@@ -219,10 +219,10 @@ Taki podział pozwala precyzyjnie ocenić i nagrodzić bazy, które charakteryzu
 
 Warto podkreślić, że do ostatecznej oceny punktowej (w rankingu końcowym) brane są pod uwagę wyłącznie wyniki wydajnościowe uzyskane w środowisku natywnego systemu Linux (Ubuntu). Wynika to z faktu, że w rzeczywistych wdrożeniach produkcyjnych systemy bazodanowe powinny być uruchamiane bezpośrednio na dedykowanych systemach operacyjnych Linux w celu zapewnienia maksymalnej wydajności i stabilności, podczas gdy środowisko wirtualizacji WSL 2 (Windows Subsystem for Linux 2) ma charakter deweloperski i służy przede wszystkim do lokalnych prac programistycznych.
 
-Dodatkowo, dla zaawansowanych scenariuszy testowych (kolejka FIFO oraz 6 operacji na dokumentach JSON) wprowadza się punkty za realizację funkcjonalności:
+Dodatkowo, dla zaawansowanych scenariuszy testowych (kolejka FIFO oraz 6 operacji na dokumentach JSON, co daje łącznie 7 scenariuszy) wprowadza się punkty za realizację funkcjonalności:
 \begin{itemize}
-    \item \textbf{10 pkt:} pomyślne ukończenie testu z użyciem natywnego wsparcia dla danej struktury danych po stronie serwera bazy danych (np. Redis, Tarantool, Couchbase).
-    \item \textbf{5 pkt:} pomyślne ukończenie testu z wykorzystaniem programowej emulacji struktur po stronie aplikacji klienckiej w języku Python (np. LevelDB, RocksDB, BerkeleyDB, Memcached, FoundationDB).
+    \item \textbf{100 pkt:} pomyślne ukończenie testu z użyciem natywnego wsparcia dla danej struktury danych po stronie serwera bazy danych (np. Redis, Tarantool, Couchbase).
+    \item \textbf{50 pkt:} pomyślne ukończenie testu z wykorzystaniem programowej emulacji struktur po stronie aplikacji klienckiej w języku Python (np. LevelDB, RocksDB, BerkeleyDB, Memcached, FoundationDB).
     \item \textbf{0 pkt:} brak możliwości przeprowadzenia testu w danej konfiguracji (np. z powodu blokad wieloprocesowych lub całkowitego braku wsparcia).
 \end{itemize}
 
