@@ -13,7 +13,7 @@ Wszystkie eksperymenty badawcze przeprowadzono na jednolitej platformie sprzęto
 \begin{itemize}
     \item \textbf{Procesor:} ośmiordzeniowy i szesnastowątkowy procesor AMD Ryzen 7 5700U (8 rdzeni fizycznych z obsługą SMT), o taktowaniu bazowym 1,8 GHz (do 4,3 GHz w trybie Boost) oraz 8 MB pamięci podręcznej L3.
     \item \textbf{Pamięć RAM:} 16 GB pamięci LPDDR4X działającej w trybie dwukanałowym.
-    \item \textbf{Dysk twardy:} nośnik SSD M.2 PCIe NVMe o pojemności 1 TB.
+    \item \textbf{Dysk twardy:} nośnik SSD M.2 PCIe NVMe o pojemności 1 TB. Przepustowość nośnika zmierzona za pomocą pakietu \texttt{fio} wyniosła 1,8~GB/s dla operacji odczytu sekwencyjnego oraz 1,1~GB/s dla operacji zapisu sekwencyjnego.
 \end{itemize}
 W celu zapewnienia powtarzalności pomiarów w środowisku WSL 2, narzucono sztywne limity zasobów obliczeniowych i pamięciowych przydzielonych dla maszyny wirtualnej. Konfigurację tę zdefiniowano w pliku \texttt{.wslconfig} w katalogu profilu użytkownika systemu operacyjnego Windows, przydzielając maszynie wirtualnej limit 8~GB pamięci RAM (odpowiadający połowie fizycznej pamięci operacyjnej platformy sprzętowej) oraz dostęp do wszystkich 16~wątków logicznych procesora. Szczegółową konfigurację tego pliku przedstawiono na listingu~\ref{lst:wslconfig}.
 
